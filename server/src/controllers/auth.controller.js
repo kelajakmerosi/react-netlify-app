@@ -2,6 +2,8 @@ const jwt    = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const User   = require('../models/User.model');
+const ERROR_CODES = require('../constants/errorCodes');
+const { sendError } = require('../utils/http');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -15,10 +17,24 @@ const signToken = (id) =>
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
+    if (!email || !password) {
+      return sendError(res, {
+        status: 400,
+        code: ERROR_CODES.EMAIL_PASSWORD_REQUIRED,
+        message: 'Email and password required',
+        requestId: req.id,
+      });
+    }
 
     const existing = await User.findByEmail(email);
-    if (existing) return res.status(409).json({ message: 'Email already in use' });
+    if (existing) {
+      return sendError(res, {
+        status: 409,
+        code: ERROR_CODES.EMAIL_ALREADY_IN_USE,
+        message: 'Email already in use',
+        requestId: req.id,
+      });
+    }
 
     const user  = await User.create({ name: name || email.split('@')[0], email, password });
     const token = signToken(user.id);
@@ -32,11 +48,23 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
+    if (!email || !password) {
+      return sendError(res, {
+        status: 400,
+        code: ERROR_CODES.EMAIL_PASSWORD_REQUIRED,
+        message: 'Email and password required',
+        requestId: req.id,
+      });
+    }
 
     const user = await User.findByEmail(email, { withPassword: true });
     if (!user || !user.password || !(await bcrypt.compare(password, user.password)))
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return sendError(res, {
+        status: 401,
+        code: ERROR_CODES.INVALID_CREDENTIALS,
+        message: 'Invalid credentials',
+        requestId: req.id,
+      });
 
     const token = signToken(user.id);
     res.json({ token, user: User.toPublic(user) });
@@ -48,7 +76,14 @@ exports.login = async (req, res, next) => {
 exports.googleAuth = async (req, res, next) => {
   try {
     const { idToken } = req.body;
-    if (!idToken) return res.status(400).json({ message: 'Google ID token required' });
+    if (!idToken) {
+      return sendError(res, {
+        status: 400,
+        code: ERROR_CODES.GOOGLE_ID_TOKEN_REQUIRED,
+        message: 'Google ID token required',
+        requestId: req.id,
+      });
+    }
 
     // Verify token with Google
     const ticket = await googleClient.verifyIdToken({

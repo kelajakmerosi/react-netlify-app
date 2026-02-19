@@ -3,10 +3,16 @@ const cors = require('cors');
 const morgan = require('morgan');
 const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/error.middleware');
+const { httpLogger } = require('./config/logger');
 
 const app = express();
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
+app.use(httpLogger);
+app.use((req, res, next) => {
+	res.setHeader('X-Request-Id', req.id);
+	next();
+});
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const { logger } = require('./logger');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -16,10 +17,10 @@ const connectDB = async () => {
     const client = await pool.connect();
     const { rows } = await client.query('SELECT NOW()');
     client.release();
-    console.log(`[db] PostgreSQL connected — ${rows[0].now}`);
+    logger.info({ now: rows[0].now }, '[db] PostgreSQL connected');
     await runMigrations();
   } catch (err) {
-    console.error(`[db] Connection error: ${err.message}`);
+    logger.error({ err }, '[db] Connection error');
     process.exit(1);
   }
 };
@@ -54,7 +55,7 @@ const runMigrations = async () => {
       updated_at  TIMESTAMPTZ DEFAULT NOW()
     );
   `);
-  console.log('[db] Migrations complete');
+  logger.info('[db] Migrations complete');
 };
 
 module.exports = { pool, connectDB };
