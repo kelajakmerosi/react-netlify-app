@@ -27,6 +27,14 @@ interface AuthResponse {
 
 // ─── Public service ────────────────────────────────────────────────────
 export const authService = {
+  loginWithGoogle: async (idToken: string): Promise<User> => {
+    const res = await api.post<AuthResponse>('/auth/google', { idToken })
+    const user: User = { id: res.user.id, name: res.user.name, email: res.user.email, token: res.token }
+    tokenStore.set(res.token)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+    return user
+  },
+
   login: async (email: string, password: string): Promise<User> => {
     const res = await api.post<AuthResponse>('/auth/login', { email, password })
     const user: User = { id: res.user.id, name: res.user.name, email: res.user.email, token: res.token }

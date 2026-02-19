@@ -1,6 +1,9 @@
 const jwt    = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 const User   = require('../models/User.model');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -44,8 +47,22 @@ exports.login = async (req, res, next) => {
 
 exports.googleAuth = async (req, res, next) => {
   try {
-    // TODO: verify Google ID token with google-auth-library, then upsert user
-    res.status(501).json({ message: 'Google OAuth not yet implemented' });
+    const { idToken } = req.body;
+    if (!idToken) return res.status(400).json({ message: 'Google ID token required' });
+
+    // Verify token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Upsert user — create on first login, update avatar on subsequent
+    const user  = await User.upsertGoogle({ googleId, email, name, avatar: picture });
+    const token = signToken(user.id);
+
+    res.json({ token, user: User.toPublic(user) });
   } catch (err) { next(err); }
 };
 

@@ -67,4 +67,22 @@ const update = async (id, { name, avatar }) => {
   return rows[0] ?? null;
 };
 
-module.exports = { findByEmail, findById, create, update, toPublic };
+/**
+ * Upsert a Google OAuth user — insert on first login, update avatar on subsequent.
+ */
+const upsertGoogle = async ({ googleId, email, name, avatar }) => {
+  const { rows } = await pool.query(
+    `INSERT INTO users (name, email, avatar, provider, google_id)
+     VALUES ($1, $2, $3, 'google', $4)
+     ON CONFLICT (email) DO UPDATE
+       SET google_id = EXCLUDED.google_id,
+           avatar    = COALESCE(EXCLUDED.avatar, users.avatar),
+           provider  = 'google',
+           updated_at = NOW()
+     RETURNING id, name, email, avatar, role, provider, created_at`,
+    [name, email.toLowerCase(), avatar ?? '', googleId]
+  );
+  return rows[0];
+};
+
+module.exports = { findByEmail, findById, create, update, upsertGoogle, toPublic };

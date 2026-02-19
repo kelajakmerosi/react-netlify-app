@@ -73,10 +73,11 @@ export interface LanguageContextValue {
 }
 
 export interface AuthContextValue extends AuthState {
-  login:           (emailOrUsername: string, password: string) => Promise<User>
-  register:        (name: string, email: string, password: string) => Promise<User>
-  logout:          () => void
-  continueAsGuest: () => void
+  login:             (emailOrUsername: string, password: string) => Promise<User>
+  register:          (name: string, email: string, password: string) => Promise<User>
+  loginWithGoogle:   (idToken: string) => Promise<User>
+  logout:            () => void
+  continueAsGuest:   () => void
 }
 
 export interface AppContextValue {

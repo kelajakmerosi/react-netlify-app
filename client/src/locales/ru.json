@@ -59,5 +59,7 @@
   "review": "Обзор",
   "quizReview": "Обзор теста",
   "subjectOverview": "Обзор предмета",
-  "markAs": "Изменить статус"
+  "markAs": "Изменить статус",
+  "loginWithGoogle": "Войти через Google",
+  "orContinueWith": "или"
 }

@@ -15,6 +15,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return u
   }, [])
 
+  const loginWithGoogle = useCallback(async (idToken: string): Promise<User> => {
+    const u = await authService.loginWithGoogle(idToken)
+    setUser(u)
+    setIsGuest(false)
+    return u
+  }, [])
+
   const register = useCallback(async (name: string, email: string, password: string): Promise<User> => {
     const u = await authService.register(name, email, password)
     setUser(u)
@@ -34,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, isGuest, login, register, logout, continueAsGuest }}>
+    <AuthContext.Provider value={{ user, isGuest, login, loginWithGoogle, register, logout, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   )

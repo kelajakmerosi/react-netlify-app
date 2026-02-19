@@ -59,5 +59,7 @@
   "review": "Ko'rib chiqish",
   "quizReview": "Test natijalari",
   "subjectOverview": "Fan ko'rinishi",
-  "markAs": "Holatni o'zgartirish"
+  "markAs": "Holatni o'zgartirish",
+  "loginWithGoogle": "Google bilan kirish",
+  "orContinueWith": "yoki"
 }

@@ -59,5 +59,7 @@
   "review": "Review",
   "quizReview": "Quiz Review",
   "subjectOverview": "Subject Overview",
-  "markAs": "Change status"
+  "markAs": "Change status",
+  "loginWithGoogle": "Continue with Google",
+  "orContinueWith": "or"
 }
