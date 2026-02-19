@@ -1,6 +1,4 @@
-# EduUz — Production-Ready Learning Platform
 
-> 🎓 O'zbek tilida ta'lim platformasi | SaaS-grade frontend | TypeScript + React 18 + Vite
 
 ---
 
@@ -150,3 +148,6 @@ src/
 - Services are completely decoupled from UI
 - Adding React Router: replace `useRouter()` in `router.tsx` with `react-router-dom` hooks
 - Adding Zustand: replace `AppProvider` context with a Zustand store
+=======
+# react-netlify-app
+>>>>>>> 625bda0ef620090a699a8a2983eeb53cafd404ec
