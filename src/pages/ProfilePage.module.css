@@ -1,0 +1,45 @@
+.pageHeader { margin-bottom: 28px; }
+.title      { font-size: 28px; font-weight: 800; }
+
+.userRow    { display: flex; align-items: center; gap: 20px; }
+.userInfo   { flex: 1; }
+.userName   { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.userEmail  { color: var(--text-2); font-size: 14px; }
+.guestChip  {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  background: rgba(139,146,176,.15); color: #8892b0;
+  margin-top: 8px;
+}
+
+.sectionTitle { font-weight: 700; font-size: 17px; margin-bottom: 16px; }
+
+.subjectList { display: flex; flex-direction: column; gap: 16px; }
+
+.subHead {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.subName   { display: flex; align-items: center; gap: 12px; }
+.subLabel  { font-weight: 700; font-size: 16px; }
+.subPct    { font-family: var(--font-mono); font-weight: 800; font-size: 22px; }
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.statItem  { text-align: center; }
+.statVal   {
+  display: block; font-weight: 700; font-size: 20px;
+  font-family: var(--font-mono); color: var(--accent);
+}
+.statLabel { font-size: 11px; color: var(--text-3); margin-top: 2px; }

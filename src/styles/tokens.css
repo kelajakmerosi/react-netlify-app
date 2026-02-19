@@ -1,0 +1,64 @@
+/* ─── Design Tokens ──────────────────────────────────────── */
+:root {
+  --font-main:  'Outfit', sans-serif;
+  --font-mono:  'Space Mono', monospace;
+
+  --radius-xs:  6px;
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-full: 9999px;
+
+  --shadow-sm:  0 2px 8px  rgba(0,0,0,.06);
+  --shadow-md:  0 4px 24px rgba(0,0,0,.10);
+  --shadow-lg:  0 8px 48px rgba(0,0,0,.15);
+
+  --transition: .2s cubic-bezier(.4,0,.2,1);
+  --sidebar-w:  260px;
+  --topbar-h:   64px;
+
+  /* Accent palette */
+  --accent:        #6366f1;
+  --accent-2:      #8b5cf6;
+  --accent-light:  rgba(99,102,241,.12);
+  --success:       #10b981;
+  --warning:       #f59e0b;
+  --danger:        #ef4444;
+  --info:          #06b6d4;
+}
+
+/* ─── Light theme ────────────────────────────────────────── */
+[data-theme='light'] {
+  --bg:              #f0f2f8;
+  --bg-2:            #ffffff;
+  --bg-3:            #e8eaf4;
+  --surface:         rgba(255,255,255,.85);
+  --surface-border:  rgba(255,255,255,.60);
+  --glass:           rgba(255,255,255,.70);
+  --glass-border:    rgba(255,255,255,.90);
+  --text:            #0f1117;
+  --text-2:          #4b5168;
+  --text-3:          #8b92a9;
+}
+
+/* ─── Dark theme ─────────────────────────────────────────── */
+[data-theme='dark'] {
+  --bg:              #0a0c14;
+  --bg-2:            #111422;
+  --bg-3:            #181c2e;
+  --surface:         rgba(20,24,40,.90);
+  --surface-border:  rgba(255,255,255,.08);
+  --glass:           rgba(18,22,38,.80);
+  --glass-border:    rgba(255,255,255,.10);
+  --text:            #e8eaf6;
+  --text-2:          #8892b0;
+  --text-3:          #4a5070;
+  --accent:          #818cf8;
+  --accent-2:        #a78bfa;
+  --accent-light:    rgba(129,140,248,.15);
+  --success:         #34d399;
+  --warning:         #fbbf24;
+  --danger:          #f87171;
+  --info:            #22d3ee;
+}
