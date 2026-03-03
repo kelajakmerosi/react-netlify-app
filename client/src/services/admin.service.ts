@@ -2,43 +2,308 @@ import { z } from 'zod'
 import api from './api'
 import { tokenStore } from './auth.service'
 
+export type AdminSource = 'none' | 'allowlist' | 'db_role' | 'both'
+
 export interface AdminUserSummary {
   id: string
   name: string
+  firstName?: string | null
+  lastName?: string | null
   email?: string | null
   phone?: string | null
-  role?: string
+  role?: 'student' | 'admin' | 'superadmin'
+  dbRole?: 'student' | 'admin' | 'superadmin'
+  adminSource?: AdminSource
+  phoneVerified?: boolean
+  createdAt?: string | number
 }
 
 export interface SystemInfo {
   uptime?: string
   version?: string
   env?: string
+  googleConfigured?: boolean
+  eskizConfigured?: boolean
   adminAccess?: {
     emailCount?: number
     phoneCount?: number
+    superAdminEmailCount?: number
+    superAdminPhoneCount?: number
   }
+}
+
+export interface SubjectQuestion {
+  id?: number
+  text: string
+  imageUrl?: string
+  options: string[]
+  answer: number
+  concept?: string
+}
+
+export interface SubjectTopic {
+  id: string
+  title: string
+  videoId: string
+  videoUrl?: string
+  questions?: SubjectQuestion[]
+}
+
+export interface SubjectRecord {
+  id: string
+  title: string
+  description?: string
+  icon?: string
+  color?: string
+  order?: number
+  topics?: SubjectTopic[]
+  created_at?: string
+  updated_at?: string
+}
+
+export interface AnalyticsSummary {
+  totalUsers: number
+  dau: number
+  wau: number
+  mau: number
+  trackedTopics: number
+  completedTopics: number
+  completionRate: number
+  avgQuizScore: number
+  authSources: Array<{ source: string; value: number }>
+  range: { from: string; to: string }
+}
+
+export interface AnalyticsTimeseries {
+  metric: string
+  granularity: 'day' | 'week' | 'month'
+  points: Array<{ bucket: string; value: number }>
+  range: { from: string; to: string }
+}
+
+export interface AnalyticsBreakdownItem {
+  label: string
+  value?: number
+  completed?: number
+  total?: number
+  completionRate?: number
+}
+
+export interface AnalyticsBreakdown {
+  type: 'subject' | 'auth_source' | 'quiz_distribution'
+  items: AnalyticsBreakdownItem[]
+  range: { from: string; to: string }
+}
+
+export interface PricingPlan {
+  key: 'free' | 'pro' | 'premium'
+  title: string
+  description?: string
+  priceMonthlyUzs: number
+  isActive: boolean
+  features: string[]
+  updatedAt?: string
+}
+
+export interface CoursePrice {
+  id: string
+  subjectId: string
+  subjectTitle?: string
+  priceUzs: number
+  isActive: boolean
+  updatedAt?: string
+}
+
+export interface PricingCatalog {
+  plans: PricingPlan[]
+  coursePrices: CoursePrice[]
+}
+
+export interface FinanceSummary {
+  totalRevenueUzs: number
+  refundedUzs: number
+  paidCount: number
+  failedCount: number
+  subscriptionPaidCount: number
+  coursePaidCount: number
+  byProvider: Array<{ provider: 'payme' | 'click' | 'manual'; count: number; revenueUzs: number }>
+  byType: Array<{ type: 'subscription' | 'course_purchase'; paidCount: number; revenueUzs: number }>
+  dailyRevenue: Array<{ bucket: string; revenueUzs: number }>
+  range: { from: string; to: string }
 }
 
 const SystemInfoSchema = z.object({
   uptime: z.string().optional(),
   version: z.string().optional(),
   env: z.string().optional(),
+  googleConfigured: z.boolean().optional(),
+  eskizConfigured: z.boolean().optional(),
   adminAccess: z.object({
     emailCount: z.number().optional(),
     phoneCount: z.number().optional(),
+    superAdminEmailCount: z.number().optional(),
+    superAdminPhoneCount: z.number().optional(),
   }).optional(),
 })
 
 const AdminUserSchema = z.object({
   id: z.string(),
   name: z.string(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
   email: z.string().email().nullable().optional(),
   phone: z.string().nullable().optional(),
-  role: z.string().optional(),
+  role: z.enum(['student', 'admin', 'superadmin']).default('student'),
+  dbRole: z.enum(['student', 'admin', 'superadmin']).optional(),
+  adminSource: z.enum(['none', 'allowlist', 'db_role', 'both']).optional(),
+  phoneVerified: z.boolean().optional(),
+  createdAt: z.union([z.string(), z.number()]).optional(),
+})
+
+const SubjectQuestionSchema = z.object({
+  id: z.number().int().optional(),
+  text: z.string().min(1),
+  imageUrl: z.string().url().optional(),
+  options: z.array(z.string()).min(2),
+  answer: z.number().int().nonnegative(),
+  concept: z.string().optional(),
+})
+
+const SubjectTopicSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  videoId: z.string().min(1),
+  videoUrl: z.string().url().optional(),
+  questions: z.array(SubjectQuestionSchema).default([]),
+})
+
+const SubjectSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().optional(),
+  icon: z.string().optional(),
+  color: z.string().optional(),
+  order: z.number().int().optional(),
+  topics: z.array(SubjectTopicSchema).default([]),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+})
+
+const AnalyticsSummarySchema = z.object({
+  totalUsers: z.number().int(),
+  dau: z.number().int(),
+  wau: z.number().int(),
+  mau: z.number().int(),
+  trackedTopics: z.number().int(),
+  completedTopics: z.number().int(),
+  completionRate: z.number(),
+  avgQuizScore: z.number(),
+  authSources: z.array(z.object({
+    source: z.string(),
+    value: z.number().int(),
+  })),
+  range: z.object({
+    from: z.string(),
+    to: z.string(),
+  }),
+})
+
+const AnalyticsTimeseriesSchema = z.object({
+  metric: z.string(),
+  granularity: z.enum(['day', 'week', 'month']),
+  points: z.array(z.object({
+    bucket: z.string(),
+    value: z.number(),
+  })),
+  range: z.object({
+    from: z.string(),
+    to: z.string(),
+  }),
+})
+
+const AnalyticsBreakdownSchema = z.object({
+  type: z.enum(['subject', 'auth_source', 'quiz_distribution']),
+  items: z.array(z.object({
+    label: z.string(),
+    value: z.number().optional(),
+    completed: z.number().optional(),
+    total: z.number().optional(),
+    completionRate: z.number().optional(),
+  })),
+  range: z.object({
+    from: z.string(),
+    to: z.string(),
+  }),
+})
+
+const PricingPlanSchema = z.object({
+  key: z.enum(['free', 'pro', 'premium']),
+  title: z.string(),
+  description: z.string().optional(),
+  priceMonthlyUzs: z.number(),
+  isActive: z.boolean(),
+  features: z.array(z.string()),
+  updatedAt: z.string().optional(),
+})
+
+const CoursePriceSchema = z.object({
+  id: z.string(),
+  subjectId: z.string(),
+  subjectTitle: z.string().optional(),
+  priceUzs: z.number(),
+  isActive: z.boolean(),
+  updatedAt: z.string().optional(),
+})
+
+const PricingCatalogSchema = z.object({
+  plans: z.array(PricingPlanSchema),
+  coursePrices: z.array(CoursePriceSchema),
+})
+
+const FinanceSummarySchema = z.object({
+  totalRevenueUzs: z.number(),
+  refundedUzs: z.number(),
+  paidCount: z.number().int(),
+  failedCount: z.number().int(),
+  subscriptionPaidCount: z.number().int(),
+  coursePaidCount: z.number().int(),
+  byProvider: z.array(z.object({
+    provider: z.enum(['payme', 'click', 'manual']),
+    count: z.number().int(),
+    revenueUzs: z.number(),
+  })),
+  byType: z.array(z.object({
+    type: z.enum(['subscription', 'course_purchase']),
+    paidCount: z.number().int(),
+    revenueUzs: z.number(),
+  })),
+  dailyRevenue: z.array(z.object({
+    bucket: z.string(),
+    revenueUzs: z.number(),
+  })),
+  range: z.object({
+    from: z.string(),
+    to: z.string(),
+  }),
 })
 
 const resolveToken = () => tokenStore.get() ?? undefined
+
+const withQuery = (path: string, query: Record<string, string | undefined>) => {
+  const params = new URLSearchParams()
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) params.set(key, value)
+  })
+  const suffix = params.toString()
+  return suffix ? `${path}?${suffix}` : path
+}
+
+const normalizeIdentity = (value: string): { email?: string; phone?: string } => {
+  const raw = value.trim()
+  if (!raw) return {}
+  if (raw.includes('@')) return { email: raw.toLowerCase() }
+  return { phone: raw.startsWith('+') ? raw : `+${raw.replace(/\D/g, '')}` }
+}
 
 export const adminService = {
   getSystemInfo: async (): Promise<SystemInfo> => {
@@ -49,8 +314,143 @@ export const adminService = {
     return api.get<AdminUserSummary[]>('/admin/users', resolveToken(), z.array(AdminUserSchema))
   },
 
-  deleteUser: async (userId: string): Promise<void> => {
-    await api.delete<{ deleted: boolean; userId: string }>(`/admin/users/${userId}`, resolveToken())
+  updateUserRole: async (userId: string, role: 'student' | 'admin' | 'superadmin'): Promise<AdminUserSummary> => {
+    const payload = await api.patch<{ user: AdminUserSummary }>(
+      `/admin/users/${userId}/role`,
+      { role },
+      resolveToken(),
+      z.object({ user: AdminUserSchema, roleUpdated: z.boolean().optional() }),
+    )
+    return payload.user
+  },
+
+  grantAdmin: async (identity: string): Promise<AdminUserSummary> => {
+    const payload = await api.post<{ user: AdminUserSummary }>(
+      '/admin/admins/grant',
+      normalizeIdentity(identity),
+      resolveToken(),
+      z.object({ user: AdminUserSchema, granted: z.boolean().optional() }),
+    )
+    return payload.user
+  },
+
+  revokeAdmin: async (identity: string): Promise<AdminUserSummary> => {
+    const payload = await api.post<{ user: AdminUserSummary }>(
+      '/admin/admins/revoke',
+      normalizeIdentity(identity),
+      resolveToken(),
+      z.object({ user: AdminUserSchema, revoked: z.boolean().optional() }),
+    )
+    return payload.user
+  },
+
+  deleteUser: async (userId: string): Promise<{ selfDeleted: boolean }> => {
+    return api.delete<{ deleted: boolean; userId: string; selfDeleted: boolean }>(`/admin/users/${userId}`, resolveToken())
+  },
+
+  getSubjects: async (): Promise<SubjectRecord[]> => {
+    return api.get<SubjectRecord[]>('/subjects', resolveToken(), z.array(SubjectSchema))
+  },
+
+  createSubject: async (subject: Omit<SubjectRecord, 'id'>): Promise<SubjectRecord> => {
+    return api.post<SubjectRecord>('/subjects', subject, resolveToken(), SubjectSchema)
+  },
+
+  updateSubject: async (subjectId: string, subject: Partial<Omit<SubjectRecord, 'id'>>): Promise<SubjectRecord> => {
+    return api.put<SubjectRecord>(`/subjects/${subjectId}`, subject, resolveToken(), SubjectSchema)
+  },
+
+  deleteSubject: async (subjectId: string): Promise<void> => {
+    await api.delete<{ deleted: boolean }>(`/subjects/${subjectId}`, resolveToken())
+  },
+
+  createTopic: async (subjectId: string, topic: SubjectTopic): Promise<SubjectRecord> => {
+    return api.post<SubjectRecord>(`/subjects/${subjectId}/topics`, topic, resolveToken(), SubjectSchema)
+  },
+
+  updateTopic: async (subjectId: string, topicId: string, topic: Partial<SubjectTopic>): Promise<SubjectRecord> => {
+    return api.put<SubjectRecord>(`/subjects/${subjectId}/topics/${topicId}`, topic, resolveToken(), SubjectSchema)
+  },
+
+  deleteTopic: async (subjectId: string, topicId: string): Promise<SubjectRecord> => {
+    return api.delete<SubjectRecord>(`/subjects/${subjectId}/topics/${topicId}`, resolveToken(), SubjectSchema)
+  },
+
+  reorderTopics: async (subjectId: string, topicIds: string[]): Promise<SubjectRecord> => {
+    return api.patch<SubjectRecord>(`/subjects/${subjectId}/topics/reorder`, { topicIds }, resolveToken(), SubjectSchema)
+  },
+
+  getAnalyticsSummary: async (query: { from?: string; to?: string; subjectId?: string } = {}): Promise<AnalyticsSummary> => {
+    return api.get<AnalyticsSummary>(
+      withQuery('/admin/analytics/summary', query),
+      resolveToken(),
+      AnalyticsSummarySchema,
+    )
+  },
+
+  getAnalyticsTimeseries: async (query: {
+    from?: string
+    to?: string
+    subjectId?: string
+    metric: 'user_growth' | 'active_users' | 'completion_trend' | 'quiz_score_trend'
+    granularity?: 'day' | 'week' | 'month'
+  }): Promise<AnalyticsTimeseries> => {
+    return api.get<AnalyticsTimeseries>(
+      withQuery('/admin/analytics/timeseries', query),
+      resolveToken(),
+      AnalyticsTimeseriesSchema,
+    )
+  },
+
+  getAnalyticsBreakdown: async (query: {
+    from?: string
+    to?: string
+    subjectId?: string
+    type: 'subject' | 'auth_source' | 'quiz_distribution'
+  }): Promise<AnalyticsBreakdown> => {
+    return api.get<AnalyticsBreakdown>(
+      withQuery('/admin/analytics/breakdowns', query),
+      resolveToken(),
+      AnalyticsBreakdownSchema,
+    )
+  },
+
+  getPricingCatalog: async (): Promise<PricingCatalog> => {
+    return api.get<PricingCatalog>('/admin/billing/pricing', resolveToken(), PricingCatalogSchema)
+  },
+
+  updatePricingPlan: async (
+    planKey: 'free' | 'pro' | 'premium',
+    payload: Omit<PricingPlan, 'key' | 'updatedAt'>,
+  ): Promise<PricingPlan> => {
+    const data = await api.put<{ plan: PricingPlan }>(
+      `/admin/billing/plans/${planKey}`,
+      payload,
+      resolveToken(),
+      z.object({ plan: PricingPlanSchema, updated: z.boolean().optional() }),
+    )
+    return data.plan
+  },
+
+  updateCoursePrice: async (
+    subjectId: string,
+    payload: { subjectId: string; subjectTitle?: string; priceUzs: number; isActive: boolean },
+  ): Promise<CoursePrice> => {
+    const data = await api.put<{ coursePrice: CoursePrice }>(
+      `/admin/billing/courses/${subjectId}`,
+      payload,
+      resolveToken(),
+      z.object({ coursePrice: CoursePriceSchema, updated: z.boolean().optional() }),
+    )
+    return data.coursePrice
+  },
+
+  getFinanceSummary: async (query: { from?: string; to?: string } = {}): Promise<FinanceSummary> => {
+    return api.get<FinanceSummary>(
+      withQuery('/admin/billing/finance-summary', query),
+      resolveToken(),
+      FinanceSummarySchema,
+    )
   },
 }
 

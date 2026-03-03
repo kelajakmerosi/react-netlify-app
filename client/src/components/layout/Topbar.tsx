@@ -18,13 +18,13 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
     subject:   t('subjects'),
     profile:   t('profile'),
     topic:     t('topics'),
-    admin:     'Admin',
+    admin:     t('admin'),
   }
 
   return (
     <header className={styles.topbar}>
       <div className={styles.left}>
-        <button className={styles.hamburger} onClick={onMenuToggle} aria-label="Menu">
+        <button className={styles.hamburger} onClick={onMenuToggle} aria-label={t('menu')}>
           <span /><span /><span />
         </button>
         <h1 className={styles.title}>{titles[activePage] ?? ''}</h1>

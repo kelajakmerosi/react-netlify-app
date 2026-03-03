@@ -10,6 +10,7 @@ export type ModuleTrack = 'foundation' | 'practice'
 export interface Question {
   id:      number
   text:    string
+  imageUrl?: string
   options: string[]
   answer:  number          // index of correct option
   difficulty?: QuizDifficulty
@@ -49,7 +50,7 @@ export interface User {
   email?: string | null
   phone?: string | null
   phoneVerified?: boolean
-  role?: 'student' | 'admin'
+  role?: 'student' | 'admin' | 'superadmin'
   passwordSetAt?: string | null
   token: string            // JWT-ready
 }

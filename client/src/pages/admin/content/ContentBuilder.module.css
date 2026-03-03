@@ -1,0 +1,635 @@
+.builderShell {
+  display: grid;
+  gap: 12px;
+  position: relative;
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.stepItem {
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.stepItem:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.stepItem:hover:not(:disabled),
+.stepItem:focus-visible:not(:disabled) {
+  outline: none;
+  background: color-mix(in srgb, var(--surface) 78%, var(--bg-2));
+}
+
+.stepItemActive {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 14px rgba(29, 111, 201, 0.22);
+}
+
+.stepIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.stepText {
+  line-height: 1;
+}
+
+.stepLayout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.stepSingle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.subjectRail,
+.topicRail,
+.questionRail,
+.editorPanel,
+.previewPanel {
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
+.subjectRail,
+.topicRail,
+.questionRail {
+  padding: 12px;
+}
+
+.editorPanel,
+.previewPanel {
+  padding: 14px;
+}
+
+.railHead,
+.rowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.railHead h4,
+.rowHeader h4,
+.railHead h5 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.subjectList,
+.topicList,
+.questionNavList {
+  display: grid;
+  gap: 8px;
+}
+
+.subjectItem,
+.topicItem,
+.questionNavItem {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  color: var(--text);
+}
+
+.subjectItem,
+.questionNavItem {
+  text-align: left;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.subjectItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subjectItem small,
+.questionNavItem small,
+.topicSelectBtn small {
+  color: var(--text-3);
+}
+
+.subjectItemActive,
+.topicItemActive,
+.questionNavItemActive {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--surface-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.topicItem {
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.topicSelectBtn {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+}
+
+.topicMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.iconActions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.iconActions button,
+.iconDangerBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: transparent;
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.iconActions button:hover,
+.iconDangerBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--surface) 76%, var(--bg-2));
+}
+
+.iconDangerBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.statusDraft {
+  color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 20%, transparent);
+  border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
+}
+
+.statusReady {
+  color: #22c55e;
+  background: color-mix(in srgb, #22c55e 18%, transparent);
+  border: 1px solid color-mix(in srgb, #22c55e 35%, transparent);
+}
+
+.statusPublished {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.field,
+.fieldWide {
+  display: grid;
+  gap: 6px;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.field span,
+.fieldWide span {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  color: var(--text);
+  min-height: 44px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.stepHint,
+.stepHintInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.quizBuilderGrid {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.questionEditor {
+  display: grid;
+  gap: 10px;
+}
+
+.optionList {
+  display: grid;
+  gap: 8px;
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.optionCorrectPick {
+  min-height: 44px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-2);
+}
+
+.modeSwitch {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.modeBtn {
+  min-height: 34px;
+  min-width: 0;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.modeBtnActive {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.inlineActions {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.previewPanel {
+  display: grid;
+  gap: 10px;
+}
+
+.previewTabs {
+  display: inline-flex;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.previewTab {
+  min-height: 36px;
+  min-width: 120px;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.previewTabActive {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.videoPreviewMock,
+.quizPreviewMock {
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.previewMuted {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.previewWatchBtn,
+.previewNavBtn {
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text);
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.previewWatchBtn:hover,
+.previewNavBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--surface) 72%, var(--bg-2));
+}
+
+.previewNavBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.quizPreviewTop {
+  display: grid;
+  gap: 8px;
+}
+
+.previewProgressTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 64%, transparent);
+}
+
+.previewProgressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.previewOptions {
+  display: grid;
+  gap: 8px;
+}
+
+.previewOption {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  min-height: 40px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.previewOptionActive {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--surface-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summaryItem {
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.summaryItem p {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.summaryItem strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.validationBox {
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.validationBox h5 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.validState {
+  margin: 0;
+  color: #22c55e;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.issueList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.issueList li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f59e0b;
+}
+
+.publishActions,
+.bottomActions,
+.leftActions,
+.rightActions,
+.recoveryAlertActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bottomActions {
+  justify-content: space-between;
+  border-top: 1px solid var(--surface-border);
+  padding-top: 10px;
+}
+
+.leftActions,
+.rightActions {
+  min-width: 0;
+}
+
+.recoveryAlertLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lastSavedAt {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.emptyState {
+  border: 1px dashed var(--surface-border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: color-mix(in srgb, var(--bg) 24%, transparent);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.modal {
+  width: min(500px, 96vw);
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface) 94%, var(--bg-2));
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 22px;
+}
+
+.modalBody {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sparklineDecoration {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  opacity: 0.34;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+@media (max-width: 1120px) {
+  .stepLayout,
+  .quizBuilderGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

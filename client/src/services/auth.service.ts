@@ -12,7 +12,7 @@ const UserSchema = z.object({
   email: z.string().email().nullable().optional(),
   phone: z.string().nullable().optional(),
   phoneVerified: z.boolean().optional(),
-  role: z.enum(['student', 'admin']).optional(),
+  role: z.enum(['student', 'admin', 'superadmin']).optional(),
   passwordSetAt: z.string().nullable().optional(),
 })
 

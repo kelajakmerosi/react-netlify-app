@@ -74,7 +74,7 @@ function TopicRoute() {
 function AdminGuardRoute() {
   const { user } = useAuth()
   if (!user) return <Navigate to="/dashboard" replace />
-  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
+  if (user.role !== 'admin' && user.role !== 'superadmin') return <Navigate to="/dashboard" replace />
   return <AdminPage />
 }
 
