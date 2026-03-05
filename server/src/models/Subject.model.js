@@ -49,4 +49,79 @@ const remove = async (id) => {
   return rowCount > 0;
 };
 
-module.exports = { findAll, findById, create, update, remove };
+const replaceTopics = async (id, topics) => {
+  const { rows } = await pool.query(
+    `UPDATE subjects
+     SET topics = $1::jsonb,
+         updated_at = NOW()
+     WHERE id = $2
+     RETURNING *`,
+    [JSON.stringify(topics || []), id]
+  )
+  return rows[0] ?? null
+}
+
+const addTopic = async (id, topic) => {
+  const subject = await findById(id)
+  if (!subject) return null
+
+  const nextTopics = [...(subject.topics || []), topic]
+  return replaceTopics(id, nextTopics)
+}
+
+const updateTopic = async (id, topicId, patch) => {
+  const subject = await findById(id)
+  if (!subject) return null
+  const topics = subject.topics || []
+  const nextTopics = topics.map((topic) => (
+    topic.id === topicId ? { ...topic, ...patch } : topic
+  ))
+
+  if (!nextTopics.some((topic) => topic.id === topicId)) {
+    return { subject, topicFound: false }
+  }
+
+  const updated = await replaceTopics(id, nextTopics)
+  return { subject: updated, topicFound: true }
+}
+
+const removeTopic = async (id, topicId) => {
+  const subject = await findById(id)
+  if (!subject) return null
+  const topics = subject.topics || []
+  const nextTopics = topics.filter((topic) => topic.id !== topicId)
+  if (nextTopics.length === topics.length) {
+    return { subject, topicFound: false }
+  }
+  const updated = await replaceTopics(id, nextTopics)
+  return { subject: updated, topicFound: true }
+}
+
+const reorderTopics = async (id, topicIds) => {
+  const subject = await findById(id)
+  if (!subject) return null
+
+  const topics = subject.topics || []
+  const byId = new Map(topics.map((topic) => [topic.id, topic]))
+  const reordered = topicIds.map((topicId) => byId.get(topicId)).filter(Boolean)
+
+  if (reordered.length !== topics.length) {
+    return { subject, valid: false }
+  }
+
+  const updated = await replaceTopics(id, reordered)
+  return { subject: updated, valid: true }
+}
+
+module.exports = {
+  findAll,
+  findById,
+  create,
+  update,
+  remove,
+  replaceTopics,
+  addTopic,
+  updateTopic,
+  removeTopic,
+  reorderTopics,
+};

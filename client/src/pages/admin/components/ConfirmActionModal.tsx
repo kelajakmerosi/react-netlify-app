@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button'
+import { Modal } from '../../../components/ui'
 import styles from '../AdminWorkspace.module.css'
 
 interface ConfirmActionModalProps {
@@ -28,18 +29,24 @@ export function ConfirmActionModal({
   if (!open) return null
 
   return (
-    <div className={styles.modalOverlay} onMouseDown={(event) => event.target === event.currentTarget && onCancel()}>
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="confirm-action-title">
-        <h3 id="confirm-action-title" className={styles.modalTitle}>{title}</h3>
-        <div className={styles.modalDescription}>{description}</div>
+    <Modal
+      open={open}
+      title={title}
+      labelledBy="confirm-action-title"
+      onClose={onCancel}
+      footer={(
         <div className={styles.modalActions}>
-          <Button variant="ghost" onClick={onCancel} disabled={pending}>{cancelLabel}</Button>
+          <Button variant="ghost" onClick={onCancel} disabled={pending}>
+            {cancelLabel}
+          </Button>
           <Button variant="danger" onClick={onConfirm} disabled={pending}>
             {pending ? pendingLabel : confirmLabel}
           </Button>
         </div>
-      </div>
-    </div>
+      )}
+    >
+      <div className={styles.modalDescription}>{description}</div>
+    </Modal>
   )
 }
 

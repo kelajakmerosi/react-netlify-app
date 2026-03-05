@@ -11,6 +11,20 @@ import type {
 
 const hasText = (value: string) => value.trim().length > 0
 
+const isValidOptionalUrl = (value: string): boolean => {
+  const input = value.trim()
+  if (!input) return true
+
+  const withProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(input) ? input : `https://${input}`
+  try {
+    // Validate normalized URL shape only; domain reachability is not checked here.
+    new URL(withProtocol)
+    return true
+  } catch {
+    return false
+  }
+}
+
 const extractYoutubeVideoId = (value: string): string => {
   const input = value.trim()
   if (!input) return ''
@@ -99,6 +113,14 @@ export const validateDraftForPublish = (draft: ContentDraft): ValidationIssue[] 
     }
 
     topic.questions.forEach((question, questionIndex) => {
+      if (!isValidOptionalUrl(question.imageUrl)) {
+        issues.push({
+          step: 3,
+          path: `topics.${topicIndex}.questions.${questionIndex}.imageUrl`,
+          message: 'adminContentIssueInvalidUrl',
+        })
+      }
+
       if (!isQuestionComplete(question)) {
         issues.push({
           step: 3,

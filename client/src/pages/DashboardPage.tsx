@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useLang, useApp } from '../hooks'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Button } from '../components/ui/Button'
 import { Alert } from '../components/ui/index'
 import { SUBJECT_NAMES, TOPIC_NAMES } from '../constants'
+import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { Clock3, Compass, Flame, PlayCircle, Target, Trophy } from 'lucide-react'
 import type { CurrentTopic, PageId, ResumeTarget } from '../types'
 import styles from './DashboardPage.module.css'
@@ -27,6 +27,7 @@ const formatTimeOnTask = (sec: number) => {
 export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const { user, isGuest } = useAuth()
   const { t, lang } = useLang()
+  const { byId } = useLearnerSubjects()
   const {
     learningSummary,
     isHydrating,
@@ -36,8 +37,10 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   } = useApp()
 
   const topicLabel = (subjectId: string, topicId: string) => {
-    const subjectName = SUBJECT_NAMES[lang]?.[subjectId] ?? subjectId
-    const topicName = TOPIC_NAMES[lang]?.[topicId] ?? topicId
+    const subject = byId.get(subjectId)
+    const topic = subject?.topics.find((entry) => entry.id === topicId)
+    const subjectName = subject?.title || SUBJECT_NAMES[lang]?.[subjectId] || subjectId
+    const topicName = topic?.title || TOPIC_NAMES[lang]?.[topicId] || topicId
     return `${subjectName} · ${topicName}`
   }
 
@@ -62,15 +65,17 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const weakTop = learningSummary.weakTopics[0] ?? null
   const continueTarget = learningSummary.resumeTarget ?? learningSummary.recommendedNext
 
-  const cards = useMemo(() => ([
+  const cards = [
     {
       id: 'continue',
       icon: <PlayCircle size={20} />,
       title: t('continueLearning'),
       body: continueTarget
-        ? `${topicLabel(continueTarget.subjectId, continueTarget.topicId)} · ${toReasonText(continueTarget.reason)}`
+        ? topicLabel(continueTarget.subjectId, continueTarget.topicId)
         : t('noLessonToResume'),
+      kicker: continueTarget ? toReasonText(continueTarget.reason) : t('startLearningNow'),
       action: continueTarget ? t('resume') : t('startLearningNow'),
+      actionVariant: 'primary' as const,
       onClick: () => openTarget(continueTarget),
       disabled: false,
     },
@@ -79,9 +84,11 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       icon: <Clock3 size={20} />,
       title: t('dueToday'),
       body: dueTop
-        ? `${topicLabel(dueTop.subjectId, dueTop.topicId)} · ${t(`dueReason_${dueTop.reason}`)}`
+        ? topicLabel(dueTop.subjectId, dueTop.topicId)
         : t('nothingDueToday'),
+      kicker: dueTop ? t(`dueReason_${dueTop.reason}`) : t('browseLessons'),
       action: dueTop ? t('startDueLesson') : t('browseLessons'),
+      actionVariant: 'primary' as const,
       onClick: () => openTarget(dueTop),
       disabled: false,
     },
@@ -90,9 +97,11 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       icon: <Target size={20} />,
       title: t('weakTopics'),
       body: weakTop
-        ? `${topicLabel(weakTop.subjectId, weakTop.topicId)} · ${weakTop.score}%`
+        ? topicLabel(weakTop.subjectId, weakTop.topicId)
         : t('noWeakTopics'),
+      kicker: weakTop ? `${weakTop.score}%` : t('review'),
       action: weakTop ? t('reviewMistakes') : t('takeQuiz'),
+      actionVariant: 'ghost' as const,
       onClick: () => openTarget(weakTop),
       disabled: false,
     },
@@ -101,19 +110,15 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       icon: <Compass size={20} />,
       title: t('recommendedNext'),
       body: learningSummary.recommendedNext
-        ? `${topicLabel(learningSummary.recommendedNext.subjectId, learningSummary.recommendedNext.topicId)} · ${toReasonText(learningSummary.recommendedNext.reason)}`
+        ? topicLabel(learningSummary.recommendedNext.subjectId, learningSummary.recommendedNext.topicId)
         : t('noRecommendationYet'),
+      kicker: learningSummary.recommendedNext ? toReasonText(learningSummary.recommendedNext.reason) : t('browseLessons'),
       action: learningSummary.recommendedNext ? t('startLesson') : t('browseLessons'),
+      actionVariant: 'ghost' as const,
       onClick: () => openTarget(learningSummary.recommendedNext),
       disabled: false,
     },
-  ]), [
-    continueTarget,
-    dueTop,
-    learningSummary.recommendedNext,
-    t,
-    weakTop,
-  ])
+  ]
 
   return (
     <div className="page-content fade-in">
@@ -187,8 +192,9 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 <span className={styles.cardIcon}>{card.icon}</span>
                 <h3 className={styles.cardTitle}>{card.title}</h3>
               </div>
+              <p className={styles.cardKicker}>{card.kicker}</p>
               <p className={styles.cardBody}>{card.body}</p>
-              <Button fullWidth onClick={card.onClick} disabled={card.disabled}>
+              <Button variant={card.actionVariant} fullWidth onClick={card.onClick} disabled={card.disabled}>
                 {card.action}
               </Button>
             </GlassCard>

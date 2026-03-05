@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
 import { ArrowDown, ArrowUp, Pencil, PlusCircle, Trash2 } from 'lucide-react'
+import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Button } from '../../../components/ui/Button'
+import { Input } from '../../../components/ui/Input'
+import { Textarea } from '../../../components/ui'
 import { useLang } from '../../../hooks'
 import type { SubjectDraft } from '../types'
 import type { SubjectTopic } from '../../../services/admin.service'
@@ -34,43 +37,72 @@ export function SubjectEditorPanel({
   topicEditor,
 }: SubjectEditorPanelProps): JSX.Element {
   const { t } = useLang()
+  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
 
   return (
     <section className={styles.subjectEditorPanel}>
       <div className={styles.formGrid}>
         <label className={styles.field}>
           <span>{t('adminContentTitle')}</span>
-          <input className={styles.input} value={draft.title} onChange={(event) => onDraftChange({ title: event.target.value })} />
+          {useSharedPrimitives ? (
+            <Input value={draft.title} onChange={(event) => onDraftChange({ title: event.target.value })} />
+          ) : (
+            <input className={styles.input} value={draft.title} onChange={(event) => onDraftChange({ title: event.target.value })} />
+          )}
         </label>
 
         <label className={styles.field}>
           <span>{t('adminContentOrder')}</span>
-          <input
-            className={styles.input}
-            type="number"
-            value={draft.order}
-            onChange={(event) => onDraftChange({ order: Number(event.target.value) || 0 })}
-          />
+          {useSharedPrimitives ? (
+            <Input
+              type="number"
+              value={String(draft.order)}
+              onChange={(event) => onDraftChange({ order: Number(event.target.value) || 0 })}
+            />
+          ) : (
+            <input
+              className={styles.input}
+              type="number"
+              value={draft.order}
+              onChange={(event) => onDraftChange({ order: Number(event.target.value) || 0 })}
+            />
+          )}
         </label>
 
         <label className={styles.field}>
           <span>{t('adminContentIcon')}</span>
-          <input className={styles.input} value={draft.icon} onChange={(event) => onDraftChange({ icon: event.target.value })} />
+          {useSharedPrimitives ? (
+            <Input value={draft.icon} onChange={(event) => onDraftChange({ icon: event.target.value })} />
+          ) : (
+            <input className={styles.input} value={draft.icon} onChange={(event) => onDraftChange({ icon: event.target.value })} />
+          )}
         </label>
 
         <label className={styles.field}>
           <span>{t('adminContentColor')}</span>
-          <input className={styles.input} value={draft.color} onChange={(event) => onDraftChange({ color: event.target.value })} />
+          {useSharedPrimitives ? (
+            <Input value={draft.color} onChange={(event) => onDraftChange({ color: event.target.value })} />
+          ) : (
+            <input className={styles.input} value={draft.color} onChange={(event) => onDraftChange({ color: event.target.value })} />
+          )}
         </label>
 
         <label className={styles.fieldWide}>
           <span>{t('adminContentDescription')}</span>
-          <textarea
-            className={styles.textarea}
-            rows={3}
-            value={draft.description}
-            onChange={(event) => onDraftChange({ description: event.target.value })}
-          />
+          {useSharedPrimitives ? (
+            <Textarea
+              rows={3}
+              value={draft.description}
+              onChange={(event) => onDraftChange({ description: event.target.value })}
+            />
+          ) : (
+            <textarea
+              className={styles.textarea}
+              rows={3}
+              value={draft.description}
+              onChange={(event) => onDraftChange({ description: event.target.value })}
+            />
+          )}
         </label>
       </div>
 

@@ -1,6 +1,14 @@
 const bcrypt = require('bcryptjs')
 const { pool } = require('../config/db')
-const { isConfiguredAdmin } = require('../utils/adminAccess')
+const {
+  getAdminSource,
+  getAnyAdminEmails,
+  getAnyAdminPhones,
+  isAdminUser,
+  isSuperAdminUser,
+  normalizeEmail,
+  normalizePhone,
+} = require('../utils/adminAccess')
 
 const PUBLIC_USER_FIELDS = Object.freeze([
   'id',
@@ -12,6 +20,9 @@ const PUBLIC_USER_FIELDS = Object.freeze([
   'phone_verified',
   'avatar',
   'role',
+  'can_teach',
+  'can_buy',
+  'can_learn',
   'created_at',
   'password_set_at',
 ])
@@ -26,6 +37,9 @@ const PUBLIC_SELECT = `
   phone_verified,
   avatar,
   role,
+  can_teach,
+  can_buy,
+  can_learn,
   provider,
   password_set_at,
   created_at
@@ -44,6 +58,8 @@ const toPublic = (row) => {
     if (Object.prototype.hasOwnProperty.call(row, field)) safe[field] = row[field]
   }
 
+  const adminSource = getAdminSource(row)
+
   return {
     id: safe.id,
     name: safe.name,
@@ -53,7 +69,16 @@ const toPublic = (row) => {
     phone: safe.phone ?? null,
     phoneVerified: safe.phone_verified ?? false,
     avatar: safe.avatar,
-    role: isConfiguredAdmin(row) ? 'admin' : 'student',
+    role: isSuperAdminUser(row)
+      ? 'superadmin'
+      : (isAdminUser(row) ? 'admin' : 'student'),
+    capabilities: {
+      canTeach: Boolean(safe.can_teach),
+      canBuy: safe.can_buy !== false,
+      canLearn: safe.can_learn !== false,
+    },
+    dbRole: safe.role ?? 'student',
+    adminSource,
     passwordSetAt: safe.password_set_at ?? null,
     createdAt: safe.created_at,
   }
@@ -71,7 +96,7 @@ const findByEmail = async (email, { withPassword = false } = {}) => {
      FROM users
      WHERE email = $1
      LIMIT 1`,
-    [email.toLowerCase()]
+    [normalizeEmail(email)]
   )
   return rows[0] ?? null
 }
@@ -85,8 +110,27 @@ const findByPhone = async (phone, { withPassword = false } = {}) => {
      FROM users
      WHERE phone = $1
      LIMIT 1`,
-    [phone]
+    [normalizePhone(phone)]
   )
+  return rows[0] ?? null
+}
+
+const findByIdentity = async ({ email, phone }, { withPassword = false } = {}) => {
+  const normalizedEmail = normalizeEmail(email)
+  const normalizedPhone = normalizePhone(phone)
+  if (!normalizedEmail && !normalizedPhone) return null
+
+  const cols = withPassword ? PRIVATE_SELECT : PUBLIC_SELECT
+  const { rows } = await pool.query(
+    `SELECT ${cols}
+     FROM users
+     WHERE ($1::text IS NOT NULL AND email = $1)
+        OR ($2::text IS NOT NULL AND phone = $2)
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [normalizedEmail || null, normalizedPhone || null]
+  )
+
   return rows[0] ?? null
 }
 
@@ -112,9 +156,42 @@ const listPublicSummaries = async () => {
     `SELECT ${PUBLIC_SELECT}
      FROM users
      ORDER BY created_at DESC
-     LIMIT 200`
+     LIMIT 500`
   )
   return rows.map((row) => toPublic(row)).filter(Boolean)
+}
+
+const countDbRoleAdmins = async () => {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS count
+     FROM users
+     WHERE role IN ('admin', 'superadmin')`
+  )
+  return rows[0]?.count ?? 0
+}
+
+const countDbRoleSuperAdmins = async () => {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS count
+     FROM users
+     WHERE role = 'superadmin'`
+  )
+  return rows[0]?.count ?? 0
+}
+
+const countAllowlistAdmins = async () => {
+  const emails = Array.from(getAnyAdminEmails())
+  const phones = Array.from(getAnyAdminPhones())
+  if (emails.length === 0 && phones.length === 0) return 0
+
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS count
+     FROM users
+     WHERE ($1::text[] IS NOT NULL AND email = ANY($1::text[]))
+        OR ($2::text[] IS NOT NULL AND phone = ANY($2::text[]))`,
+    [emails.length > 0 ? emails : null, phones.length > 0 ? phones : null]
+  )
+  return rows[0]?.count ?? 0
 }
 
 /**
@@ -153,8 +230,8 @@ const create = async ({
       resolvedName,
       firstName,
       lastName,
-      email ? email.toLowerCase() : null,
-      phone,
+      email ? normalizeEmail(email) : null,
+      phone ? normalizePhone(phone) : null,
       Boolean(phoneVerified),
       hashed,
       provider,
@@ -165,7 +242,8 @@ const create = async ({
 }
 
 const findOrCreateByPhone = async ({ phone, name, allowCreate = true }) => {
-  const existing = await findByPhone(phone)
+  const normalizedPhone = normalizePhone(phone)
+  const existing = await findByPhone(normalizedPhone)
   if (existing) {
     await pool.query(
       `UPDATE users
@@ -179,12 +257,12 @@ const findOrCreateByPhone = async ({ phone, name, allowCreate = true }) => {
 
   if (!allowCreate) return null
 
-  const resolvedName = (name || '').trim() || `User ${phone.slice(-4)}`
+  const resolvedName = (name || '').trim() || `User ${normalizedPhone.slice(-4)}`
   const { rows } = await pool.query(
     `INSERT INTO users (name, phone, provider, phone_verified)
      VALUES ($1, $2, 'local', TRUE)
      RETURNING ${PUBLIC_SELECT}`,
-    [resolvedName, phone]
+    [resolvedName, normalizedPhone]
   )
   return rows[0]
 }
@@ -236,6 +314,37 @@ const update = async (id, { name, avatar }) => {
   return rows[0] ?? null
 }
 
+const updateRole = async (id, role) => {
+  const { rows } = await pool.query(
+    `UPDATE users
+     SET role = $1,
+         updated_at = NOW()
+     WHERE id = $2
+     RETURNING ${PUBLIC_SELECT}`,
+    [role, id]
+  )
+  return rows[0] ?? null
+}
+
+const updateCapabilities = async (id, { canTeach, canBuy, canLearn }) => {
+  const { rows } = await pool.query(
+    `UPDATE users
+     SET can_teach = COALESCE($1, can_teach),
+         can_buy = COALESCE($2, can_buy),
+         can_learn = COALESCE($3, can_learn),
+         updated_at = NOW()
+     WHERE id = $4
+     RETURNING ${PUBLIC_SELECT}`,
+    [
+      canTeach === undefined ? null : Boolean(canTeach),
+      canBuy === undefined ? null : Boolean(canBuy),
+      canLearn === undefined ? null : Boolean(canLearn),
+      id,
+    ]
+  )
+  return rows[0] ?? null
+}
+
 /**
  * Upsert a Google OAuth user — insert on first login, update avatar on subsequent.
  */
@@ -249,7 +358,7 @@ const upsertGoogle = async ({ googleId, email, name, avatar }) => {
            provider = 'google',
            updated_at = NOW()
      RETURNING ${PUBLIC_SELECT}`,
-    [name, email.toLowerCase(), avatar ?? '', googleId]
+    [name, normalizeEmail(email), avatar ?? '', googleId]
   )
   return rows[0]
 }
@@ -267,15 +376,21 @@ const deleteById = async (id) => {
 module.exports = {
   findByEmail,
   findByPhone,
+  findByIdentity,
   findById,
   findOrCreateByPhone,
   listPublicSummaries,
+  countDbRoleAdmins,
+  countDbRoleSuperAdmins,
+  countAllowlistAdmins,
   create,
   verifyPassword,
   setPassword,
   markPhoneVerified,
   deleteById,
   update,
+  updateRole,
+  updateCapabilities,
   upsertGoogle,
   toPublic,
 }

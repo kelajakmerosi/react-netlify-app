@@ -1,5 +1,7 @@
 import { Eraser, Save } from 'lucide-react'
+import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Button } from '../../../components/ui/Button'
+import { Input } from '../../../components/ui/Input'
 import { useLang } from '../../../hooks'
 import type { TopicDraft, TopicQuestionDraft } from '../types'
 import QuestionEditorList from './QuestionEditorList'
@@ -29,6 +31,7 @@ export function TopicEditorPanel({
   onClear,
 }: TopicEditorPanelProps): JSX.Element {
   const { t } = useLang()
+  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
 
   return (
     <section className={styles.topicEditorPanel}>
@@ -39,35 +42,51 @@ export function TopicEditorPanel({
       <div className={styles.formGrid}>
         <label className={styles.field}>
           <span>{t('adminContentTopicId')}</span>
-          <input
-            className={styles.input}
-            value={topicDraft.id}
-            onChange={(event) => onDraftChange({ id: event.target.value })}
-          />
+          {useSharedPrimitives ? (
+            <Input value={topicDraft.id} onChange={(event) => onDraftChange({ id: event.target.value })} />
+          ) : (
+            <input
+              className={styles.input}
+              value={topicDraft.id}
+              onChange={(event) => onDraftChange({ id: event.target.value })}
+            />
+          )}
         </label>
         <label className={styles.field}>
           <span>{t('adminContentTitle')}</span>
-          <input
-            className={styles.input}
-            value={topicDraft.title}
-            onChange={(event) => onDraftChange({ title: event.target.value })}
-          />
+          {useSharedPrimitives ? (
+            <Input value={topicDraft.title} onChange={(event) => onDraftChange({ title: event.target.value })} />
+          ) : (
+            <input
+              className={styles.input}
+              value={topicDraft.title}
+              onChange={(event) => onDraftChange({ title: event.target.value })}
+            />
+          )}
         </label>
         <label className={styles.fieldWide}>
           <span>{t('adminContentVideoId')}</span>
-          <input
-            className={styles.input}
-            value={topicDraft.videoId}
-            onChange={(event) => onDraftChange({ videoId: event.target.value })}
-          />
+          {useSharedPrimitives ? (
+            <Input value={topicDraft.videoId} onChange={(event) => onDraftChange({ videoId: event.target.value })} />
+          ) : (
+            <input
+              className={styles.input}
+              value={topicDraft.videoId}
+              onChange={(event) => onDraftChange({ videoId: event.target.value })}
+            />
+          )}
         </label>
         <label className={styles.fieldWide}>
           <span>{t('adminContentVideoUrl')}</span>
-          <input
-            className={styles.input}
-            value={topicDraft.videoUrl ?? ''}
-            onChange={(event) => onDraftChange({ videoUrl: event.target.value })}
-          />
+          {useSharedPrimitives ? (
+            <Input value={topicDraft.videoUrl ?? ''} onChange={(event) => onDraftChange({ videoUrl: event.target.value })} />
+          ) : (
+            <input
+              className={styles.input}
+              value={topicDraft.videoUrl ?? ''}
+              onChange={(event) => onDraftChange({ videoUrl: event.target.value })}
+            />
+          )}
         </label>
       </div>
 

@@ -1,30 +1,33 @@
-import { createContext, useCallback, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useMemo, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { LanguageContextValue, LocaleKey } from '../../types'
-import uz from '../../locales/uz.json'
-import en from '../../locales/en.json'
-import ru from '../../locales/ru.json'
-
-const TRANSLATIONS: Record<LocaleKey, Record<string, string>> = { uz, en, ru }
+import i18n, { resolveLocale, syncLocaleToUrl } from '../i18n'
 
 export const LanguageContext = createContext<LanguageContextValue | null>(null)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<LocaleKey>(
-    () => (localStorage.getItem('lang') as LocaleKey) ?? 'uz',
-  )
+  const { t, i18n: instance } = useTranslation('common')
+  const lang = resolveLocale(instance.resolvedLanguage || instance.language) as LocaleKey
 
   const changeLang = useCallback((l: LocaleKey) => {
-    localStorage.setItem('lang', l)
-    setLang(l)
+    const next = resolveLocale(l)
+    void i18n.changeLanguage(next)
+    syncLocaleToUrl(next)
   }, [])
 
-  const t = useCallback(
-    (key: string) => TRANSLATIONS[lang]?.[key] ?? key,
-    [lang],
-  )
+  const safeTranslate = useCallback((key: string) => {
+    const value = t(key)
+    return typeof value === 'string' ? value : key
+  }, [t])
+
+  const value = useMemo<LanguageContextValue>(() => ({
+    lang,
+    changeLang,
+    t: safeTranslate,
+  }), [changeLang, lang, safeTranslate])
 
   return (
-    <LanguageContext.Provider value={{ lang, changeLang, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   )

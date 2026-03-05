@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Button > matches snapshot for key variants 1`] = `
+<div>
+  <div>
+    <button
+      class="_btn_947cf7 _btnPrimary_947cf7"
+      type="button"
+    >
+      Primary
+    </button>
+    <button
+      class="_btn_947cf7 _btnGhost_947cf7"
+      type="button"
+    >
+      Ghost
+    </button>
+    <button
+      class="_btn_947cf7 _btnDanger_947cf7"
+      type="button"
+    >
+      Danger
+    </button>
+    <button
+      aria-label="icon button"
+      class="_btn_947cf7 _btnIcon_947cf7"
+      type="button"
+    >
+      +
+    </button>
+  </div>
+</div>
+`;

@@ -1,0 +1,17 @@
+const MATH_SYMBOL_REGEX = /[=+\-*/^<>≤≥≈√∫∑π∞°]/u
+
+const buildMathFragments = ({ text = '', sourceType = 'docx', images = [] } = {}) => {
+  const hasMath = MATH_SYMBOL_REGEX.test(String(text))
+
+  return {
+    sourceType,
+    hasMath,
+    confidence: hasMath ? 'low' : 'high',
+    needsImageReview: hasMath,
+    imageFragments: Array.isArray(images) ? images : [],
+  }
+}
+
+module.exports = {
+  buildMathFragments,
+}

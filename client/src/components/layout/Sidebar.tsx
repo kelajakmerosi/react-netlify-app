@@ -6,7 +6,7 @@ import { cn } from '../../utils'
 import { Avatar } from '../ui/index'
 import { Button } from '../ui/Button'
 import styles from './Sidebar.module.css'
-import { LayoutDashboard, BookOpen, User, LogOut, Shield } from 'lucide-react'
+import { LayoutDashboard, BookOpen, User, LogOut, Shield, FileCheck2, Library, ShoppingBag } from 'lucide-react'
 
 interface SidebarProps {
   mobileOpen: boolean
@@ -16,11 +16,20 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { id: 'dashboard' as PageId, path: '/dashboard', icon: <LayoutDashboard size={20} /> },
   { id: 'subjects' as PageId, path: '/subjects', icon: <BookOpen size={20} /> },
+  { id: 'exams' as PageId, path: '/exams', icon: <FileCheck2 size={20} /> },
+  { id: 'materials' as PageId, path: '/materials', icon: <ShoppingBag size={20} /> },
+  { id: 'materialLibrary' as PageId, path: '/materials/library', icon: <Library size={20} /> },
   { id: 'profile' as PageId, path: '/profile', icon: <User size={20} /> },
   { id: 'admin' as PageId, path: '/admin', icon: <Shield size={20} />, adminOnly: true },
 ]
 
 const resolveActivePage = (pathname: string): PageId => {
+  if (pathname.startsWith('/payments/')) return 'payment'
+  if (pathname.startsWith('/exam-attempts/')) return 'examAttempt'
+  if (pathname.startsWith('/exams/')) return 'exam'
+  if (pathname.startsWith('/exams')) return 'exams'
+  if (pathname.startsWith('/materials/')) return pathname.startsWith('/materials/library') ? 'materialLibrary' : 'materialCheckout'
+  if (pathname.startsWith('/materials')) return 'materials'
   if (pathname.startsWith('/subjects/')) return pathname.includes('/topics/') ? 'topic' : 'subject'
   if (pathname.startsWith('/subjects')) return 'subjects'
   if (pathname.startsWith('/profile')) return 'profile'
@@ -35,6 +44,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation()
 
   const activePage = resolveActivePage(location.pathname)
+  const paymentKind = new URLSearchParams(location.search).get('kind')
 
   const handleNav = (path: string) => {
     navigate(path)
@@ -52,18 +62,27 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className={styles.nav}>
-          {NAV_ITEMS.filter(item => !item.adminOnly || user?.role === 'admin' || user?.role === 'superadmin').map(item => (
-            <Button
-              key={item.id}
-              variant="nav"
-              active={activePage === item.id}
-              onClick={() => handleNav(item.path)}
-              fullWidth
-            >
-              <span className={styles.navIcon}>{item.icon}</span>
-              {t(item.id as any)}
-            </Button>
-          ))}
+          {NAV_ITEMS
+            .filter((item) => !item.adminOnly || user?.role === 'admin' || user?.role === 'superadmin')
+            .map((item) => {
+              const isActive = activePage === item.id
+                || (item.id === 'exams' && (activePage === 'exam' || activePage === 'examAttempt'))
+                || (item.id === 'materials' && (activePage === 'materialCheckout' || (activePage === 'payment' && paymentKind === 'material')))
+                || (item.id === 'exams' && activePage === 'payment' && paymentKind !== 'material')
+
+              return (
+                <Button
+                  key={item.id}
+                  variant="nav"
+                  active={isActive}
+                  onClick={() => handleNav(item.path)}
+                  fullWidth
+                >
+                  <span className={styles.navIcon}>{item.icon}</span>
+                  {t(item.id as any)}
+                </Button>
+              )
+            })}
         </nav>
 
         <div className={styles.footer}>

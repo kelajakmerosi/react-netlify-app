@@ -3,6 +3,7 @@ import { GlassCard }    from '../ui/GlassCard'
 import { ProgressBar }  from '../ui/index'
 import { useLang } from '../../hooks'
 import type { Subject } from '../../types'
+import { renderSafeIcon } from '../../utils/renderSafeIcon'
 import styles           from './SubjectCard.module.css'
 
 interface SubjectCardProps {
@@ -24,7 +25,7 @@ export function SubjectCard({ subject, name, completed, total, pct, onClick }: S
       style={{ '--subject-color': subject.color } as CSSProperties}
     >
       <div className={styles.iconWrap} style={{ background: subject.gradient }}>
-        <span className={styles.icon}>{subject.icon}</span>
+        <span className={styles.icon}>{renderSafeIcon(subject.icon)}</span>
       </div>
 
       <h3 className={styles.name} style={{ color: subject.color }}>{name}</h3>

@@ -21,8 +21,55 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 360px));
+  justify-content: flex-start;
   gap: 18px;
+}
+
+.skeletonCard {
+  min-height: 226px;
+  display: grid;
+  gap: 14px;
+}
+
+.skeletonIcon,
+.skeletonLineLg,
+.skeletonLine {
+  border-radius: 12px;
+  background:
+    linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--surface) 88%, transparent) 15%,
+      color-mix(in srgb, var(--bg-2) 76%, var(--surface)) 45%,
+      color-mix(in srgb, var(--surface) 88%, transparent) 75%
+    );
+  background-size: 220% 100%;
+  animation: subjectsShimmer 1.5s linear infinite;
+}
+
+.skeletonIcon {
+  width: 52px;
+  height: 52px;
+}
+
+.skeletonLineLg {
+  height: 20px;
+  width: 68%;
+}
+
+.skeletonLine {
+  height: 14px;
+  width: 92%;
+}
+
+@keyframes subjectsShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
 }
 
 @media (max-width: 640px) {

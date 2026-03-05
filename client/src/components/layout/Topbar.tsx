@@ -19,6 +19,13 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
     profile:   t('profile'),
     topic:     t('topics'),
     admin:     t('admin'),
+    exams:     t('exams'),
+    exam:      t('exam'),
+    examAttempt: t('exam'),
+    payment: t('payment'),
+    materials: t('materials'),
+    materialCheckout: t('materialCheckout'),
+    materialLibrary: t('materialLibrary'),
   }
 
   return (

@@ -77,6 +77,13 @@ vi.mock('../hooks', () => ({
   }),
 }))
 
+vi.mock('../app/feature-flags', () => ({
+  UI_MIGRATION_FLAGS: {
+    adminUseSharedFormPrimitives: true,
+    adminUseSharedSegmentedControls: true,
+  },
+}))
+
 const renderAuthPage = async () => {
   const { AuthPage } = await import('./AuthPage')
   return render(<AuthPage />)
@@ -157,6 +164,23 @@ describe('AuthPage password-first flow', () => {
 
     await waitFor(() => expect(legacyLoginOtpRequestCode).toHaveBeenCalledWith('+998901234569'))
     expect(screen.getByText('Sign In with Code')).toBeTruthy()
+  })
+
+  it('closes shared OTP modal on overlay press', async () => {
+    legacyLoginOtpRequestCode.mockResolvedValue(undefined)
+    await renderAuthPage()
+
+    fireEvent.change(screen.getByPlaceholderText('+998XXXXXXXXX'), { target: { value: '+998901234569' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in via OTP' }))
+
+    await waitFor(() => expect(legacyLoginOtpRequestCode).toHaveBeenCalledWith('+998901234569'))
+
+    const dialog = screen.getByRole('dialog')
+    const overlay = dialog.parentElement
+    if (!overlay) throw new Error('Modal overlay not found')
+
+    fireEvent.mouseDown(overlay)
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
   it('keeps Google sign in available', async () => {

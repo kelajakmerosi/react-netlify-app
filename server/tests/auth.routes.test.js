@@ -41,6 +41,10 @@ jest.mock('../src/services/sms/eskiz.service', () => ({
   sendOtp: jest.fn(),
 }))
 
+jest.mock('../src/models/Analytics.model', () => ({
+  trackEvent: jest.fn().mockResolvedValue(null),
+}))
+
 jest.mock('google-auth-library', () => {
   const verifyIdToken = jest.fn()
   return {

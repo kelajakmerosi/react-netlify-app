@@ -1,12 +1,14 @@
 import { useMemo } from 'react'
 import { useLang, useApp } from '../hooks'
 import { useAuth } from '../hooks/useAuth'
-import { SUBJECTS, SUBJECT_NAMES, TOPIC_NAMES, MODULE_NAMES } from '../constants'
+import { SUBJECT_NAMES, TOPIC_NAMES, MODULE_NAMES } from '../constants'
+import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Button } from '../components/ui/Button'
 import { Divider, Alert } from '../components/ui/index'
 import { TopicRow } from '../components/features/TopicRow'
 import type { CurrentTopic, TopicProgressData, TopicStatus } from '../types'
+import { renderSafeIcon } from '../utils/renderSafeIcon'
 import styles from './SubjectPage.module.css'
 
 interface SubjectPageProps {
@@ -34,6 +36,7 @@ const toScorePct = (data: TopicProgressData, totalQuestions?: number) => {
 export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPageProps) {
   const { t, lang } = useLang()
   const { user } = useAuth()
+  const { byId, loading: loadingSubject, error: subjectLoadError } = useLearnerSubjects()
   const {
     getTopicStatus,
     getTopicData,
@@ -43,9 +46,7 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
     retryLoad,
   } = useApp()
 
-  const subject = SUBJECTS.find(s => s.id === subjectId)
-  if (!subject) return null
-
+  const subject = byId.get(subjectId)
   const statusLabels = {
     completed:  t('completed'),
     inprogress: t('inProgress'),
@@ -75,16 +76,35 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
     return { label: t('startLesson'), hint: t('beginModule') }
   }
 
-  const moduleBlocks = useMemo(() => subject.modules.map(module => {
-    const lessons = module.topicIds
-      .map(topicId => subject.topics.find(topic => topic.id === topicId))
-      .filter((topic): topic is (typeof subject.topics)[number] => Boolean(topic))
+  const moduleBlocks = useMemo(() => {
+    if (!subject) return []
 
-    return {
-      module,
-      lessons,
-    }
-  }), [subject.modules, subject.topics])
+    return subject.modules.map(module => {
+      const lessons = module.topicIds
+        .map(topicId => subject.topics.find(topic => topic.id === topicId))
+        .filter((topic): topic is (typeof subject.topics)[number] => Boolean(topic))
+
+      return {
+        module,
+        lessons,
+      }
+    })
+  }, [subject])
+
+  if (!subject && !loadingSubject) {
+    return (
+      <div className="page-content fade-in">
+        <Alert variant="warning">Subject not found.</Alert>
+      </div>
+    )
+  }
+  if (!subject) {
+    return (
+      <div className="page-content fade-in">
+        <Alert variant="info">Loading subject...</Alert>
+      </div>
+    )
+  }
 
   return (
     <div className="page-content fade-in">
@@ -94,15 +114,21 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
 
       <div className={styles.header}>
         <div className={styles.iconWrap} style={{ background: subject.gradient }}>
-          <span className={styles.iconGlyph}>{subject.icon}</span>
+          <span className={styles.iconGlyph}>{renderSafeIcon(subject.icon)}</span>
         </div>
         <div>
           <h2 className={styles.title} style={{ color: subject.color }}>
-            {SUBJECT_NAMES[lang][subject.id]}
+            {subject.title || SUBJECT_NAMES[lang]?.[subject.id] || subject.id}
           </h2>
           <p className={styles.meta}>{subject.topics.length} {t('lessons')}</p>
         </div>
       </div>
+
+      {subjectLoadError ? (
+        <Alert variant="warning" className={styles.syncWarning}>
+          {subjectLoadError}
+        </Alert>
+      ) : null}
 
       {loadError && (
         <Alert variant="info" className={styles.syncWarning}>
@@ -124,7 +150,7 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
           {moduleBlocks.map(({ module, lessons }) => (
             <GlassCard key={module.id} style={{ overflow: 'hidden' }}>
               <div className={styles.moduleHeader}>
-                <h3 className={styles.moduleTitle}>{MODULE_NAMES[lang][module.track]}</h3>
+                <h3 className={styles.moduleTitle}>{MODULE_NAMES[lang]?.[module.track] || t('topics')}</h3>
                 <p className={styles.moduleMeta}>{lessons.length} {t('lessons')}</p>
               </div>
 
@@ -148,7 +174,7 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
                 return (
                   <div key={topic.id}>
                     <TopicRow
-                      name={TOPIC_NAMES[lang][topic.id]}
+                      name={topic.title || TOPIC_NAMES[lang]?.[topic.id] || topic.id}
                       status={status}
                       statusLabel={statusLabels[status]}
                       quizScore={data.quizScore}

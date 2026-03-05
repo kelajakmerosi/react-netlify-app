@@ -1,0 +1,125 @@
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret'
+
+jest.mock('../src/models/User.model', () => ({
+  findById: jest.fn(),
+  findByIdentity: jest.fn(),
+  listPublicSummaries: jest.fn(),
+  updateRole: jest.fn(),
+  deleteById: jest.fn(),
+  countDbRoleAdmins: jest.fn(),
+  countAllowlistAdmins: jest.fn(),
+  toPublic: jest.fn((row) => ({
+    id: row.id,
+    name: row.name,
+    email: row.email ?? null,
+    phone: row.phone ?? null,
+    role: row.role === 'admin' ? 'admin' : 'student',
+    dbRole: row.role === 'admin' ? 'admin' : 'student',
+    adminSource: row.adminSource || (row.role === 'admin' ? 'db_role' : 'none'),
+  })),
+}))
+
+jest.mock('../src/models/Analytics.model', () => ({
+  getSummary: jest.fn(),
+  getTimeseries: jest.fn(),
+  getBreakdown: jest.fn(),
+}))
+
+const request = require('supertest')
+const jwt = require('jsonwebtoken')
+const app = require('../src/app')
+const User = require('../src/models/User.model')
+const Analytics = require('../src/models/Analytics.model')
+
+const adminToken = jwt.sign({ id: 'admin-1' }, process.env.JWT_SECRET)
+
+describe('Admin routes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    User.findById.mockImplementation(async (id) => {
+      if (id === 'admin-1') {
+        return {
+          id: 'admin-1',
+          name: 'Admin',
+          email: 'kelajakmerosi@gmail.com',
+          role: 'admin',
+        }
+      }
+      if (id === '11111111-1111-4111-8111-111111111111') {
+        return {
+          id: '11111111-1111-4111-8111-111111111111',
+          name: 'Second Admin',
+          email: 'admin2@example.com',
+          role: 'admin',
+        }
+      }
+      return null
+    })
+  })
+
+  it('lists admins and users from admin endpoint', async () => {
+    User.listPublicSummaries.mockResolvedValue([
+      {
+        id: 'admin-1',
+        name: 'Admin',
+        email: 'kelajakmerosi@gmail.com',
+        role: 'admin',
+        adminSource: 'both',
+      },
+      {
+        id: 'user-10',
+        name: 'Student User',
+        email: 'student@example.com',
+        role: 'student',
+      },
+    ])
+
+    const res = await request(app)
+      .get('/api/admin/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.data).toHaveLength(2)
+    expect(res.body.meta).toMatchObject({
+      total: 2,
+      admins: 1,
+      users: 1,
+    })
+  })
+
+  it('protects against removing the last admin role', async () => {
+    User.countDbRoleAdmins.mockResolvedValue(1)
+    User.countAllowlistAdmins.mockResolvedValue(0)
+
+    const res = await request(app)
+      .patch('/api/admin/users/11111111-1111-4111-8111-111111111111/role')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ role: 'student' })
+
+    expect(res.status).toBe(409)
+    expect(res.body).toHaveProperty('error.code', 'ADMIN_LAST_PROTECTED')
+  })
+
+  it('returns analytics summary payload', async () => {
+    Analytics.getSummary.mockResolvedValue({
+      totalUsers: 10,
+      dau: 4,
+      wau: 7,
+      mau: 9,
+      trackedTopics: 20,
+      completedTopics: 12,
+      completionRate: 60,
+      avgQuizScore: 71.2,
+      authSources: [{ source: 'google', value: 3 }],
+      range: { from: '2026-02-01T00:00:00.000Z', to: '2026-02-28T00:00:00.000Z' },
+    })
+
+    const res = await request(app)
+      .get('/api/admin/analytics/summary?from=2026-02-01&to=2026-02-28')
+      .set('Authorization', `Bearer ${adminToken}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('data.totalUsers', 10)
+    expect(Analytics.getSummary).toHaveBeenCalled()
+  })
+})

@@ -7,6 +7,7 @@ import { ApiError } from '../services/api'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
+import { Modal } from '../components/ui'
 import styles from './AuthPage.module.css'
 
 function GoogleSVG() {
@@ -124,8 +125,6 @@ export function AuthPage() {
   const [passwordModalLoading, setPasswordModalLoading] = useState(false)
 
   const otpRefs = useRef<Array<HTMLInputElement | null>>([])
-  const otpDialogRef = useRef<HTMLDivElement | null>(null)
-  const passwordDialogRef = useRef<HTMLDivElement | null>(null)
 
   const resolveErrorMessage = (err: unknown) => {
     if (err instanceof ApiError) {
@@ -236,7 +235,7 @@ export function AuthPage() {
     setNewPassword('')
     setConfirmNewPassword('')
     setPasswordModalOpen(true)
-    requestAnimationFrame(() => passwordDialogRef.current?.querySelector<HTMLInputElement>('input')?.focus())
+    requestAnimationFrame(() => document.getElementById('auth-new-password')?.focus())
   }
 
   const closePasswordModal = () => {
@@ -244,48 +243,6 @@ export function AuthPage() {
     setPasswordModalError('')
     setPasswordModalLoading(false)
   }
-
-  useEffect(() => {
-    if (!otpOpen) return undefined
-    const previousActive = document.activeElement as HTMLElement | null
-    document.body.style.overflow = 'hidden'
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        closeOtpModal()
-        return
-      }
-
-      if (event.key !== 'Tab') return
-      const dialog = otpDialogRef.current
-      if (!dialog) return
-
-      const focusable = dialog.querySelectorAll<HTMLElement>(
-        'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
-      )
-      if (!focusable.length) return
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      const active = document.activeElement as HTMLElement | null
-
-      if (event.shiftKey && active === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
-      previousActive?.focus?.()
-    }
-  }, [otpOpen])
 
   const clearNotices = () => {
     setError('')
@@ -680,6 +637,8 @@ export function AuthPage() {
           {mode === 'login' ? (
             <>
               <Input
+                label={t('phonePlaceholder')}
+                hideLabel
                 placeholder={t('phonePlaceholder')}
                 value={loginPhone}
                 onChange={(event) => {
@@ -690,6 +649,8 @@ export function AuthPage() {
               />
               <div className={styles.passwordField}>
                 <Input
+                  label={t('password')}
+                  hideLabel
                   type={showLoginPassword ? 'text' : 'password'}
                   placeholder={t('password')}
                   value={loginPassword}
@@ -733,6 +694,8 @@ export function AuthPage() {
             <>
               <div className={styles.nameRow}>
                 <Input
+                  label={t('firstName')}
+                  hideLabel
                   placeholder={t('firstName')}
                   value={firstName}
                   onChange={(event) => {
@@ -742,6 +705,8 @@ export function AuthPage() {
                   error={!!error}
                 />
                 <Input
+                  label={t('lastName')}
+                  hideLabel
                   placeholder={t('lastName')}
                   value={lastName}
                   onChange={(event) => {
@@ -752,6 +717,8 @@ export function AuthPage() {
                 />
               </div>
               <Input
+                label={t('phonePlaceholder')}
+                hideLabel
                 placeholder={t('phonePlaceholder')}
                 value={signupPhone}
                 onChange={(event) => {
@@ -762,6 +729,8 @@ export function AuthPage() {
               />
               <div className={styles.passwordField}>
                 <Input
+                  label={t('password')}
+                  hideLabel
                   type={showSignupPassword ? 'text' : 'password'}
                   placeholder={t('password')}
                   value={signupPassword}
@@ -783,6 +752,8 @@ export function AuthPage() {
               </div>
               <div className={styles.passwordField}>
                 <Input
+                  label={t('confirmPassword')}
+                  hideLabel
                   type={showSignupConfirmPassword ? 'text' : 'password'}
                   placeholder={t('confirmPassword')}
                   value={signupConfirmPassword}
@@ -836,55 +807,13 @@ export function AuthPage() {
       </GlassCard>
 
       {otpOpen && (
-        <div className={styles.modalOverlay} onMouseDown={(event) => event.target === event.currentTarget && closeOtpModal()}>
-          <div
-            ref={otpDialogRef}
-            className={styles.modal}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="otp-modal-title"
-          >
-            <div className={styles.modalHeader}>
-              <h2 id="otp-modal-title">{otpTitle}</h2>
-              <p>{interpolate(t('otpModalSubtitle'), { phone: maskPhone(otpPhone) })}</p>
-            </div>
-
-            <div className={styles.otpGrid}>
-              {codeDigits.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(element) => { otpRefs.current[index] = element }}
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete={index === 0 ? 'one-time-code' : 'off'}
-                  maxLength={OTP_LENGTH}
-                  aria-label={`${t('otpDigitAria')} ${index + 1}`}
-                  className={cn(
-                    styles.otpBox,
-                    digit && styles.otpBoxFilled,
-                    otpError && styles.otpBoxError,
-                  )}
-                  value={digit}
-                  onFocus={(event) => event.currentTarget.select()}
-                  onChange={(event) => {
-                    handleOtpChange(index, event.target.value)
-                    if (otpError) setOtpError('')
-                  }}
-                  onKeyDown={(event) => handleOtpKeyDown(index, event)}
-                  onPaste={handleOtpPaste}
-                />
-              ))}
-            </div>
-
-            {!otpError && otpInfo && <AuthNotice variant="info" message={otpInfo} />}
-            {otpError && <AuthNotice variant="error" message={otpError} />}
-
-            <div className={styles.modalMeta}>
-              {resendCountdown > 0
-                ? <span>{interpolate(t('otpResendIn'), { seconds: String(resendCountdown) })}</span>
-                : <span>{t('otpResendReady')}</span>}
-            </div>
-
+        <Modal
+          open={otpOpen}
+          title={otpTitle}
+          description={interpolate(t('otpModalSubtitle'), { phone: maskPhone(otpPhone) })}
+          labelledBy="otp-modal-title"
+          onClose={closeOtpModal}
+          footer={(
             <div className={styles.modalActions}>
               <div className={styles.modalSecondaryRow}>
                 <Button
@@ -912,78 +841,55 @@ export function AuthPage() {
                 {otpLoading ? t('authLoading') : t('verifyOtp')}
               </Button>
             </div>
+          )}
+        >
+          <div className={styles.otpGrid}>
+            {codeDigits.map((digit, index) => (
+              <Input
+                key={index}
+                ref={(element) => { otpRefs.current[index] = element }}
+                type="text"
+                inputMode="numeric"
+                autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                maxLength={OTP_LENGTH}
+                aria-label={`${t('otpDigitAria')} ${index + 1}`}
+                className={cn(
+                  styles.otpBox,
+                  digit && styles.otpBoxFilled,
+                  otpError && styles.otpBoxError,
+                )}
+                value={digit}
+                onFocus={(event) => event.currentTarget.select()}
+                onChange={(event) => {
+                  handleOtpChange(index, event.target.value)
+                  if (otpError) setOtpError('')
+                }}
+                onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                onPaste={handleOtpPaste}
+              />
+            ))}
           </div>
-        </div>
+
+          {!otpError && otpInfo && <AuthNotice variant="info" message={otpInfo} />}
+          {otpError && <AuthNotice variant="error" message={otpError} />}
+
+          <div className={styles.modalMeta}>
+            {resendCountdown > 0
+              ? <span>{interpolate(t('otpResendIn'), { seconds: String(resendCountdown) })}</span>
+              : <span>{t('otpResendReady')}</span>}
+          </div>
+        </Modal>
       )}
 
       {passwordModalOpen && (
-        <div
-          className={styles.modalOverlay}
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && passwordModalKind !== 'legacySetup') {
-              closePasswordModal()
-            }
-          }}
-        >
-          <div
-            ref={passwordDialogRef}
-            className={styles.modal}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="password-modal-title"
-          >
-            <div className={styles.modalHeader}>
-              <h2 id="password-modal-title">
-                {passwordModalKind === 'legacySetup' ? t('setPasswordTitle') : t('resetPasswordTitle')}
-              </h2>
-              <p>{t('passwordPolicyHint')}</p>
-            </div>
-
-            <div className={styles.passwordField}>
-              <Input
-                type={showNewPassword ? 'text' : 'password'}
-                placeholder={t('newPassword')}
-                value={newPassword}
-                onChange={(event) => {
-                  setNewPassword(event.target.value)
-                  if (passwordModalError) setPasswordModalError('')
-                }}
-                error={!!passwordModalError}
-                className={styles.passwordInput}
-              />
-              <button
-                type="button"
-                className={styles.passwordToggle}
-                onClick={() => setShowNewPassword((prev) => !prev)}
-                aria-label={showNewPassword ? 'Hide password' : 'Show password'}
-              >
-                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            <div className={styles.passwordField}>
-              <Input
-                type={showConfirmNewPassword ? 'text' : 'password'}
-                placeholder={t('confirmPassword')}
-                value={confirmNewPassword}
-                onChange={(event) => {
-                  setConfirmNewPassword(event.target.value)
-                  if (passwordModalError) setPasswordModalError('')
-                }}
-                error={!!passwordModalError}
-                className={styles.passwordInput}
-              />
-              <button
-                type="button"
-                className={styles.passwordToggle}
-                onClick={() => setShowConfirmNewPassword((prev) => !prev)}
-                aria-label={showConfirmNewPassword ? 'Hide password' : 'Show password'}
-              >
-                {showConfirmNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-
-            {passwordModalError && <AuthNotice variant="error" message={passwordModalError} />}
-
+        <Modal
+          open={passwordModalOpen}
+          title={passwordModalKind === 'legacySetup' ? t('setPasswordTitle') : t('resetPasswordTitle')}
+          description={t('passwordPolicyHint')}
+          labelledBy="password-modal-title"
+          dismissible={passwordModalKind !== 'legacySetup'}
+          onClose={closePasswordModal}
+          footer={(
             <div className={styles.modalActions}>
               {passwordModalKind === 'passwordReset' && (
                 <Button variant="ghost" className={styles.modalSecondaryBtn} onClick={closePasswordModal}>
@@ -999,8 +905,60 @@ export function AuthPage() {
                 {passwordModalLoading ? t('authLoading') : t('savePassword')}
               </Button>
             </div>
+          )}
+        >
+          <div className={styles.passwordField}>
+            <Input
+              id="auth-new-password"
+              label={t('newPassword')}
+              hideLabel
+              type={showNewPassword ? 'text' : 'password'}
+              placeholder={t('newPassword')}
+              value={newPassword}
+              onChange={(event) => {
+                setNewPassword(event.target.value)
+                if (passwordModalError) setPasswordModalError('')
+              }}
+              errorMessage={passwordModalError || undefined}
+              error={!!passwordModalError}
+              className={styles.passwordInput}
+            />
+            <button
+              type="button"
+              className={styles.passwordToggle}
+              onClick={() => setShowNewPassword((prev) => !prev)}
+              aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+            >
+              {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
-        </div>
+          <div className={styles.passwordField}>
+            <Input
+              label={t('confirmPassword')}
+              hideLabel
+              type={showConfirmNewPassword ? 'text' : 'password'}
+              placeholder={t('confirmPassword')}
+              value={confirmNewPassword}
+              onChange={(event) => {
+                setConfirmNewPassword(event.target.value)
+                if (passwordModalError) setPasswordModalError('')
+              }}
+              errorMessage={passwordModalError || undefined}
+              error={!!passwordModalError}
+              className={styles.passwordInput}
+            />
+            <button
+              type="button"
+              className={styles.passwordToggle}
+              onClick={() => setShowConfirmNewPassword((prev) => !prev)}
+              aria-label={showConfirmNewPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+
+          {passwordModalError && <AuthNotice variant="error" message={passwordModalError} />}
+        </Modal>
       )}
     </div>
   )

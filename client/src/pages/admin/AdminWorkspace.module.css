@@ -3,22 +3,16 @@
   gap: 14px;
 }
 
-.stickyHead {
-  position: static;
-  top: auto;
-  z-index: auto;
+.headerBlock {
+  position: static !important;
+  top: auto !important;
+  z-index: 0;
   isolation: isolate;
   display: grid;
   gap: 10px;
-  padding: 6px 0 12px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--bg) 98%, var(--bg-2)) 0%,
-      color-mix(in srgb, var(--bg) 96%, var(--bg-2)) 78%,
-      color-mix(in srgb, var(--bg) 92%, transparent) 100%
-    );
-  border-bottom: 1px solid color-mix(in srgb, var(--surface-border) 70%, transparent);
+  padding: 6px 0 8px;
+  background: transparent;
+  border-bottom: 0;
 }
 
 .adminHeader {
@@ -64,8 +58,50 @@
   border: 1px solid var(--surface-border);
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   padding: 6px;
-  position: relative;
+  position: static !important;
   overflow: hidden;
+}
+
+.tabRailSegmented {
+  display: grid;
+  grid-template-columns: repeat(var(--admin-tab-count, 4), minmax(0, 1fr));
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  padding: 6px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tabRailSegmented :global(button[role='tab']) {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  color: var(--text-2);
+  background: transparent;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.tabRailSegmented :global(button[role='tab'][aria-selected='false']:hover:not(:disabled)),
+.tabRailSegmented :global(button[role='tab'][aria-selected='false']:focus-visible:not(:disabled)) {
+  background: color-mix(in srgb, var(--surface) 76%, var(--bg-2));
+  color: var(--text-2);
+  outline: none;
+}
+
+.tabRailSegmented :global(button[role='tab'][aria-selected='true']) {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 14px rgba(29, 111, 201, 0.22);
+}
+
+.tabRailSegmented :global(button[role='tab'][aria-selected='true']:hover:not(:disabled)),
+.tabRailSegmented :global(button[role='tab'][aria-selected='true']:focus-visible:not(:disabled)) {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
 }
 
 .tabItem {
@@ -199,6 +235,13 @@
 
 .quickOpsCompact {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.actionsRow {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .quickOpBtn {
@@ -374,8 +417,8 @@
 }
 
 .subjectRail {
-  position: sticky;
-  top: 154px;
+  position: static;
+  top: auto;
   border: 1px solid var(--surface-border);
   border-radius: 16px;
   background: color-mix(in srgb, var(--surface) 94%, transparent);
@@ -474,6 +517,11 @@
 .fieldWide span {
   font-size: 13px;
   color: var(--text-2);
+}
+
+.helperText {
+  font-size: 12px;
+  color: var(--text-3);
 }
 
 .questionEditorWrap {

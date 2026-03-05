@@ -67,6 +67,46 @@ vi.mock('../pages/AdminPage', () => ({
   default: () => <div>AdminPage</div>,
 }))
 
+vi.mock('../pages/ExamCatalogPage', () => ({
+  ExamCatalogPage: () => <div>ExamCatalogPage</div>,
+  default: () => <div>ExamCatalogPage</div>,
+}))
+
+vi.mock('../pages/ExamCheckoutPage', () => ({
+  ExamCheckoutPage: () => <div>ExamCheckoutPage</div>,
+  default: () => <div>ExamCheckoutPage</div>,
+}))
+
+vi.mock('../pages/ExamSessionPage', () => ({
+  ExamSessionPage: () => <div>ExamSessionPage</div>,
+  default: () => <div>ExamSessionPage</div>,
+}))
+
+vi.mock('../pages/ExamResultPage', () => ({
+  ExamResultPage: () => <div>ExamResultPage</div>,
+  default: () => <div>ExamResultPage</div>,
+}))
+
+vi.mock('../pages/MaterialCatalogPage', () => ({
+  MaterialCatalogPage: () => <div>MaterialCatalogPage</div>,
+  default: () => <div>MaterialCatalogPage</div>,
+}))
+
+vi.mock('../pages/MaterialCheckoutPage', () => ({
+  MaterialCheckoutPage: () => <div>MaterialCheckoutPage</div>,
+  default: () => <div>MaterialCheckoutPage</div>,
+}))
+
+vi.mock('../pages/MaterialLibraryPage', () => ({
+  MaterialLibraryPage: () => <div>MaterialLibraryPage</div>,
+  default: () => <div>MaterialLibraryPage</div>,
+}))
+
+vi.mock('../pages/PaymentGatewayPage', () => ({
+  PaymentGatewayPage: () => <div>PaymentGatewayPage</div>,
+  default: () => <div>PaymentGatewayPage</div>,
+}))
+
 const renderAt = (path: string, auth: { user: unknown; isGuest: boolean }) => {
   window.history.pushState({}, 'test', path)
   mockUseAuth.mockReturnValue(auth)
@@ -111,6 +151,36 @@ describe('App routing', () => {
   it('renders admin for admin users', () => {
     renderAt('/admin', { user: { id: 'u2', role: 'admin' }, isGuest: false })
     expect(screen.getByText('AdminPage')).toBeTruthy()
+  })
+
+  it('renders exams catalog route', () => {
+    renderAt('/exams', { user: { id: 'u1', role: 'student' }, isGuest: false })
+    expect(screen.getByText('ExamCatalogPage')).toBeTruthy()
+  })
+
+  it('renders exam checkout route', () => {
+    renderAt('/exams/abc', { user: { id: 'u1', role: 'student' }, isGuest: false })
+    expect(screen.getByText('ExamCheckoutPage')).toBeTruthy()
+  })
+
+  it('renders material library route', () => {
+    renderAt('/materials/library', { user: { id: 'u1', role: 'student' }, isGuest: false })
+    expect(screen.getByText('MaterialLibraryPage')).toBeTruthy()
+  })
+
+  it('renders material catalog route', () => {
+    renderAt('/materials', { user: { id: 'u1', role: 'student' }, isGuest: false })
+    expect(screen.getByText('MaterialCatalogPage')).toBeTruthy()
+  })
+
+  it('renders material checkout route', () => {
+    renderAt('/materials/m-1', { user: { id: 'u1', role: 'student' }, isGuest: false })
+    expect(screen.getByText('MaterialCheckoutPage')).toBeTruthy()
+  })
+
+  it('renders payment gateway route', () => {
+    renderAt('/payments/p-1?kind=exam&resourceId=e-1', { user: { id: 'u1', role: 'student' }, isGuest: false })
+    expect(screen.getByText('PaymentGatewayPage')).toBeTruthy()
   })
 
   it('redirects /admin to dashboard for non-admin users', () => {

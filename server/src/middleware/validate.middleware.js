@@ -1,15 +1,34 @@
 const ERROR_CODES = require('../constants/errorCodes')
 const { sendError } = require('../utils/http')
 
+const toValidationDetails = (zodError) => {
+  const flattened = zodError.flatten()
+  const issues = zodError.issues.map((issue) => ({
+    path: issue.path,
+    message: issue.message,
+    code: issue.code,
+  }))
+
+  return {
+    ...flattened,
+    issues,
+  }
+}
+
+const getValidationMessage = (zodError, fallback) => {
+  const firstIssue = zodError.issues.find((issue) => typeof issue?.message === 'string' && issue.message.length > 0)
+  return firstIssue?.message || fallback
+}
+
 const validateBody = (schema) => (req, res, next) => {
   const parsed = schema.safeParse(req.body)
   if (!parsed.success) {
     return sendError(res, {
       status: 400,
       code: ERROR_CODES.VALIDATION_ERROR,
-      message: 'Validation failed',
+      message: getValidationMessage(parsed.error, 'Validation failed'),
       requestId: req.id,
-      details: parsed.error.flatten(),
+      details: toValidationDetails(parsed.error),
     })
   }
 
@@ -23,9 +42,9 @@ const validateParams = (schema) => (req, res, next) => {
     return sendError(res, {
       status: 400,
       code: ERROR_CODES.VALIDATION_ERROR,
-      message: 'Invalid path parameters',
+      message: getValidationMessage(parsed.error, 'Invalid path parameters'),
       requestId: req.id,
-      details: parsed.error.flatten(),
+      details: toValidationDetails(parsed.error),
     })
   }
 
@@ -33,4 +52,20 @@ const validateParams = (schema) => (req, res, next) => {
   return next()
 }
 
-module.exports = { validateBody, validateParams }
+const validateQuery = (schema) => (req, res, next) => {
+  const parsed = schema.safeParse(req.query)
+  if (!parsed.success) {
+    return sendError(res, {
+      status: 400,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      message: getValidationMessage(parsed.error, 'Invalid query parameters'),
+      requestId: req.id,
+      details: toValidationDetails(parsed.error),
+    })
+  }
+
+  req.query = parsed.data
+  return next()
+}
+
+module.exports = { validateBody, validateParams, validateQuery }

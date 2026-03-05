@@ -13,6 +13,7 @@ import type {
 } from '../../types'
 import { lessonService } from '../../services/lesson.service'
 import { progressService } from '../../services/progress.service'
+import subjectService from '../../services/subject.service'
 import { useAuth } from '../../hooks/useAuth'
 import { SUBJECTS } from '../../constants'
 
@@ -43,6 +44,13 @@ const toProgressErrorMessage = (err: unknown): string => {
 
 const TOPIC_CATALOG = SUBJECTS.flatMap(subject =>
   subject.topics.map(topic => ({ subjectId: subject.id, topicId: topic.id })),
+)
+
+const buildTopicCatalog = (subjects: Array<{ id: string; topics?: Array<{ id: string }> }>) => (
+  subjects.flatMap((subject) => (subject.topics || []).map((topic) => ({
+    subjectId: subject.id,
+    topicId: topic.id,
+  })))
 )
 
 const toDayKey = (ts: number): string => {
@@ -104,8 +112,9 @@ const buildSummary = (
   topicProgress: TopicProgressMap,
   lessonHistory: LessonHistoryEntry[],
   progressMetrics: ProgressMetrics,
+  topicCatalog: Array<{ subjectId: string; topicId: string }>,
 ): LearningSummary => {
-  const entries: TopicEntry[] = TOPIC_CATALOG.map(({ subjectId, topicId }) => {
+  const entries: TopicEntry[] = topicCatalog.map(({ subjectId, topicId }) => {
     const key = `${subjectId}_${topicId}`
     const data = topicProgress[key] ?? {}
     const status = data.status ?? 'locked'
@@ -219,6 +228,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [topicProgress, setTopicProgress] = useState<TopicProgressMap>({})
   const [lessonHistory, setLessonHistory] = useState<LessonHistoryEntry[]>([])
   const [progressMetrics, setProgressMetrics] = useState<ProgressMetrics>(FALLBACK_METRICS)
+  const [topicCatalog, setTopicCatalog] = useState(TOPIC_CATALOG)
   const [isHydrating, setIsHydrating] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
@@ -227,6 +237,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTopicProgress({})
       setLessonHistory([])
       setProgressMetrics(FALLBACK_METRICS)
+      setTopicCatalog(TOPIC_CATALOG)
       setLoadError(null)
       setIsHydrating(false)
       return
@@ -240,6 +251,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setTopicProgress(localProgress)
     setLessonHistory(localHistory)
+
+    try {
+      const subjects = await subjectService.getAll()
+      const nextCatalog = buildTopicCatalog(subjects)
+      if (nextCatalog.length > 0) {
+        setTopicCatalog(nextCatalog)
+      } else {
+        setTopicCatalog(TOPIC_CATALOG)
+      }
+    } catch {
+      setTopicCatalog(TOPIC_CATALOG)
+    }
 
     try {
       const remote = await progressService.getProgress(user.token)
@@ -351,8 +374,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const learningSummary = useMemo(
-    () => buildSummary(topicProgress, lessonHistory, progressMetrics),
-    [lessonHistory, progressMetrics, topicProgress],
+    () => buildSummary(topicProgress, lessonHistory, progressMetrics, topicCatalog),
+    [lessonHistory, progressMetrics, topicCatalog, topicProgress],
   )
 
   const retryLoad = useCallback(() => {

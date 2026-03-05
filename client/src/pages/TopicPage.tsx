@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useLang, useApp } from '../hooks'
 import { useAuth } from '../hooks/useAuth'
-import { SUBJECTS, SUBJECT_NAMES, TOPIC_NAMES } from '../constants'
+import { SUBJECT_NAMES, TOPIC_NAMES } from '../constants'
+import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { Button } from '../components/ui/Button'
 import { Tabs, Alert } from '../components/ui/index'
 import { VideoPlayer } from '../components/features/VideoPlayer'
@@ -17,6 +18,7 @@ interface TopicPageProps {
 export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
   const { t, lang } = useLang()
   const { user } = useAuth()
+  const { byId, loading: loadingSubject, error: subjectLoadError } = useLearnerSubjects()
   const {
     getTopicData,
     updateTopicProgress,
@@ -25,9 +27,8 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
     retryLoad,
   } = useApp()
 
-  const subject = SUBJECTS.find(s => s.id === subjectId)
+  const subject = byId.get(subjectId)
   const topic = subject?.topics.find(tp => tp.id === topicId)
-  if (!subject || !topic) return null
 
   const data = getTopicData(subjectId, topicId)
   const [tab, setTab] = useState<'video' | 'quiz'>('video')
@@ -38,7 +39,7 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
   }, [data.videoWatched])
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !subject || !topic) return
 
     const currentStatus = data.status
     if (currentStatus !== 'completed') {
@@ -63,8 +64,24 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
       const delta = Math.floor((now - lastTick) / 1000)
       if (delta > 0) recordTimeOnTask(subjectId, topicId, delta)
     }
+  // Keep the timer session stable for this topic + user lifecycle.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectId, topicId, user?.id])
+  }, [subjectId, topicId, user?.id, subject, topic])
+
+  if ((!subject || !topic) && !loadingSubject) {
+    return (
+      <div className="page-content fade-in">
+        <Alert variant="warning">Topic not found.</Alert>
+      </div>
+    )
+  }
+  if (!subject || !topic) {
+    return (
+      <div className="page-content fade-in">
+        <Alert variant="info">Loading topic...</Alert>
+      </div>
+    )
+  }
 
   const handleMarkVideoWatched = () => {
     setVideoWatched(true)
@@ -95,9 +112,15 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
       </Button>
 
       <div className={styles.header}>
-        <h2 className={styles.title}>{TOPIC_NAMES[lang][topicId]}</h2>
-        <p className={styles.subtitle}>{SUBJECT_NAMES[lang][subjectId]}</p>
+        <h2 className={styles.title}>{topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}</h2>
+        <p className={styles.subtitle}>{subject.title || SUBJECT_NAMES[lang]?.[subjectId] || subjectId}</p>
       </div>
+
+      {subjectLoadError ? (
+        <Alert variant="warning" className={styles.syncWarning}>
+          {subjectLoadError}
+        </Alert>
+      ) : null}
 
       {loadError && (
         <Alert variant="info" className={styles.syncWarning}>
@@ -114,7 +137,7 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
         <div id="tab-panel-video" role="tabpanel" aria-label="Video lesson">
           <VideoPlayer
             videoId={topic.videoId}
-            title={TOPIC_NAMES[lang][topicId]}
+            title={topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}
             watched={videoWatched}
             onMarkWatched={handleMarkVideoWatched}
           />

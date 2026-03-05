@@ -11,6 +11,14 @@ import { SubjectPage } from '../pages/SubjectPage'
 import { TopicPage } from '../pages/TopicPage'
 import { ProfilePage } from '../pages/ProfilePage'
 import { AdminPage } from '../pages/AdminPage'
+import { ExamCatalogPage } from '../pages/ExamCatalogPage'
+import { ExamCheckoutPage } from '../pages/ExamCheckoutPage'
+import { ExamSessionPage } from '../pages/ExamSessionPage'
+import { ExamResultPage } from '../pages/ExamResultPage'
+import { MaterialCatalogPage } from '../pages/MaterialCatalogPage'
+import { MaterialCheckoutPage } from '../pages/MaterialCheckoutPage'
+import { MaterialLibraryPage } from '../pages/MaterialLibraryPage'
+import { PaymentGatewayPage } from '../pages/PaymentGatewayPage'
 import { useAuth } from '../hooks/useAuth'
 import type { CurrentTopic, PageId } from '../types'
 
@@ -19,6 +27,10 @@ const routeForPage = (page: PageId, opts?: { subjectId?: string; topic?: Current
   if (page === 'subjects') return '/subjects'
   if (page === 'profile') return '/profile'
   if (page === 'admin') return '/admin'
+  if (page === 'exams') return '/exams'
+  if (page === 'materials') return '/materials'
+  if (page === 'materialLibrary') return '/materials/library'
+  if (page === 'payment') return '/dashboard'
   if (page === 'subject') return opts?.subjectId ? `/subjects/${opts.subjectId}` : '/subjects'
   if (page === 'topic' && opts?.topic) {
     return `/subjects/${opts.topic.subjectId}/topics/${opts.topic.topicId}`
@@ -95,6 +107,14 @@ function RoutedApp() {
             <Route path="/subjects/:subjectId/topics/:topicId" element={<TopicRoute />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminGuardRoute />} />
+            <Route path="/exams" element={<ExamCatalogPage />} />
+            <Route path="/exams/:examId" element={<ExamCheckoutPage />} />
+            <Route path="/exam-attempts/:attemptId" element={<ExamSessionPage />} />
+            <Route path="/exam-attempts/:attemptId/result" element={<ExamResultPage />} />
+            <Route path="/materials" element={<MaterialCatalogPage />} />
+            <Route path="/materials/:packId" element={<MaterialCheckoutPage />} />
+            <Route path="/materials/library" element={<MaterialLibraryPage />} />
+            <Route path="/payments/:paymentId" element={<PaymentGatewayPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

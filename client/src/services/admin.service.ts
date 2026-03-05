@@ -12,6 +12,11 @@ export interface AdminUserSummary {
   email?: string | null
   phone?: string | null
   role?: 'student' | 'admin' | 'superadmin'
+  capabilities?: {
+    canTeach?: boolean
+    canBuy?: boolean
+    canLearn?: boolean
+  }
   dbRole?: 'student' | 'admin' | 'superadmin'
   adminSource?: AdminSource
   phoneVerified?: boolean
@@ -35,7 +40,7 @@ export interface SystemInfo {
 export interface SubjectQuestion {
   id?: number
   text: string
-  imageUrl?: string
+  imageUrl?: string | null
   options: string[]
   answer: number
   concept?: string
@@ -45,16 +50,16 @@ export interface SubjectTopic {
   id: string
   title: string
   videoId: string
-  videoUrl?: string
+  videoUrl?: string | null
   questions?: SubjectQuestion[]
 }
 
 export interface SubjectRecord {
   id: string
   title: string
-  description?: string
-  icon?: string
-  color?: string
+  description?: string | null
+  icon?: string | null
+  color?: string | null
   order?: number
   topics?: SubjectTopic[]
   created_at?: string
@@ -108,7 +113,7 @@ export interface PricingPlan {
 export interface CoursePrice {
   id: string
   subjectId: string
-  subjectTitle?: string
+  subjectTitle?: string | null
   priceUzs: number
   isActive: boolean
   updatedAt?: string
@@ -126,10 +131,29 @@ export interface FinanceSummary {
   failedCount: number
   subscriptionPaidCount: number
   coursePaidCount: number
-  byProvider: Array<{ provider: 'payme' | 'click' | 'manual'; count: number; revenueUzs: number }>
-  byType: Array<{ type: 'subscription' | 'course_purchase'; paidCount: number; revenueUzs: number }>
+  byProvider: Array<{ provider: string; count: number; revenueUzs: number }>
+  byType: Array<{ type: string; paidCount: number; revenueUzs: number }>
   dailyRevenue: Array<{ bucket: string; revenueUzs: number }>
   range: { from: string; to: string }
+}
+
+export interface DemoBootstrapResult {
+  seeded: boolean
+  subject: {
+    id: string
+    title: string
+  }
+  exam: {
+    id: string
+    title: string
+    status: string
+    requiredQuestionCount: number
+  }
+  materialPack: {
+    id: string
+    title: string
+    status: string
+  }
 }
 
 const SystemInfoSchema = z.object({
@@ -151,19 +175,26 @@ const AdminUserSchema = z.object({
   name: z.string(),
   firstName: z.string().nullable().optional(),
   lastName: z.string().nullable().optional(),
-  email: z.string().email().nullable().optional(),
+  email: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
   role: z.enum(['student', 'admin', 'superadmin']).default('student'),
+  capabilities: z.object({
+    canTeach: z.boolean().optional(),
+    canBuy: z.boolean().optional(),
+    canLearn: z.boolean().optional(),
+  }).optional(),
   dbRole: z.enum(['student', 'admin', 'superadmin']).optional(),
   adminSource: z.enum(['none', 'allowlist', 'db_role', 'both']).optional(),
   phoneVerified: z.boolean().optional(),
   createdAt: z.union([z.string(), z.number()]).optional(),
 })
 
+const OptionalContentUrlSchema = z.string().nullable().optional()
+
 const SubjectQuestionSchema = z.object({
   id: z.number().int().optional(),
   text: z.string().min(1),
-  imageUrl: z.string().url().optional(),
+  imageUrl: OptionalContentUrlSchema,
   options: z.array(z.string()).min(2),
   answer: z.number().int().nonnegative(),
   concept: z.string().optional(),
@@ -173,16 +204,16 @@ const SubjectTopicSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   videoId: z.string().min(1),
-  videoUrl: z.string().url().optional(),
+  videoUrl: OptionalContentUrlSchema,
   questions: z.array(SubjectQuestionSchema).default([]),
 })
 
 const SubjectSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
-  description: z.string().optional(),
-  icon: z.string().optional(),
-  color: z.string().optional(),
+  description: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
   order: z.number().int().optional(),
   topics: z.array(SubjectTopicSchema).default([]),
   created_at: z.string().optional(),
@@ -249,7 +280,7 @@ const PricingPlanSchema = z.object({
 const CoursePriceSchema = z.object({
   id: z.string(),
   subjectId: z.string(),
-  subjectTitle: z.string().optional(),
+  subjectTitle: z.string().nullable().optional(),
   priceUzs: z.number(),
   isActive: z.boolean(),
   updatedAt: z.string().optional(),
@@ -268,12 +299,12 @@ const FinanceSummarySchema = z.object({
   subscriptionPaidCount: z.number().int(),
   coursePaidCount: z.number().int(),
   byProvider: z.array(z.object({
-    provider: z.enum(['payme', 'click', 'manual']),
+    provider: z.string(),
     count: z.number().int(),
     revenueUzs: z.number(),
   })),
   byType: z.array(z.object({
-    type: z.enum(['subscription', 'course_purchase']),
+    type: z.string(),
     paidCount: z.number().int(),
     revenueUzs: z.number(),
   })),
@@ -284,6 +315,25 @@ const FinanceSummarySchema = z.object({
   range: z.object({
     from: z.string(),
     to: z.string(),
+  }),
+})
+
+const DemoBootstrapSchema = z.object({
+  seeded: z.boolean(),
+  subject: z.object({
+    id: z.string(),
+    title: z.string(),
+  }),
+  exam: z.object({
+    id: z.string(),
+    title: z.string(),
+    status: z.string(),
+    requiredQuestionCount: z.number().int().positive(),
+  }),
+  materialPack: z.object({
+    id: z.string(),
+    title: z.string(),
+    status: z.string(),
   }),
 })
 
@@ -451,6 +501,12 @@ export const adminService = {
       resolveToken(),
       FinanceSummarySchema,
     )
+  },
+
+  bootstrapDemoDataset: async (
+    payload: { subjectId?: string; force?: boolean } = {},
+  ): Promise<DemoBootstrapResult> => {
+    return api.post<DemoBootstrapResult>('/admin/demo/bootstrap', payload, resolveToken(), DemoBootstrapSchema)
   },
 }
 

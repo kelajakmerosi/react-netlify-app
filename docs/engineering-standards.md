@@ -56,3 +56,48 @@ A task is done only when all are true:
 - Route-level flow tests for dashboard, subjects, topic, profile, and admin paths.
 - Contract tests for success/error envelope parsing.
 - Regression checks for auth expiry handling.
+
+## UI Consistency Baseline (Frozen)
+
+### Canonical Token Matrix
+- Source of truth: [client/src/styles/tokens.css](client/src/styles/tokens.css)
+- Spacing scale (canonical): 4 / 8 / 12 / 16 / 20 / 24 / 32
+- Radius scale (canonical): 8 / 12 / 16 / 22 / 28 / full
+- Typography scale (canonical):
+	- Label: 12px, weight 700, uppercase + tracking
+	- Body: 13–14px, weight 400–600
+	- Button: 13–16px, weight 700
+	- Section title: 20–23px
+	- Page title: clamp(28px, 3vw, 40px)
+- Interaction tokens (canonical): `--transition`, `--accent`, `--accent-light`, `--surface-border`
+
+### Canonical Primitive Ownership
+- `Button`: [client/src/components/ui/Button.tsx](client/src/components/ui/Button.tsx)
+- `Input`: [client/src/components/ui/Input.tsx](client/src/components/ui/Input.tsx)
+- `GlassCard`: [client/src/components/ui/GlassCard.tsx](client/src/components/ui/GlassCard.tsx)
+- `Alert/Divider/Tabs/ProgressBar/Avatar`: [client/src/components/ui/index.tsx](client/src/components/ui/index.tsx)
+
+### Enforcement Rules
+- Do not add new raw `<button>` or `<input>` in `src/components` and `src/pages` unless explicitly migration-exempted.
+- Prefer variant props on shared primitives instead of introducing sibling duplicates.
+- Modal, segmented tab/step controls, and icon-only controls must use shared primitives.
+
+### Migration + Rollback Policy
+- Each migration PR must preserve old implementation behind a module-level feature flag for one release cycle.
+- Rollback path must be import-alias or wrapper-toggle based (no destructive rewrites).
+- Remove dead selectors and duplicate styles only after migration tests pass.
+
+### Regression Protection Requirements
+- Add/maintain UI interaction tests for:
+	- Button states (hover/focus/disabled semantics)
+	- Modal keyboard + dismiss behavior
+	- Tabs/stepper selection and keyboard navigation
+	- Admin route baseline rendering
+- Add a11y checks (`axe`) for modal and tab flows.
+
+## Localization Baseline
+- Supported app languages are fixed: `uz`, `ru`, `en`.
+- Default and fallback language must be `uz`.
+- Runtime localization must use `i18next` + `react-i18next`.
+- Language resolution order: URL `?lang=` -> persisted preference -> browser locale -> `uz`.
+- New user-facing strings must be added to locale resources before UI usage.

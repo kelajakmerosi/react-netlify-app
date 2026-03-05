@@ -1,5 +1,7 @@
 import { BookOpen, FileEdit, FolderPlus, Trash2 } from 'lucide-react'
+import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Button } from '../../../components/ui/Button'
+import { Input, Textarea } from '../../../components/ui'
 import { useLang } from '../../../hooks'
 import type { ContentDraft } from './types'
 import type { SubjectRecord } from '../../../services/admin.service'
@@ -27,6 +29,7 @@ export default function SubjectSelectorStep({
   onRequestDeleteSubject,
 }: SubjectSelectorStepProps): JSX.Element {
   const { t } = useLang()
+  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
 
   return (
     <div className={styles.stepLayout}>
@@ -47,20 +50,37 @@ export default function SubjectSelectorStep({
           {subjects.map((subject) => {
             const active = selectedSubjectId === subject.id
             return (
-              <button
-                key={subject.id}
-                type="button"
-                className={`${styles.subjectItem} ${active ? styles.subjectItemActive : ''}`}
-                onClick={() => onSelectSubject(subject.id)}
-              >
-                <div>
-                  <strong>{subject.title}</strong>
-                  <small>
-                    {(subject.topics?.length ?? 0)} {t('adminContentTopicsCountSuffix')}
-                  </small>
-                </div>
-                <BookOpen size={14} aria-hidden="true" />
-              </button>
+              useSharedPrimitives ? (
+                <Button
+                  key={subject.id}
+                  variant="ghost"
+                  className={`${styles.subjectItem} ${active ? styles.subjectItemActive : ''}`}
+                  onClick={() => onSelectSubject(subject.id)}
+                >
+                  <div>
+                    <strong>{subject.title}</strong>
+                    <small>
+                      {(subject.topics?.length ?? 0)} {t('adminContentTopicsCountSuffix')}
+                    </small>
+                  </div>
+                  <BookOpen size={14} aria-hidden="true" />
+                </Button>
+              ) : (
+                <button
+                  key={subject.id}
+                  type="button"
+                  className={`${styles.subjectItem} ${active ? styles.subjectItemActive : ''}`}
+                  onClick={() => onSelectSubject(subject.id)}
+                >
+                  <div>
+                    <strong>{subject.title}</strong>
+                    <small>
+                      {(subject.topics?.length ?? 0)} {t('adminContentTopicsCountSuffix')}
+                    </small>
+                  </div>
+                  <BookOpen size={14} aria-hidden="true" />
+                </button>
+              )
             )
           })}
         </div>
@@ -80,64 +100,116 @@ export default function SubjectSelectorStep({
         <div className={styles.formGrid}>
           <label className={styles.fieldWide}>
             <span>{t('adminContentTitle')}</span>
-            <input
-              className={styles.input}
-              value={draft.subject.title}
-              onChange={(event) => onDraftChange({
-                ...draft,
-                subject: { ...draft.subject, title: event.target.value },
-              })}
-            />
+            {useSharedPrimitives ? (
+              <Input
+                value={draft.subject.title}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, title: event.target.value },
+                })}
+              />
+            ) : (
+              <input
+                className={styles.input}
+                value={draft.subject.title}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, title: event.target.value },
+                })}
+              />
+            )}
           </label>
 
           <label className={styles.field}>
             <span>{t('adminContentOrder')}</span>
-            <input
-              className={styles.input}
-              type="number"
-              value={draft.subject.order}
-              onChange={(event) => onDraftChange({
-                ...draft,
-                subject: { ...draft.subject, order: Number(event.target.value) || 0 },
-              })}
-            />
+            {useSharedPrimitives ? (
+              <Input
+                type="number"
+                value={String(draft.subject.order)}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, order: Number(event.target.value) || 0 },
+                })}
+              />
+            ) : (
+              <input
+                className={styles.input}
+                type="number"
+                value={draft.subject.order}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, order: Number(event.target.value) || 0 },
+                })}
+              />
+            )}
           </label>
 
           <label className={styles.field}>
             <span>{t('adminContentIcon')}</span>
-            <input
-              className={styles.input}
-              value={draft.subject.icon}
-              onChange={(event) => onDraftChange({
-                ...draft,
-                subject: { ...draft.subject, icon: event.target.value },
-              })}
-            />
+            {useSharedPrimitives ? (
+              <Input
+                value={draft.subject.icon}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, icon: event.target.value },
+                })}
+              />
+            ) : (
+              <input
+                className={styles.input}
+                value={draft.subject.icon}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, icon: event.target.value },
+                })}
+              />
+            )}
           </label>
 
           <label className={styles.field}>
             <span>{t('adminContentColor')}</span>
-            <input
-              className={styles.input}
-              value={draft.subject.color}
-              onChange={(event) => onDraftChange({
-                ...draft,
-                subject: { ...draft.subject, color: event.target.value },
-              })}
-            />
+            {useSharedPrimitives ? (
+              <Input
+                value={draft.subject.color}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, color: event.target.value },
+                })}
+              />
+            ) : (
+              <input
+                className={styles.input}
+                value={draft.subject.color}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, color: event.target.value },
+                })}
+              />
+            )}
           </label>
 
           <label className={styles.fieldWide}>
             <span>{t('adminContentDescription')}</span>
-            <textarea
-              className={styles.textarea}
-              rows={4}
-              value={draft.subject.description}
-              onChange={(event) => onDraftChange({
-                ...draft,
-                subject: { ...draft.subject, description: event.target.value },
-              })}
-            />
+            {useSharedPrimitives ? (
+              <Textarea
+                rows={4}
+                value={draft.subject.description}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, description: event.target.value },
+                })}
+              />
+            ) : (
+              <textarea
+                className={styles.textarea}
+                rows={4}
+                value={draft.subject.description}
+                onChange={(event) => onDraftChange({
+                  ...draft,
+                  subject: { ...draft.subject, description: event.target.value },
+                })}
+              />
+            )}
           </label>
         </div>
 

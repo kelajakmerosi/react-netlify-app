@@ -39,26 +39,54 @@ interface ContentBuilderShellProps {
 const sortSubjects = (items: SubjectRecord[]) => [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)
   || a.title.localeCompare(b.title))
 
-const formatValidationError = (error: unknown): string | null => {
-  if (!(error instanceof ApiError)) return null
-  if (error.code !== 'VALIDATION_ERROR') return null
+const formatValidationError = (error: unknown, fallbackValidationMessage: string, invalidUrlMessage: string): string | null => {
+  const extractFromPlainError = (value: unknown): string | null => {
+    if (!(value instanceof Error)) return null
+    const message = value.message || ''
+    if (/invalid url/i.test(message) || /topics?:\s*invalid url/i.test(message)) return invalidUrlMessage
+    if (/validation failed/i.test(message)) return fallbackValidationMessage
+    return message || null
+  }
+
+  if (!(error instanceof ApiError)) {
+    return extractFromPlainError(error)
+  }
 
   const details = error.details as {
     formErrors?: string[]
     fieldErrors?: Record<string, string[]>
+    issues?: Array<{ path?: Array<string | number>; message?: string }>
   } | undefined
 
+  const isValidation = error.code === 'VALIDATION_ERROR' || error.status === 400
+  const mentionsInvalidUrl = (value: string) => /invalid url/i.test(value)
+  const isUrlField = (value: string) => /url|imageurl|videourl/i.test(value)
+  const normalizePath = (path?: Array<string | number>) => (path ?? []).join('.')
+
+  const firstIssue = details?.issues?.find((issue) => typeof issue?.message === 'string' && issue.message.length > 0)
+  if (firstIssue?.message) {
+    const issuePath = normalizePath(firstIssue.path)
+    if (mentionsInvalidUrl(firstIssue.message) || isUrlField(issuePath)) return invalidUrlMessage
+    return issuePath ? `${issuePath}: ${firstIssue.message}` : firstIssue.message
+  }
+
   const formError = details?.formErrors?.find(Boolean)
-  if (formError) return formError
+  if (formError) return mentionsInvalidUrl(formError) ? invalidUrlMessage : formError
 
   const fieldErrors = details?.fieldErrors ? Object.entries(details.fieldErrors) : []
   const firstField = fieldErrors.find(([, messages]) => Array.isArray(messages) && messages.length > 0)
   if (firstField) {
     const [field, messages] = firstField
-    return `${field}: ${messages[0]}`
+    const firstMessage = messages[0]
+    if (mentionsInvalidUrl(firstMessage) || isUrlField(field)) return invalidUrlMessage
+    return `${field}: ${firstMessage}`
   }
 
-  return error.message || null
+  if (mentionsInvalidUrl(error.message || '')) return invalidUrlMessage
+  if (isValidation && isUrlField(error.message || '')) return invalidUrlMessage
+  if (isValidation) return fallbackValidationMessage
+
+  return error.message || extractFromPlainError(error)
 }
 
 export default function ContentBuilderShell({
@@ -208,11 +236,16 @@ export default function ContentBuilderShell({
     setStep((current) => Math.max(1, current - 1) as BuilderStep)
   }
 
+  const getFirstIssueMessage = () => {
+    if (issues.length === 0) return t('adminContentFixValidation')
+    return t(issues[0].message)
+  }
+
   const askPublish = () => {
     if (issues.length > 0) {
       const invalidStep = getFirstInvalidStep(issues)
       setStep(invalidStep)
-      onError(t('adminContentFixValidation'))
+      onError(getFirstIssueMessage())
       return
     }
     setPublishModalOpen(true)
@@ -221,7 +254,7 @@ export default function ContentBuilderShell({
   const publish = async () => {
     if (issues.length > 0) {
       setPublishModalOpen(false)
-      onError(t('adminContentFixValidation'))
+      onError(getFirstIssueMessage())
       return
     }
 
@@ -259,7 +292,10 @@ export default function ContentBuilderShell({
       onSuccess(t('adminContentPublishedSuccess'))
     } catch (error) {
       setPublishModalOpen(false)
-      onError(formatValidationError(error) ?? (error instanceof Error ? error.message : t('adminActionFailed')))
+      onError(
+        formatValidationError(error, t('adminContentFixValidation'), t('adminContentIssueInvalidUrl'))
+        ?? (error instanceof Error ? error.message : t('adminActionFailed')),
+      )
     } finally {
       setPublishing(false)
     }

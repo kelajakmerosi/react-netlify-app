@@ -13,6 +13,11 @@ const UserSchema = z.object({
   phone: z.string().nullable().optional(),
   phoneVerified: z.boolean().optional(),
   role: z.enum(['student', 'admin', 'superadmin']).optional(),
+  capabilities: z.object({
+    canTeach: z.boolean().optional(),
+    canBuy: z.boolean().optional(),
+    canLearn: z.boolean().optional(),
+  }).optional(),
   passwordSetAt: z.string().nullable().optional(),
 })
 
@@ -78,6 +83,7 @@ const persistUser = (payload: z.infer<typeof AuthResponseSchema>): User => {
     phone: payload.user.phone ?? null,
     phoneVerified: payload.user.phoneVerified ?? false,
     role: payload.user.role,
+    capabilities: payload.user.capabilities,
     passwordSetAt: payload.user.passwordSetAt ?? null,
     token: payload.token,
   }

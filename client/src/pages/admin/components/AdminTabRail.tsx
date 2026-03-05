@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { SegmentedControl } from '../../../components/ui'
 import type { AdminTab } from '../types'
 import styles from '../AdminWorkspace.module.css'
 
@@ -17,26 +18,14 @@ interface AdminTabRailProps {
 
 export function AdminTabRail({ tabs, active, onChange, ariaLabel }: AdminTabRailProps): JSX.Element {
   return (
-    <div
-      className={styles.tabRail}
-      role="tablist"
-      aria-label={ariaLabel}
+    <SegmentedControl
+      options={tabs.map((tab) => ({ id: tab.id, label: tab.label }))}
+      value={active}
+      onChange={onChange}
+      ariaLabel={ariaLabel}
+      className={styles.tabRailSegmented}
       style={{ '--admin-tab-count': String(Math.max(1, tabs.length)) } as CSSProperties}
-    >
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
-          role="tab"
-          aria-selected={active === tab.id}
-          className={`${styles.tabItem} ${active === tab.id ? styles.tabItemActive : ''}`}
-          onClick={() => onChange(tab.id)}
-        >
-          {tab.icon ? <span className={styles.tabItemIcon}>{tab.icon}</span> : null}
-          <span className={styles.tabItemLabel}>{tab.label}</span>
-        </button>
-      ))}
-    </div>
+    />
   )
 }
 

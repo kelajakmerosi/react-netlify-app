@@ -1,0 +1,47 @@
+const { spawnSync } = require('child_process')
+const path = require('path')
+
+const SCRIPT_PATH = path.join(__dirname, '../../../scripts/extract_exam_text.py')
+
+const parsePdfSource = async (sourcePath) => {
+  const result = spawnSync('python3', [SCRIPT_PATH, '--source', sourcePath, '--type', 'pdf'], {
+    encoding: 'utf8',
+  })
+
+  if (result.error) {
+    return {
+      text: '',
+      warnings: [`PDF parser launch failed: ${result.error.message}`],
+      images: [],
+    }
+  }
+
+  let payload = null
+  try {
+    payload = JSON.parse(String(result.stdout || '{}'))
+  } catch {
+    return {
+      text: '',
+      warnings: ['PDF parser returned invalid JSON output'],
+      images: [],
+    }
+  }
+
+  if (result.status !== 0 || payload.error) {
+    return {
+      text: '',
+      warnings: [String(payload.error || result.stderr || 'PDF parser failed')],
+      images: [],
+    }
+  }
+
+  return {
+    text: String(payload.text || ''),
+    warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
+    images: Array.isArray(payload.images) ? payload.images : [],
+  }
+}
+
+module.exports = {
+  parsePdfSource,
+}

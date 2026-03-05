@@ -23,6 +23,15 @@ export const relativeTime = (timestamp: number, lang = 'uz'): string => {
   return `${Math.floor(hrs / 24)}d`
 }
 
+export const formatUzs = (amount: number, lang: 'uz' | 'ru' | 'en' = 'uz'): string => {
+  const locale = lang === 'ru' ? 'ru-RU' : lang === 'en' ? 'en-US' : 'uz-UZ'
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'UZS',
+    maximumFractionDigits: 0,
+  }).format(Number(amount || 0))
+}
+
 // ─── Class name joiner ────────────────────────────────────
 export const cn = (...classes: (string | undefined | false | null)[]) =>
   classes.filter(Boolean).join(' ')

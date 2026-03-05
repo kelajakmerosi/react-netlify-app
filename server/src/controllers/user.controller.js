@@ -1,5 +1,8 @@
 const User = require('../models/User.model');
 const Progress = require('../models/Progress.model');
+const Analytics = require('../models/Analytics.model');
+const MaterialPack = require('../models/MaterialPack.model');
+const { getAssetAccess } = require('../services/storage');
 const ERROR_CODES = require('../constants/errorCodes');
 const { sendError, sendSuccess } = require('../utils/http');
 
@@ -98,6 +101,29 @@ exports.patchTopicProgress = async (req, res, next) => {
     const updated = await Progress.upsert(req.user.id, subjectId, topicId, patch);
     const snapshot = await Progress.buildProgressPayload(req.user.id);
 
+    if (patch.status === 'completed') {
+      Analytics.trackEvent({
+        eventType: 'topic_completed',
+        userId: req.user.id,
+        subjectId,
+        topicId,
+      }).catch(() => {})
+    }
+
+    if (patch.quizSubmitted === true) {
+      Analytics.trackEvent({
+        eventType: 'quiz_submitted',
+        userId: req.user.id,
+        subjectId,
+        topicId,
+        payload: {
+          quizScore: patch.quizScore ?? null,
+          quizTotalQuestions: patch.quizTotalQuestions ?? null,
+          masteryScore: patch.masteryScore ?? null,
+        },
+      }).catch(() => {})
+    }
+
     return sendSuccess(res, {
       updated: Progress.toPublicProgress(updated),
       ...snapshot,
@@ -106,3 +132,20 @@ exports.patchTopicProgress = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getMaterialLibrary = async (req, res, next) => {
+  try {
+    const library = await MaterialPack.listLibraryByUser(req.user.id)
+    const withLinks = library.map((entry) => ({
+      ...entry,
+      assets: (entry.assets || []).map((asset) => ({
+        ...asset,
+        access: getAssetAccess(asset.storageKey),
+      })),
+    }))
+
+    return sendSuccess(res, withLinks)
+  } catch (err) {
+    return next(err)
+  }
+}

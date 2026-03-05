@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SegmentedControl > matches snapshot 1`] = `
+<div>
+  <div
+    aria-label="Snapshot segmented"
+    class="_root_8c4e0f"
+    role="tablist"
+  >
+    <button
+      aria-selected="true"
+      class="_item_8c4e0f _itemActive_8c4e0f"
+      role="tab"
+      type="button"
+    >
+      Alpha
+    </button>
+    <button
+      aria-selected="false"
+      class="_item_8c4e0f"
+      disabled=""
+      role="tab"
+      type="button"
+    >
+      Beta
+    </button>
+  </div>
+</div>
+`;

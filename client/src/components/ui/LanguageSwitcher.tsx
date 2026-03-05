@@ -3,6 +3,13 @@ import { useLang }   from '../../hooks'
 import type { LocaleKey } from '../../types'
 import { Button }    from './Button'
 import { Globe, ChevronDown } from 'lucide-react'
+import { SUPPORTED_LOCALES } from '../../app/i18n'
+
+const LOCALE_LABELS: Record<LocaleKey, string> = {
+  uz: "O'zbek",
+  ru: 'Русский',
+  en: 'English',
+}
 
 export function LanguageSwitcher() {
   const { lang, changeLang } = useLang()
@@ -24,7 +31,7 @@ export function LanguageSwitcher() {
           border:'1px solid var(--glass-border)', borderRadius:'var(--radius-md)',
           boxShadow:'var(--shadow-md)', minWidth:110, padding:6, zIndex:200,
         }}>
-          {(['uz', 'en', 'ru'] as LocaleKey[]).map(l => (
+          {SUPPORTED_LOCALES.map(l => (
             <button key={l}
               onClick={() => { changeLang(l); setOpen(false) }}
               style={{
@@ -38,7 +45,7 @@ export function LanguageSwitcher() {
                 transition:'all var(--transition)',
               }}
             >
-              {l.toUpperCase()}
+              {LOCALE_LABELS[l]}
             </button>
           ))}
         </div>

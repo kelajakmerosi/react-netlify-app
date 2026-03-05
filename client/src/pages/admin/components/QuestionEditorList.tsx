@@ -1,5 +1,7 @@
 import { PlusCircle, Trash2 } from 'lucide-react'
+import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Button } from '../../../components/ui/Button'
+import { Input } from '../../../components/ui/Input'
 import { useLang } from '../../../hooks'
 import type { TopicQuestionDraft } from '../types'
 import styles from '../AdminWorkspace.module.css'
@@ -18,6 +20,7 @@ export function QuestionEditorList({
   onQuestionRemove,
 }: QuestionEditorListProps): JSX.Element {
   const { t } = useLang()
+  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
 
   return (
     <div className={styles.questionEditorWrap}>
@@ -37,44 +40,68 @@ export function QuestionEditorList({
             <div key={`${question.id ?? 'new'}-${index}`} className={styles.questionCard}>
               <label className={styles.fieldWide}>
                 <span>{t('adminContentQuestionText')}</span>
-                <input
-                  className={styles.input}
-                  value={question.text}
-                  onChange={(event) => onQuestionChange(index, { text: event.target.value })}
-                />
+                {useSharedPrimitives ? (
+                  <Input value={question.text} onChange={(event) => onQuestionChange(index, { text: event.target.value })} />
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={question.text}
+                    onChange={(event) => onQuestionChange(index, { text: event.target.value })}
+                  />
+                )}
               </label>
               <label className={styles.fieldWide}>
                 <span>{t('adminContentQuestionImageUrl')}</span>
-                <input
-                  className={styles.input}
-                  value={question.imageUrl ?? ''}
-                  onChange={(event) => onQuestionChange(index, { imageUrl: event.target.value })}
-                />
+                {useSharedPrimitives ? (
+                  <Input value={question.imageUrl ?? ''} onChange={(event) => onQuestionChange(index, { imageUrl: event.target.value })} />
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={question.imageUrl ?? ''}
+                    onChange={(event) => onQuestionChange(index, { imageUrl: event.target.value })}
+                  />
+                )}
               </label>
               <label className={styles.fieldWide}>
                 <span>{t('adminContentOptions')}</span>
-                <input
-                  className={styles.input}
-                  value={question.optionsText}
-                  onChange={(event) => onQuestionChange(index, { optionsText: event.target.value })}
-                />
+                {useSharedPrimitives ? (
+                  <Input value={question.optionsText} onChange={(event) => onQuestionChange(index, { optionsText: event.target.value })} />
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={question.optionsText}
+                    onChange={(event) => onQuestionChange(index, { optionsText: event.target.value })}
+                  />
+                )}
               </label>
               <label className={styles.field}>
                 <span>{t('adminContentCorrectIndex')}</span>
-                <input
-                  className={styles.input}
-                  type="number"
-                  value={question.answer}
-                  onChange={(event) => onQuestionChange(index, { answer: Number(event.target.value) || 0 })}
-                />
+                {useSharedPrimitives ? (
+                  <Input
+                    type="number"
+                    value={String(question.answer)}
+                    onChange={(event) => onQuestionChange(index, { answer: Number(event.target.value) || 0 })}
+                  />
+                ) : (
+                  <input
+                    className={styles.input}
+                    type="number"
+                    value={question.answer}
+                    onChange={(event) => onQuestionChange(index, { answer: Number(event.target.value) || 0 })}
+                  />
+                )}
               </label>
               <label className={styles.field}>
                 <span>{t('adminContentConceptOptional')}</span>
-                <input
-                  className={styles.input}
-                  value={question.concept ?? ''}
-                  onChange={(event) => onQuestionChange(index, { concept: event.target.value })}
-                />
+                {useSharedPrimitives ? (
+                  <Input value={question.concept ?? ''} onChange={(event) => onQuestionChange(index, { concept: event.target.value })} />
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={question.concept ?? ''}
+                    onChange={(event) => onQuestionChange(index, { concept: event.target.value })}
+                  />
+                )}
               </label>
 
               <div className={styles.actionRow}>

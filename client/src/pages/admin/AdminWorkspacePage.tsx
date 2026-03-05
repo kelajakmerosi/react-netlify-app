@@ -45,6 +45,7 @@ import UsersTable from './components/UsersTable'
 import SubjectsRail from './components/SubjectsRail'
 import SubjectEditorPanel from './components/SubjectEditorPanel'
 import TopicEditorPanel from './components/TopicEditorPanel'
+import ExamImportReviewPanel from './components/ExamImportReviewPanel'
 import ContentBuilderShell from './content/ContentBuilderShell'
 import {
   NEW_SUBJECT_ID,
@@ -60,6 +61,7 @@ import {
   type TopicQuestionDraft,
 } from './types'
 import styles from './AdminWorkspace.module.css'
+import { resolveUiErrorMessage } from '../../utils/errorPresentation'
 
 const toTopicPayload = (draft: TopicDraft): SubjectTopic => ({
   id: draft.id.trim(),
@@ -130,6 +132,7 @@ export function AdminWorkspacePage(): JSX.Element {
   const { t, lang } = useLang()
   const isSuperAdmin = currentUser?.role === 'superadmin'
   const useContentV2 = import.meta.env.VITE_ADMIN_CONTENT_V2 !== 'false'
+  const localizeError = (err: unknown, fallbackKey = 'adminActionFailed') => resolveUiErrorMessage(err, t, fallbackKey)
 
   const [tab, setTab] = useState<AdminTab>('overview')
 
@@ -324,8 +327,7 @@ export function AdminWorkspacePage(): JSX.Element {
       await Promise.all([loadCore(), loadAnalytics(), loadBilling()])
       setLastUpdatedAt(new Date())
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('adminLoadFailed')
-      setFatalError(message)
+      setFatalError(localizeError(err, 'adminLoadFailed'))
     }
   }
 
@@ -415,7 +417,7 @@ export function AdminWorkspacePage(): JSX.Element {
       })
       setSuccess(t('adminPricingSaved'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     } finally {
       setSavingPlanKey(null)
     }
@@ -471,7 +473,7 @@ export function AdminWorkspacePage(): JSX.Element {
       })
       setSuccess(t('adminCoursePricingSaved'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     } finally {
       setSavingCourseId(null)
     }
@@ -493,7 +495,7 @@ export function AdminWorkspacePage(): JSX.Element {
 
       setSuccess(t('adminUserDeleted'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     } finally {
       setDeletingUserId(null)
       setConfirmDelete({ open: false, user: null })
@@ -508,7 +510,7 @@ export function AdminWorkspacePage(): JSX.Element {
       setUsers((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
       setSuccess(role === 'admin' ? t('adminPromoted') : t('adminDemoted'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     }
   }
 
@@ -536,7 +538,7 @@ export function AdminWorkspacePage(): JSX.Element {
       setSuccess(action === 'grant' ? t('adminGranted') : t('adminRevoked'))
       setIdentityInput('')
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     } finally {
       setIdentityActionLoading(false)
     }
@@ -566,7 +568,7 @@ export function AdminWorkspacePage(): JSX.Element {
         setSuccess(t('adminSubjectCreated'))
       }
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     } finally {
       setSavingSubject(false)
     }
@@ -588,7 +590,7 @@ export function AdminWorkspacePage(): JSX.Element {
       setSubjectDraft(emptySubjectDraft())
       setSuccess(t('adminSubjectDeleted'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     }
   }
 
@@ -629,7 +631,7 @@ export function AdminWorkspacePage(): JSX.Element {
       setEditingTopicId(null)
       setTopicDraft(emptyTopicDraft())
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     } finally {
       setSavingTopic(false)
     }
@@ -652,7 +654,7 @@ export function AdminWorkspacePage(): JSX.Element {
       applySubjectUpdate(updated)
       setSuccess(t('adminTopicDeleted'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     }
   }
 
@@ -675,7 +677,7 @@ export function AdminWorkspacePage(): JSX.Element {
       applySubjectUpdate(updated)
       setSuccess(t('adminTopicOrderUpdated'))
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     }
   }
 
@@ -710,7 +712,7 @@ export function AdminWorkspacePage(): JSX.Element {
       setSuccess(t('adminAnalyticsUpdated'))
       setLastUpdatedAt(new Date())
     } catch (err) {
-      setPanelError(err instanceof Error ? err.message : t('adminActionFailed'))
+      setPanelError(localizeError(err))
     }
   }
 
@@ -766,7 +768,7 @@ export function AdminWorkspacePage(): JSX.Element {
   return (
     <div className="page-content fade-in">
       <div className={styles.page}>
-        <div className={styles.stickyHead}>
+        <div className={styles.headerBlock}>
           <AdminHeader
             title={t('adminTitle')}
             subtitle={t('adminSubtitle')}
@@ -1061,11 +1063,9 @@ export function AdminWorkspacePage(): JSX.Element {
         ) : null}
 
         {tab === 'content' ? (
-          useContentV2 ? (
-            <ContentBuilderShell
-              subjects={subjects}
-              currentUserId={currentUser?.id}
-              onSubjectsChange={(nextSubjects) => setSubjects(nextSubjects)}
+          <div className={styles.sectionGrid}>
+            <ExamImportReviewPanel
+              subjects={subjects.map((subject) => ({ id: subject.id, title: subject.title }))}
               onSuccess={(message) => {
                 setPanelError(null)
                 setSuccess(message)
@@ -1075,51 +1075,66 @@ export function AdminWorkspacePage(): JSX.Element {
                 setPanelError(message)
               }}
             />
-          ) : (
-            <div className={styles.contentLayout}>
-              <SubjectsRail
+            {useContentV2 ? (
+              <ContentBuilderShell
                 subjects={subjects}
-                selectedSubjectId={selectedSubjectId}
-                onSelect={setSelectedSubjectId}
-                onCreate={handleStartNewSubject}
+                currentUserId={currentUser?.id}
+                onSubjectsChange={(nextSubjects) => setSubjects(nextSubjects)}
+                onSuccess={(message) => {
+                  setPanelError(null)
+                  setSuccess(message)
+                }}
+                onError={(message) => {
+                  setSuccess(null)
+                  setPanelError(message)
+                }}
               />
+            ) : (
+              <div className={styles.contentLayout}>
+                <SubjectsRail
+                  subjects={subjects}
+                  selectedSubjectId={selectedSubjectId}
+                  onSelect={setSelectedSubjectId}
+                  onCreate={handleStartNewSubject}
+                />
 
-              <SubjectEditorPanel
-                draft={subjectDraft}
-                saving={savingSubject}
-                topics={subjectDraft.topics}
-                onDraftChange={(patch) => setSubjectDraft((prev) => ({ ...prev, ...patch }))}
-                onSaveSubject={() => void handleSaveSubject()}
-                onDeleteSubject={() => void handleDeleteSubject()}
-                onCreateTopic={() => {
-                  setEditingTopicId(null)
-                  setTopicDraft(emptyTopicDraft())
-                }}
-                onEditTopic={(topic) => {
-                  setEditingTopicId(topic.id)
-                  setTopicDraft(toTopicDraft(topic))
-                }}
-                onDeleteTopic={(topicId) => void handleDeleteTopic(topicId)}
-                onReorderTopic={(topicId, direction) => void handleReorderTopic(topicId, direction)}
-                topicEditor={(
-                  <TopicEditorPanel
-                    topicDraft={topicDraft}
-                    editingTopicId={editingTopicId}
-                    saving={savingTopic}
-                    onDraftChange={(patch) => setTopicDraft((prev) => ({ ...prev, ...patch }))}
-                    onQuestionAdd={handleQuestionAdd}
-                    onQuestionChange={handleQuestionChange}
-                    onQuestionRemove={handleQuestionRemove}
-                    onSave={() => void handleSaveTopic()}
-                    onClear={() => {
-                      setEditingTopicId(null)
-                      setTopicDraft(emptyTopicDraft())
-                    }}
-                  />
-                )}
-              />
-            </div>
-          )
+                <SubjectEditorPanel
+                  draft={subjectDraft}
+                  saving={savingSubject}
+                  topics={subjectDraft.topics}
+                  onDraftChange={(patch) => setSubjectDraft((prev) => ({ ...prev, ...patch }))}
+                  onSaveSubject={() => void handleSaveSubject()}
+                  onDeleteSubject={() => void handleDeleteSubject()}
+                  onCreateTopic={() => {
+                    setEditingTopicId(null)
+                    setTopicDraft(emptyTopicDraft())
+                  }}
+                  onEditTopic={(topic) => {
+                    setEditingTopicId(topic.id)
+                    setTopicDraft(toTopicDraft(topic))
+                  }}
+                  onDeleteTopic={(topicId) => void handleDeleteTopic(topicId)}
+                  onReorderTopic={(topicId, direction) => void handleReorderTopic(topicId, direction)}
+                  topicEditor={(
+                    <TopicEditorPanel
+                      topicDraft={topicDraft}
+                      editingTopicId={editingTopicId}
+                      saving={savingTopic}
+                      onDraftChange={(patch) => setTopicDraft((prev) => ({ ...prev, ...patch }))}
+                      onQuestionAdd={handleQuestionAdd}
+                      onQuestionChange={handleQuestionChange}
+                      onQuestionRemove={handleQuestionRemove}
+                      onSave={() => void handleSaveTopic()}
+                      onClear={() => {
+                        setEditingTopicId(null)
+                        setTopicDraft(emptyTopicDraft())
+                      }}
+                    />
+                  )}
+                />
+              </div>
+            )}
+          </div>
         ) : null}
 
         {tab === 'analytics' ? (

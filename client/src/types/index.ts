@@ -20,7 +20,9 @@ export interface Question {
 
 export interface Topic {
   id:        string
+  title?:    string
   videoId:   string        // YouTube video ID
+  videoUrl?: string
   questions: Question[]
   estimatedMinutes?: number
 }
@@ -33,6 +35,9 @@ export interface SubjectModule {
 
 export interface Subject {
   id:       string
+  title?:   string
+  description?: string
+  iconName?: string
   icon:     ReactNode
   color:    string
   gradient: string
@@ -51,6 +56,11 @@ export interface User {
   phone?: string | null
   phoneVerified?: boolean
   role?: 'student' | 'admin' | 'superadmin'
+  capabilities?: {
+    canTeach?: boolean
+    canBuy?: boolean
+    canLearn?: boolean
+  }
   passwordSetAt?: string | null
   token: string            // JWT-ready
 }
@@ -185,7 +195,20 @@ export interface AppContextValue {
 
 // ─── Page / routing types ─────────────────────────────────
 
-export type PageId = 'dashboard' | 'subjects' | 'subject' | 'topic' | 'profile' | 'admin'
+export type PageId =
+  | 'dashboard'
+  | 'subjects'
+  | 'subject'
+  | 'topic'
+  | 'profile'
+  | 'admin'
+  | 'exams'
+  | 'exam'
+  | 'examAttempt'
+  | 'payment'
+  | 'materials'
+  | 'materialCheckout'
+  | 'materialLibrary'
 
 export interface CurrentTopic {
   subjectId: string

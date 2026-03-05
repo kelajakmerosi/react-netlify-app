@@ -5,6 +5,7 @@ import { useSubjectStats } from '../hooks/useSubjectStats'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Avatar, ProgressBar } from '../components/ui/index'
 import { SUBJECT_NAMES } from '../constants'
+import { renderSafeIcon } from '../utils/renderSafeIcon'
 import {
   User,
   BarChart3,
@@ -61,7 +62,7 @@ export function ProfilePage() {
             <div className={styles.subHead}>
               <div className={styles.subName}>
                 <span className={styles.subjectIconChip} style={{ background: subject.gradient }}>
-                  <span className={styles.subjectIconGlyph}>{subject.icon}</span>
+                  <span className={styles.subjectIconGlyph}>{renderSafeIcon(subject.icon)}</span>
                 </span>
                 <div className={styles.subTextBlock}>
                   <span className={styles.subLabel}>{SUBJECT_NAMES[lang][subject.id]}</span>

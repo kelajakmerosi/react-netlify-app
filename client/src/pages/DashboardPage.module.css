@@ -29,6 +29,10 @@
   flex-direction: column;
   gap: 10px;
   min-height: 142px;
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, var(--surface-border));
+  background:
+    radial-gradient(120% 100% at 100% 0%, color-mix(in srgb, var(--accent-light) 36%, transparent), transparent 68%),
+    var(--glass);
 }
 
 .metricLabel {
@@ -69,6 +73,10 @@
   flex-direction: column;
   gap: 14px;
   min-height: 220px;
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, var(--surface-border));
+  background:
+    radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--accent-light) 32%, transparent), transparent 72%),
+    var(--glass);
 }
 
 .actionCard :global(button) {
@@ -103,7 +111,20 @@
   color: var(--text-2);
   font-size: 14px;
   line-height: 1.62;
-  min-height: 64px;
+  min-height: 48px;
+}
+
+.cardKicker {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--surface-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-light) 68%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
 }
 
 .stateCard {

@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const { OAuth2Client } = require('google-auth-library')
 const User = require('../models/User.model')
 const PhoneAuthCode = require('../models/PhoneAuthCode.model')
+const Analytics = require('../models/Analytics.model')
 const { sendOtp } = require('../services/sms/eskiz.service')
 const ERROR_CODES = require('../constants/errorCodes')
 const { sendError, sendSuccess } = require('../utils/http')
@@ -44,6 +45,10 @@ const verifyPasswordResetToken = (token) => {
 const getRequestIp = (req) => {
   const value = req.ip || req.headers['x-forwarded-for'] || null
   return typeof value === 'string' ? value : null
+}
+
+const trackEventSafe = (payload) => {
+  Analytics.trackEvent(payload).catch(() => {})
 }
 
 const mapOtpVerifyFailure = (req, res, reason) => {
@@ -208,6 +213,17 @@ exports.signupConfirm = async (req, res, next) => {
     })
 
     const token = signToken(user.id)
+    trackEventSafe({
+      eventType: 'signup_success',
+      userId: user.id,
+      source: 'phone_password',
+      payload: { phone },
+    })
+    trackEventSafe({
+      eventType: 'signin_success',
+      userId: user.id,
+      source: 'phone_password',
+    })
     return sendSuccess(res, { token, user: User.toPublic(user) })
   } catch (err) {
     return next(err)
@@ -248,6 +264,12 @@ exports.loginWithPassword = async (req, res, next) => {
     }
 
     const token = signToken(user.id)
+    trackEventSafe({
+      eventType: 'signin_success',
+      userId: user.id,
+      source: 'password',
+      payload: { phone },
+    })
     return sendSuccess(res, { token, user: User.toPublic(user) })
   } catch (err) {
     return next(err)
@@ -308,6 +330,12 @@ exports.legacyLoginOtpConfirm = async (req, res, next) => {
     const verifiedUser = await User.markPhoneVerified(user.id)
     const token = signToken(user.id)
     const requiresPasswordSetup = !user.password
+    trackEventSafe({
+      eventType: 'signin_success',
+      userId: user.id,
+      source: requiresPasswordSetup ? 'otp_legacy_setup' : 'otp_legacy',
+      payload: { phone },
+    })
 
     return sendSuccess(res, {
       token,
@@ -414,6 +442,12 @@ exports.passwordResetComplete = async (req, res, next) => {
     }
 
     await User.setPassword(user.id, newPassword)
+    trackEventSafe({
+      eventType: 'password_reset_complete',
+      userId: user.id,
+      source: 'password_reset',
+      payload: { phone },
+    })
     return sendSuccess(res, { reset: true })
   } catch (err) {
     return next(err)
@@ -432,6 +466,12 @@ exports.passwordSetupComplete = async (req, res, next) => {
         requestId: req.id,
       })
     }
+
+    trackEventSafe({
+      eventType: 'password_setup_complete',
+      userId: updated.id,
+      source: 'legacy_setup',
+    })
 
     return sendSuccess(res, { token: signToken(updated.id), user: User.toPublic(updated) })
   } catch (err) {
@@ -478,6 +518,12 @@ exports.googleAuth = async (req, res, next) => {
 
     const user = await User.upsertGoogle({ googleId, email, name, avatar: picture })
     const token = signToken(user.id)
+    trackEventSafe({
+      eventType: 'signin_success',
+      userId: user.id,
+      source: 'google',
+      payload: { email: user.email || null },
+    })
     return sendSuccess(res, { token, user: User.toPublic(user) })
   } catch (err) {
     return next(err)

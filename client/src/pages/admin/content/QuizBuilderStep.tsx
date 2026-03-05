@@ -1,4 +1,4 @@
-import { Eye, Pencil } from 'lucide-react'
+import { Eye, Pencil, PlusCircle } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { useLang } from '../../../hooks'
 import type { ContentDraft, QuestionDraftVm } from './types'
@@ -114,6 +114,16 @@ export default function QuizBuilderStep({
           <div className={styles.emptyState}>{t('adminContentSelectTopicBeforeQuiz')}</div>
         ) : mode === 'preview' ? (
           <TopicPreviewPanel topic={topic} />
+        ) : questions.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>{t('adminContentNoQuestions')}</p>
+            <div className={styles.inlineActions}>
+              <Button variant="ghost" size="sm" onClick={addQuestion}>
+                <PlusCircle size={14} aria-hidden="true" />
+                {t('adminContentAddQuestion')}
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className={styles.quizBuilderGrid}>
             <QuestionNavigator
@@ -122,11 +132,13 @@ export default function QuizBuilderStep({
               onSelect={onSetEditingQuestionIndex}
               onAdd={addQuestion}
             />
-            <QuestionCardEditor
-              question={activeQuestion}
-              onChange={patchQuestion}
-              onRemoveQuestion={removeQuestion}
-            />
+            <div className={styles.quizEditorHost}>
+              <QuestionCardEditor
+                question={activeQuestion}
+                onChange={patchQuestion}
+                onRemoveQuestion={removeQuestion}
+              />
+            </div>
           </div>
         )}
 

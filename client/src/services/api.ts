@@ -73,13 +73,17 @@ const toApiError = (status: number, payload: unknown): ApiError => {
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, schema } = options
 
-  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  const isFormDataBody = typeof FormData !== 'undefined' && body instanceof FormData
+  const headers: HeadersInit = {}
+  if (!isFormDataBody) headers['Content-Type'] = 'application/json'
   if (token) headers['Authorization'] = `Bearer ${token}`
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body
+      ? (isFormDataBody ? body : JSON.stringify(body))
+      : undefined,
   })
 
   const raw = await res.text()
