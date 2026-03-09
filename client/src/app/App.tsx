@@ -4,6 +4,8 @@ import { ThemeProvider } from './providers/ThemeProvider'
 import { LanguageProvider } from './providers/LanguageProvider'
 import { AuthProvider } from './providers/AuthProvider'
 import { AppProvider } from './providers/AppProvider'
+import { ToastProvider } from './providers/ToastProvider'
+import { ErrorBoundary } from '../components/ui/ErrorBoundary'
 import { AppShell } from '../components/layout/AppShell'
 import { AuthPage } from '../pages/AuthPage'
 import { LandingPage } from '../pages/LandingPage'
@@ -174,12 +176,16 @@ function RoutedApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <RoutedApp />
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <RoutedApp />
+            </AuthProvider>
+          </ToastProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
