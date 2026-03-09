@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, Input } from '../components/ui'
+import { Alert, Input, PageHeader } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
 import examService from '../services/exam.service'
@@ -12,7 +12,6 @@ import paymeLogo from '../assets/payme.png'
 import { formatUzs } from '../utils'
 import { resolveUiErrorMessage } from '../utils/errorPresentation'
 import { cn } from '../utils'
-import pageStyles from './ExamPages.module.css'
 import styles from './PaymentGatewayPage.module.css'
 
 interface ExamItem {
@@ -144,10 +143,10 @@ export function ExamCheckoutPage({ examId }: ExamCheckoutPageProps) {
 
   return (
     <div className="page-content fade-in">
-      <div className={pageStyles.header}>
-        <h2 className={pageStyles.title}>{t('examCheckoutTitle')}</h2>
-        <p className={pageStyles.subtitle}>{t('examCheckoutSubtitle')}</p>
-      </div>
+      <PageHeader
+        breadcrumbs={[{ label: t('checkout') }]}
+        title={t('examCheckoutTitle')}
+      />
 
       {error ? <Alert variant="error">{error}</Alert> : null}
       {loading ? <Alert variant="info">{t('examCheckoutLoading')}</Alert> : null}

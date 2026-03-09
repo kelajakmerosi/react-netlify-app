@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { SUBJECT_NAMES, TOPIC_NAMES } from '../constants'
 import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { Button } from '../components/ui/Button'
-import { Tabs, Alert } from '../components/ui/index'
+import { Tabs, Alert, PageHeader } from '../components/ui/index'
 import { Skeleton } from '../components/ui/Skeleton'
 import { VideoPlayer } from '../components/features/VideoPlayer'
 import { QuizPanel } from '../components/features/QuizPanel'
@@ -113,28 +113,14 @@ export function TopicPage({ subjectId, topicId, onBack, onGoToSubjects }: TopicP
 
   return (
     <div className="page-content fade-in">
-      <nav className={styles.breadcrumb} aria-label="breadcrumb">
-        {onGoToSubjects && (
-          <>
-            <button type="button" className={styles.breadcrumbLink} onClick={onGoToSubjects}>
-              {t('lessons')}
-            </button>
-            <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
-          </>
-        )}
-        <button type="button" className={styles.breadcrumbLink} onClick={onBack}>
-          {subject.title || SUBJECT_NAMES[lang]?.[subjectId] || subjectId}
-        </button>
-        <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
-        <span className={styles.breadcrumbCurrent} aria-current="page">
-          {topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}
-        </span>
-      </nav>
-
-      <div className={styles.header}>
-        <h2 className={styles.title}>{topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}</h2>
-        <p className={styles.subtitle}>{subject.title || SUBJECT_NAMES[lang]?.[subjectId] || subjectId}</p>
-      </div>
+      <PageHeader
+        breadcrumbs={[
+          ...(onGoToSubjects ? [{ label: t('lessons'), onClick: onGoToSubjects }] : []),
+          { label: subject.title || SUBJECT_NAMES[lang]?.[subjectId] || subjectId, onClick: onBack },
+          { label: topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId }
+        ]}
+        title={topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}
+      />
 
       {subjectLoadError ? (
         <Alert variant="warning" className={styles.syncWarning}>

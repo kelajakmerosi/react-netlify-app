@@ -5,7 +5,7 @@ import { SUBJECT_NAMES, TOPIC_NAMES, MODULE_NAMES } from '../constants'
 import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Button } from '../components/ui/Button'
-import { Divider, Alert } from '../components/ui/index'
+import { Divider, Alert, PageHeader } from '../components/ui/index'
 import { Skeleton } from '../components/ui/Skeleton'
 import { TopicRow } from '../components/features/TopicRow'
 import type { CurrentTopic, TopicProgressData, TopicStatus } from '../types'
@@ -118,15 +118,13 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
 
   return (
     <div className="page-content fade-in">
-      <nav className={styles.breadcrumb} aria-label="breadcrumb">
-        <button type="button" className={styles.breadcrumbLink} onClick={onBack}>
-          {t('lessons')}
-        </button>
-        <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
-        <span className={styles.breadcrumbCurrent} aria-current="page">
-          {subject.title || SUBJECT_NAMES[lang]?.[subject.id] || subject.id}
-        </span>
-      </nav>
+      <PageHeader
+        breadcrumbs={[
+          { label: t('lessons'), onClick: onBack },
+          { label: subject.title || SUBJECT_NAMES[lang]?.[subject.id] || subject.id }
+        ]}
+        title=""
+      />
 
       <div className={styles.header}>
         <div className={styles.iconWrap} style={{ background: subject.gradient }}>

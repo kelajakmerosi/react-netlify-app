@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Alert, Input, Textarea } from '../components/ui'
+import { Alert, Input, Textarea, PageHeader } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
 import { useLang } from '../hooks'
@@ -10,7 +10,6 @@ import examService from '../services/exam.service'
 import paymentService from '../services/payment.service'
 import { formatUzs } from '../utils'
 import { resolveUiErrorMessage } from '../utils/errorPresentation'
-import pageStyles from './ExamPages.module.css'
 import styles from './PaymentGatewayPage.module.css'
 
 type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
@@ -172,10 +171,10 @@ export function PaymentGatewayPage() {
 
   return (
     <div className="page-content fade-in">
-      <div className={pageStyles.header}>
-        <h2 className={pageStyles.title}>{t('paymentGatewayTitle')}</h2>
-        <p className={pageStyles.subtitle}>{t('paymentGatewaySubtitle')}</p>
-      </div>
+      <PageHeader
+        breadcrumbs={[{ label: t('checkout') }]}
+        title={t('paymentGatewayTitle')}
+      />
 
       {loading ? <Alert variant="info">{t('paymentGatewayLoading')}</Alert> : null}
       {!loading && !session ? <Alert variant="warning">{t('paymentGatewayNotFound')}</Alert> : null}

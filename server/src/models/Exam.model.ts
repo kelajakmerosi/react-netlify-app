@@ -306,7 +306,7 @@ const listPublishedCatalog = async ({ subjectId, userId }: any = {}): Promise<Ex
         GROUP BY exam_id
       ) ent ON ent.exam_id = e.id
     `
-    entitlementSelect = `, CASE WHEN ent.exam_id IS NOT NULL THEN TRUE ELSE FALSE END AS purchased, COALESCE(ent.attempts_remaining, 0) AS attempts_remaining`
+    entitlementSelect = `, COALESCE(ent.attempts_remaining, 0) > 0 AS purchased, COALESCE(ent.attempts_remaining, 0) AS attempts_remaining`
   }
 
   const { rows } = await pool.query(

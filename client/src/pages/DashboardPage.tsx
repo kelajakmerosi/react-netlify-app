@@ -1,7 +1,7 @@
 import { type CSSProperties, useMemo, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useLang, useApp } from '../hooks'
-import { Alert, ProgressBar } from '../components/ui/index'
+import { Alert, ProgressBar, PageHeader } from '../components/ui/index'
 import { Button } from '../components/ui/Button'
 import { SUBJECT_NAMES, TOPIC_NAMES } from '../constants'
 import useLearnerSubjects from '../hooks/useLearnerSubjects'
@@ -198,17 +198,12 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   return (
     <div className={`page-content fade-in ${styles.dashboardPage}`}>
       <main className={styles.mainColumn}>
-        <section className={styles.pageHeader}>
-          <div className={styles.headerCopy}>
-            <p className={styles.headerEyebrow}>{t('myLearning')}</p>
-            <h1 className={styles.headerTitle}>
-              {user?.name ? `${t('welcomeBack')}, ${user.name}` : t('myLearning')}
-            </h1>
-            <p className={styles.headerSubtitle}>
-              {leadCard ? leadCard.full : t('dashboardEmptyHint')}
-            </p>
-          </div>
-        </section>
+        <PageHeader
+          breadcrumbs={[
+            { label: t('myLearning') }
+          ]}
+          title={user?.name ? `${t('welcomeBack')}, ${user.name}` : t('myLearning')}
+        />
 
         {isGuest && (
           <Alert variant="warning" className="mb-24">

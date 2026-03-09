@@ -9,6 +9,11 @@
   gap: 20px;
 }
 
+/* PageHeader has margin-bottom: 2rem; grid gap adds 20px on top — trim so total equals 2rem */
+.mainColumn > :first-child {
+  margin-bottom: calc(2rem - 20px);
+}
+
 /* ─── Header ────────────────────────────────────────────── */
 .pageHeader {
   display: flex;

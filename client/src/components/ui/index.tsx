@@ -8,6 +8,7 @@ export { Select } from './Select'
 export { Textarea } from './Textarea'
 export { SegmentedControl } from './SegmentedControl'
 export { IconButton } from './IconButton'
+export { PageHeader } from './PageHeader'
 import { 
   CheckCircle2, Circle, PauseCircle, Lock, 
   AlertTriangle, AlertCircle, Info 

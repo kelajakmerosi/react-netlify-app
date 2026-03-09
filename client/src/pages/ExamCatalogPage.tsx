@@ -4,7 +4,7 @@ import { Alert } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Skeleton } from '../components/ui/Skeleton'
-import { PageHero } from '../components/ui/PageHero'
+import { PageHeader } from '../components/ui/PageHeader'
 import { CatalogCard } from '../components/features/CatalogCard'
 import { useAuth } from '../hooks/useAuth'
 import { useLang } from '../hooks'
@@ -46,7 +46,14 @@ export function ExamCatalogPage() {
     setError('')
     try {
       const exams = await examService.getCatalog()
-      setItems(exams as ExamItem[])
+      // Deduplicate by ID to remove backend duplicates
+      const uniqueMap = new Map<string, ExamItem>()
+      for (const exam of exams as ExamItem[]) {
+        if (!uniqueMap.has(exam.id)) {
+          uniqueMap.set(exam.id, exam)
+        }
+      }
+      setItems(Array.from(uniqueMap.values()))
     } catch (err) {
       setError(resolveUiErrorMessage(err, t, 'errorExamCatalogLoadFailed'))
     } finally {
@@ -87,6 +94,8 @@ export function ExamCatalogPage() {
     try {
       setStartingExamId(examId)
       setError('')
+      // Refresh catalog to get latest purchase status before attempting start
+      await loadCatalog()
       const started = await examService.startAttempt(examId)
       navigate(`/exam-attempts/${started.attempt.id}`)
     } catch (err) {
@@ -94,20 +103,13 @@ export function ExamCatalogPage() {
     } finally {
       setStartingExamId(null)
     }
-  }, [navigate, startingExamId, t])
+  }, [navigate, startingExamId, t, loadCatalog])
 
   return (
     <div className="page-content fade-in">
-      <PageHero
-        eyebrow={t('exams')}
+      <PageHeader
+        breadcrumbs={[{ label: t('exams') }]}
         title={t('examCatalogTitle')}
-        subtitle={t('examCatalogSubtitle')}
-        icon={<FileQuestion aria-hidden="true" />}
-        metrics={[
-          { label: t('examCatalogMetricPublished'), value: items.length, icon: <FileQuestion aria-hidden="true" /> },
-          { label: t('examCatalogMetricDuration'), value: `${avgDuration || 0} ${t('minutesShort')}`, icon: <Clock3 aria-hidden="true" /> },
-          { label: t('examCatalogMetricPolicy'), value: '80%', icon: <CircleCheckBig aria-hidden="true" /> },
-        ]}
       />
 
       {isGuest && (

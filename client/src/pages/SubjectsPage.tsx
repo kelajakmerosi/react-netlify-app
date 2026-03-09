@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
-import { BookOpen, CheckCircle2, LibraryBig, Shapes } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { useApp, useLang } from '../hooks'
 import { useAuth } from '../hooks/useAuth'
 import { SubjectCard } from '../components/features/SubjectCard'
-import { PageHero } from '../components/ui/PageHero'
+import { PageHeader } from '../components/ui/PageHeader'
 import { SUBJECT_NAMES } from '../constants'
 import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { Alert } from '../components/ui'
@@ -55,16 +55,9 @@ export function SubjectsPage({ onSubjectSelect }: SubjectsPageProps) {
 
   return (
     <div className="page-content fade-in">
-      <PageHero
-        eyebrow={t('subjects')}
+      <PageHeader
+        breadcrumbs={[{ label: t('allTopics') }]}
         title={t('subjects')}
-        subtitle={t('allTopics')}
-        icon={<BookOpen aria-hidden="true" />}
-        metrics={[
-          { label: t('subjects'), value: summary.subjects, icon: <Shapes aria-hidden="true" /> },
-          { label: t('lessons'), value: summary.lessons, icon: <LibraryBig aria-hidden="true" /> },
-          { label: t('completion'), value: `${summary.completion}%`, icon: <CheckCircle2 aria-hidden="true" /> },
-        ]}
       />
 
       {error ? <Alert variant="warning">{error}</Alert> : null}

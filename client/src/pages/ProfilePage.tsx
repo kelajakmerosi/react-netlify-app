@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../hooks'
 import { useAuth } from '../hooks/useAuth'
 import { useSubjectStats } from '../hooks/useSubjectStats'
-import { Avatar, ProgressBar } from '../components/ui/index'
+import { Avatar, ProgressBar, PageHeader } from '../components/ui/index'
 import { GlassCard } from '../components/ui/GlassCard'
 import { SUBJECT_NAMES } from '../constants'
 import { getSubjectVisual } from '../utils/subjectVisuals'
@@ -18,7 +18,6 @@ import {
   Settings,
   ArrowRight,
   Target,
-  ChevronRight,
   Layout
 } from 'lucide-react'
 import styles from './ProfilePage.module.css'
@@ -39,22 +38,16 @@ export function ProfilePage() {
 
   return (
     <div className={`page-content fade-in ${styles.pageRoot}`}>
-      <header className={styles.header}>
-        <div className={styles.headerTitles}>
-          <div className={styles.breadcrumb}>
-            <span>{t('profile')}</span>
-            <ChevronRight size={14} className={styles.breadcrumbDivider} />
-            <span className={styles.currBreadcrumb}>{t('overview')}</span>
-          </div>
-          <h1 className={styles.title}>{t('profile')}</h1>
-        </div>
-        <div className={styles.headerActions}>
-           <button className={styles.settingsBtn}>
-              <Settings size={18} />
-              <span>{t('settings')}</span>
-           </button>
-        </div>
-      </header>
+      <PageHeader
+        breadcrumbs={[{ label: t('profile') }, { label: t('overview') }]}
+        title={t('profile')}
+        actions={
+          <button className={styles.settingsBtn}>
+            <Settings size={18} />
+            <span>{t('settings')}</span>
+          </button>
+        }
+      />
 
       <div className={styles.layoutContainer}>
         {/* Sidebar: Profile Info */}

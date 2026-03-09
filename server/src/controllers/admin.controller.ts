@@ -92,16 +92,23 @@ const ensureDemoSubject = async ({ requestedSubjectId }: { requestedSubjectId?: 
 }
 
 const ensureDemoExam = async ({ subjectId, ownerUserId, reviewerId }: { subjectId: any, ownerUserId: any, reviewerId: any }): Promise<any> => {
+  // Find all exams matching the demo title, ordered newest first
   const existing = await pool.query(
     `SELECT id
      FROM exams
-     WHERE subject_id = $1
-       AND owner_user_id = $2
-       AND title = $3
-     ORDER BY created_at DESC
-     LIMIT 1`,
-    [subjectId, ownerUserId, DEMO_EXAM_TITLE],
+     WHERE title = $1
+     ORDER BY created_at DESC`,
+    [DEMO_EXAM_TITLE],
   )
+
+  // Hard-delete older duplicates so only the newest 1 ever exists
+  if (existing.rows.length > 1) {
+    const idsToDelete = existing.rows.slice(1).map((r: any) => r.id)
+    await pool.query(
+      `DELETE FROM exams WHERE id = ANY($1::uuid[])`,
+      [idsToDelete],
+    )
+  }
 
   let exam: any = null
   if (existing.rows[0]?.id) {

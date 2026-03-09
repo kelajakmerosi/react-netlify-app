@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert } from '../components/ui'
+import { Alert, PageHeader } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
 import examService from '../services/exam.service'
@@ -59,10 +59,10 @@ export function ExamResultPage({ attemptId }: ExamResultPageProps) {
 
   return (
     <div className="page-content fade-in">
-      <div className={styles.header}>
-        <h2 className={styles.title}>{t('examResultTitle')}</h2>
-        <p className={styles.subtitle}>{t('examResultSubtitle')}</p>
-      </div>
+      <PageHeader
+        breadcrumbs={[{ label: t('exams') }]}
+        title={t('examResultTitle')}
+      />
 
       {loading ? <Alert variant="info">{t('examResultLoading')}</Alert> : null}
       {error ? <Alert variant="error">{error}</Alert> : null}
