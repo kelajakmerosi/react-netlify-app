@@ -2,13 +2,15 @@ services:
   - type: web
     name: kelajakmerosi
     env: node
-    # @types/* and typescript are in dependencies so they are always installed
-    # regardless of NODE_ENV or Render's production mode setting. zod is resolved
-    # via tsconfig paths from server/node_modules/zod.
+    # Render runs all commands from the rootDir below.
+    # @types/* and typescript are in dependencies (not devDependencies) so
+    # they are always installed regardless of NODE_ENV.
+    # tsconfig has no explicit rootDir; TypeScript infers the repo root as the
+    # common ancestor of src/**/* and ../shared/**/* — compiled output mirrors
+    # that structure, so the entry point is dist/server/src/index.js.
+    rootDir: server
     buildCommand: npm install && npm run build
-    # tsconfig has no rootDir so TypeScript infers repo root as common ancestor
-    # of src/**/* and ../shared/**/* — compiled output mirrors that structure.
-    startCommand: NODE_PATH=$PWD/server/node_modules:$PWD/node_modules npm start --prefix server
+    startCommand: node dist/server/src/index.js
     envVars:
       - key: NODE_ENV
         value: production
