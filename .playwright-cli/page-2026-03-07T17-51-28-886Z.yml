@@ -1,0 +1,131 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e11]: KelajakMerosi
+    - paragraph [ref=e12]: Overview
+    - navigation "Menu" [ref=e13]:
+      - button "Dashboard" [ref=e14] [cursor=pointer]:
+        - img [ref=e16]
+        - generic [ref=e21]: Dashboard
+      - button "Lessons" [ref=e22] [cursor=pointer]:
+        - img [ref=e24]
+        - generic [ref=e26]: Lessons
+      - button "Exams" [ref=e27] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e32]: Exams
+      - button "Admin" [ref=e33] [cursor=pointer]:
+        - img [ref=e35]
+        - generic [ref=e37]: Admin
+    - button "Logout" [ref=e39] [cursor=pointer]:
+      - img [ref=e40]
+      - text: Logout
+  - generic [ref=e43]:
+    - banner [ref=e44]:
+      - heading "Admin" [level=1] [ref=e46]
+      - generic [ref=e47]:
+        - 'button "Language: EN" [ref=e48] [cursor=pointer]':
+          - img [ref=e49]
+        - button "Theme" [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+        - button "Settings" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+        - button "Profile" [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: EK
+          - generic [ref=e63]:
+            - strong [ref=e64]: Elshod Karimov
+            - generic [ref=e65]: Superadmin
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - banner [ref=e69]:
+          - generic [ref=e70]:
+            - heading "Admin Workspace" [level=2] [ref=e71]
+            - paragraph [ref=e72]: Operations console for users, content, and analytics.
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - img [ref=e75]
+              - text: "Last updated: —"
+            - button "Export" [ref=e78] [cursor=pointer]:
+              - img [ref=e79]
+              - text: Export
+            - button "Refresh" [ref=e82] [cursor=pointer]:
+              - img [ref=e83]
+              - text: Refresh
+        - tablist "Admin sections" [ref=e88]:
+          - tab "Overview" [selected] [ref=e89] [cursor=pointer]
+          - tab "Admins & Users" [ref=e90] [cursor=pointer]
+          - tab "Content" [ref=e91] [cursor=pointer]
+          - tab "Analytics" [ref=e92] [cursor=pointer]
+      - generic [ref=e94]:
+        - img [ref=e96]
+        - text: Failed to load admin data.
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - paragraph [ref=e100]: Total users
+          - paragraph [ref=e101]: "0"
+        - generic [ref=e102]:
+          - paragraph [ref=e103]: Admins
+          - paragraph [ref=e104]: "0"
+        - generic [ref=e105]:
+          - paragraph [ref=e106]: DAU
+          - paragraph [ref=e107]: "0"
+        - generic [ref=e108]:
+          - paragraph [ref=e109]: Completion
+          - paragraph [ref=e110]: 0%
+      - generic [ref=e111]:
+        - generic [ref=e113]:
+          - heading "Quick operations" [level=3] [ref=e114]
+          - paragraph [ref=e115]: Jump to the key admin workflows.
+        - generic [ref=e117]:
+          - button "Manage users" [ref=e118] [cursor=pointer]:
+            - img [ref=e119]
+            - text: Manage users
+          - button "Manage content" [ref=e124] [cursor=pointer]:
+            - img [ref=e125]
+            - text: Manage content
+          - button "View analytics" [ref=e127] [cursor=pointer]:
+            - img [ref=e128]
+            - text: View analytics
+      - generic [ref=e131]:
+        - generic [ref=e133]:
+          - heading "Status panels" [level=3] [ref=e134]
+          - paragraph [ref=e135]: Integration and system status.
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - paragraph [ref=e139]:
+              - img [ref=e140]
+              - text: Google auth
+            - paragraph [ref=e143]: Not configured
+          - generic [ref=e144]:
+            - paragraph [ref=e145]:
+              - img [ref=e146]
+              - text: Eskiz status
+            - paragraph [ref=e149]: Not configured
+          - generic [ref=e150]:
+            - paragraph [ref=e151]:
+              - img [ref=e152]
+              - text: Allowlist
+            - paragraph [ref=e155]: 0 email / 0 phone
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - generic [ref=e158]:
+            - heading "Billing and pricing" [level=3] [ref=e159]
+            - paragraph [ref=e160]: Revenue overview and monetization controls for superadmin.
+          - img [ref=e162]
+        - generic [ref=e165]:
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - paragraph [ref=e168]: Total revenue
+              - paragraph [ref=e169]: 0 UZS
+            - generic [ref=e170]:
+              - paragraph [ref=e171]: Refunded
+              - paragraph [ref=e172]: 0 UZS
+            - generic [ref=e173]:
+              - paragraph [ref=e174]: Paid payments
+              - paragraph [ref=e175]: "0"
+            - generic [ref=e176]:
+              - paragraph [ref=e177]: Failed payments
+              - paragraph [ref=e178]: "0"
+          - generic [ref=e179]:
+            - heading "Course pricing" [level=4] [ref=e180]
+            - generic [ref=e181]: No subjects available for pricing yet.

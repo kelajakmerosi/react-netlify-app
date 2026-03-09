@@ -1,42 +1,52 @@
-import type { CSSProperties } from 'react'
-import { GlassCard }    from '../ui/GlassCard'
-import { ProgressBar }  from '../ui/index'
+import { BarChart3, CheckCircle2, PlayCircle } from 'lucide-react'
+import { Button } from '../ui/Button'
 import { useLang } from '../../hooks'
 import type { Subject } from '../../types'
-import { renderSafeIcon } from '../../utils/renderSafeIcon'
-import styles           from './SubjectCard.module.css'
+import { ArrowRight } from 'lucide-react'
+import { getSubjectVisual } from '../../utils/subjectVisuals'
+import { CatalogCard } from './CatalogCard'
+import styles from './SubjectCard.module.css'
 
 interface SubjectCardProps {
-  subject:      Subject
-  name:         string
-  completed:    number
-  total:        number
-  pct:          number
-  onClick:      () => void
+  subject: Subject
+  name: string
+  completed: number
+  total: number
+  pct: number
+  onClick: () => void
 }
 
 export function SubjectCard({ subject, name, completed, total, pct, onClick }: SubjectCardProps) {
   const { t } = useLang()
+  const safeName = typeof name === 'string' ? name : String(name ?? '')
+  const safeTotal = Number.isFinite(total) ? total : 0
+  const safeCompleted = Number.isFinite(completed) ? completed : 0
+  const safePct = Number.isFinite(pct) ? pct : 0
+  const visual = getSubjectVisual(subject.id)
+  const Icon = visual.Icon
 
   return (
-    <GlassCard
+    <CatalogCard
+      variant="default"
       className={styles.card}
-      onClick={onClick}
-      style={{ '--subject-color': subject.color } as CSSProperties}
-    >
-      <div className={styles.iconWrap} style={{ background: subject.gradient }}>
-        <span className={styles.icon}>{renderSafeIcon(subject.icon)}</span>
-      </div>
-
-      <h3 className={styles.name} style={{ color: subject.color }}>{name}</h3>
-      <p className={styles.meta}>{total} {t('lessons')}</p>
-
-      <ProgressBar value={pct} color={subject.gradient} height={8} />
-
-      <div className={styles.footer}>
-        <span className={styles.metaSmall}>{completed}/{total} {t('completed')}</span>
-        <span className={styles.pct} style={{ color: subject.color }}>{pct}%</span>
-      </div>
-    </GlassCard>
+      mediaBackground={visual.media}
+      mediaIcon={<Icon size={42} aria-hidden="true" />}
+      mediaImageUrl={visual.imageUrl}
+      mediaImageAlt={visual.imageAlt}
+      subtitle={`${safeCompleted}/${safeTotal} ${t('completed')}`}
+      title={safeName}
+      description={`${safeTotal} ${t('lessons')} • ${safePct}% ${t('progress')}`}
+      rating={{ value: Math.max(3.8, Math.min(5, Number((safePct / 20 + 3.5).toFixed(1)))), votes: `(${safeTotal})` }}
+      metaItems={[
+        { icon: <PlayCircle size={12} aria-hidden="true" />, text: `${safeTotal} ${t('lessons')}` },
+        { icon: <CheckCircle2 size={12} aria-hidden="true" />, text: `${safeCompleted}/${safeTotal} ${t('completed')}` },
+        { icon: <BarChart3 size={12} aria-hidden="true" />, text: `${safePct}% ${t('progress')}` },
+      ]}
+      actions={[
+        <Button key="continue" size="sm" onClick={onClick} className={styles.actionBtn}>
+          {t('continue')} <ArrowRight size={14} aria-hidden="true" />
+        </Button>,
+      ]}
+    />
   )
 }

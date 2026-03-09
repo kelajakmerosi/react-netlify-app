@@ -6,15 +6,16 @@ import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Button } from '../components/ui/Button'
 import { Divider, Alert } from '../components/ui/index'
+import { Skeleton } from '../components/ui/Skeleton'
 import { TopicRow } from '../components/features/TopicRow'
 import type { CurrentTopic, TopicProgressData, TopicStatus } from '../types'
 import { renderSafeIcon } from '../utils/renderSafeIcon'
 import styles from './SubjectPage.module.css'
 
 interface SubjectPageProps {
-  subjectId:      string
-  onBack:         () => void
-  onTopicSelect:  (topic: CurrentTopic) => void
+  subjectId: string
+  onBack: () => void
+  onTopicSelect: (topic: CurrentTopic) => void
 }
 
 interface TopicAction {
@@ -48,10 +49,10 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
 
   const subject = byId.get(subjectId)
   const statusLabels = {
-    completed:  t('completed'),
+    completed: t('completed'),
     inprogress: t('inProgress'),
-    onhold:     t('onHold'),
-    locked:     t('locked'),
+    onhold: t('onHold'),
+    locked: t('locked'),
   } as const
 
   const buildAction = (status: TopicStatus, data: TopicProgressData, totalQuestions: number): TopicAction => {
@@ -95,22 +96,37 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
     return (
       <div className="page-content fade-in">
         <Alert variant="warning">Subject not found.</Alert>
+        <Button variant="ghost" size="sm" onClick={onBack} style={{ marginTop: 12 }}>← {t('back')}</Button>
       </div>
     )
   }
   if (!subject) {
     return (
       <div className="page-content fade-in">
-        <Alert variant="info">Loading subject...</Alert>
+        <Skeleton width={180} height={18} borderRadius={6} style={{ marginBottom: 20 }} />
+        <Skeleton width="100%" height={80} borderRadius="var(--radius-md)" style={{ marginBottom: 24 }} />
+        <GlassCard style={{ overflow: 'hidden' }}>
+          <div className={styles.skeletonList}>
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <Skeleton key={idx} width="100%" height={62} borderRadius="var(--radius-md)" />
+            ))}
+          </div>
+        </GlassCard>
       </div>
     )
   }
 
   return (
     <div className="page-content fade-in">
-      <Button variant="ghost" size="sm" onClick={onBack} className={styles.backButton}>
-        ← {t('back')}
-      </Button>
+      <nav className={styles.breadcrumb} aria-label="breadcrumb">
+        <button type="button" className={styles.breadcrumbLink} onClick={onBack}>
+          {t('lessons')}
+        </button>
+        <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
+        <span className={styles.breadcrumbCurrent} aria-current="page">
+          {subject.title || SUBJECT_NAMES[lang]?.[subject.id] || subject.id}
+        </span>
+      </nav>
 
       <div className={styles.header}>
         <div className={styles.iconWrap} style={{ background: subject.gradient }}>
@@ -141,7 +157,7 @@ export function SubjectPage({ subjectId, onBack, onTopicSelect }: SubjectPagePro
         <GlassCard style={{ padding: 20 }}>
           <div className={styles.skeletonList}>
             {Array.from({ length: 5 }).map((_, idx) => (
-              <div key={idx} className={styles.skeletonRow} />
+              <Skeleton key={idx} width="100%" height={62} borderRadius="var(--radius-md)" />
             ))}
           </div>
         </GlassCard>

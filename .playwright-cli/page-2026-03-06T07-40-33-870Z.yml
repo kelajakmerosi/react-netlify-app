@@ -1,0 +1,27 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - text: KelajakMerosi
+    - paragraph [ref=e6]: Education platform in Uzbek
+  - generic [ref=e7]:
+    - tablist "Authentication mode" [ref=e8]:
+      - tab "Login" [selected] [ref=e10] [cursor=pointer]
+      - tab "Register" [ref=e11] [cursor=pointer]
+    - paragraph [ref=e12]: Sign in with your phone number and password.
+    - generic [ref=e13]:
+      - generic [ref=e14]: +998XXXXXXXXX
+      - textbox "+998XXXXXXXXX" [ref=e15]
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: Password
+        - textbox "Password" [ref=e19]
+      - button "Show password" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+    - button "Login" [ref=e24] [cursor=pointer]
+    - generic [ref=e25]:
+      - button "Sign in via OTP" [ref=e26] [cursor=pointer]
+      - button "Forgot password?" [ref=e27] [cursor=pointer]
+    - generic [ref=e30]: or
+    - button "Continue with Google" [ref=e33] [cursor=pointer]:
+      - img [ref=e34]
+      - text: Continue with Google
+    - button "Continue as Guest" [ref=e40] [cursor=pointer]

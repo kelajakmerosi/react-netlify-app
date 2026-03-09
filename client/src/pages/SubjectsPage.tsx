@@ -1,11 +1,15 @@
 import { useMemo } from 'react'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, CheckCircle2, LibraryBig, Shapes } from 'lucide-react'
 import { useApp, useLang } from '../hooks'
+import { useAuth } from '../hooks/useAuth'
 import { SubjectCard } from '../components/features/SubjectCard'
+import { PageHero } from '../components/ui/PageHero'
 import { SUBJECT_NAMES } from '../constants'
 import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { Alert } from '../components/ui'
+import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
+import { Skeleton } from '../components/ui/Skeleton'
 import styles from './SubjectsPage.module.css'
 
 interface SubjectsPageProps {
@@ -15,6 +19,7 @@ interface SubjectsPageProps {
 export function SubjectsPage({ onSubjectSelect }: SubjectsPageProps) {
   const { t, lang } = useLang()
   const { getTopicData } = useApp()
+  const { isGuest } = useAuth()
   const { subjects, loading, error } = useLearnerSubjects()
 
   const subjectStats = useMemo(() => (
@@ -36,23 +41,46 @@ export function SubjectsPage({ onSubjectSelect }: SubjectsPageProps) {
     })
   ), [getTopicData, subjects])
 
+  const summary = useMemo(() => {
+    const totals = subjectStats.reduce((acc, item) => {
+      acc.subjects += 1
+      acc.lessons += item.total
+      acc.completed += item.completed
+      return acc
+    }, { subjects: 0, lessons: 0, completed: 0 })
+
+    const completion = totals.lessons > 0 ? Math.round((totals.completed / totals.lessons) * 100) : 0
+    return { ...totals, completion }
+  }, [subjectStats])
+
   return (
     <div className="page-content fade-in">
-      <div className={styles.header}>
-        <h2 className={styles.title}><BookOpen size={24} />{t('subjects')}</h2>
-        <p className={styles.subtitle}>{t('allTopics')}</p>
-      </div>
+      <PageHero
+        eyebrow={t('subjects')}
+        title={t('subjects')}
+        subtitle={t('allTopics')}
+        icon={<BookOpen aria-hidden="true" />}
+        metrics={[
+          { label: t('subjects'), value: summary.subjects, icon: <Shapes aria-hidden="true" /> },
+          { label: t('lessons'), value: summary.lessons, icon: <LibraryBig aria-hidden="true" /> },
+          { label: t('completion'), value: `${summary.completion}%`, icon: <CheckCircle2 aria-hidden="true" /> },
+        ]}
+      />
 
       {error ? <Alert variant="warning">{error}</Alert> : null}
+
+      {isGuest && (
+        <Alert variant="warning">{t('guestWarning')} — {t('loginToSave')}</Alert>
+      )}
 
       <div className={styles.grid}>
         {loading ? (
           Array.from({ length: 4 }).map((_, idx) => (
             <GlassCard key={`subject-skeleton-${idx}`} className={styles.skeletonCard} padding={22}>
-              <div className={styles.skeletonIcon} />
-              <div className={styles.skeletonLineLg} />
-              <div className={styles.skeletonLine} />
-              <div className={styles.skeletonLine} />
+              <Skeleton width={48} height={48} borderRadius={12} style={{ marginBottom: 16 }} />
+              <Skeleton width="60%" height={24} style={{ marginBottom: 8 }} />
+              <Skeleton width="40%" height={16} style={{ marginBottom: 8 }} />
+              <Skeleton width="30%" height={16} />
             </GlassCard>
           ))
         ) : null}
@@ -71,7 +99,10 @@ export function SubjectsPage({ onSubjectSelect }: SubjectsPageProps) {
       </div>
 
       {!loading && !subjectStats.length ? (
-        <Alert variant="warning">{t('subjectsEmpty')}</Alert>
+        <>
+          <Alert variant="warning">{t('subjectsEmpty')}</Alert>
+          <Button variant="ghost" onClick={() => window.location.reload()}>{t('retry')}</Button>
+        </>
       ) : null}
     </div>
   )

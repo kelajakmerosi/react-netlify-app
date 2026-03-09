@@ -27,10 +27,6 @@ export default function ReviewPublishStep({
     <section className={styles.editorPanel}>
       <div className={styles.rowHeader}>
         <h4>{t('adminContentStep4')}</h4>
-        <span className={styles.stepHintInline}>
-          <Send size={14} aria-hidden="true" />
-          {t('adminContentStep4Hint')}
-        </span>
       </div>
 
       <div className={styles.summaryGrid}>

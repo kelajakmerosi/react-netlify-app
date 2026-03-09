@@ -1,0 +1,225 @@
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(18px, 3vw, 34px);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--surface-border));
+  background:
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--accent-light) 66%, transparent), transparent 66%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
+  box-shadow: var(--shadow-md);
+  padding: clamp(20px, 3vw, 36px);
+  overflow: hidden;
+}
+
+.copy {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(34px, 4.4vw, 58px);
+  line-height: 1.04;
+  letter-spacing: -0.032em;
+  max-width: 13ch;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-2);
+  font-size: clamp(14px, 2vw, 18px);
+  line-height: 1.62;
+  max-width: 52ch;
+}
+
+.actions {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stats {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-2) 90%, transparent);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.statValue {
+  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text);
+}
+
+.statLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--text-3);
+  font-weight: 700;
+}
+
+.visual {
+  position: relative;
+  min-height: clamp(220px, 38vw, 340px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.desktop,
+.tablet,
+.phone {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--surface-border));
+  background: linear-gradient(180deg, #ffffff, color-mix(in srgb, #ffffff 82%, #f6ebe0));
+  box-shadow: var(--shadow-sm);
+}
+
+.desktop {
+  width: min(100%, 470px);
+  height: 270px;
+  border-radius: var(--radius-md);
+  right: 0;
+  bottom: 0;
+  transform: perspective(1200px) rotateY(-12deg);
+}
+
+.tablet {
+  width: min(72%, 320px);
+  height: 200px;
+  border-radius: var(--radius-md);
+  left: 8%;
+  bottom: 30px;
+  transform: perspective(1100px) rotateY(10deg);
+}
+
+.phone {
+  width: min(32%, 148px);
+  height: 190px;
+  border-radius: var(--radius-lg);
+  left: 2%;
+  bottom: 10px;
+  transform: perspective(900px) rotateY(18deg);
+}
+
+.screen {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-rows: 28px 1fr;
+}
+
+.screenTop {
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 12%, var(--surface-border));
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-3) 60%, transparent);
+}
+
+.screenBody {
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.barLg,
+.bar,
+.barSm {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(100deg,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      color-mix(in srgb, var(--accent-2) 30%, transparent));
+}
+
+.barLg {
+  height: 12px;
+  width: 68%;
+}
+
+.bar {
+  height: 8px;
+  width: 88%;
+}
+
+.barSm {
+  height: 8px;
+  width: 54%;
+}
+
+.chart {
+  margin-top: 2px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+  background: color-mix(in srgb, var(--accent-light) 52%, #fff);
+  min-height: 88px;
+  display: grid;
+  align-items: end;
+  padding: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.chartCol {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
+}
+
+@media (max-width: 1140px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .visual {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 780px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .desktop {
+    width: 100%;
+    height: 210px;
+    transform: none;
+    position: relative;
+  }
+
+  .tablet,
+  .phone {
+    display: none;
+  }
+}

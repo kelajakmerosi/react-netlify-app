@@ -13,7 +13,6 @@ import type {
 } from '../../types'
 import { lessonService } from '../../services/lesson.service'
 import { progressService } from '../../services/progress.service'
-import subjectService from '../../services/subject.service'
 import { useAuth } from '../../hooks/useAuth'
 import { SUBJECTS } from '../../constants'
 
@@ -33,6 +32,10 @@ const toProgressErrorMessage = (err: unknown): string => {
     return 'Progress sync failed: API server is unreachable. Start server with `cd server && npm run dev`.'
   }
 
+  if (normalized.includes('api server is unreachable') || normalized.includes('api_unreachable')) {
+    return 'Progress sync failed: API server is unreachable. Start server with `cd server && npm run dev`.'
+  }
+
   if (
     normalized.includes('cors')
   ) {
@@ -44,13 +47,6 @@ const toProgressErrorMessage = (err: unknown): string => {
 
 const TOPIC_CATALOG = SUBJECTS.flatMap(subject =>
   subject.topics.map(topic => ({ subjectId: subject.id, topicId: topic.id })),
-)
-
-const buildTopicCatalog = (subjects: Array<{ id: string; topics?: Array<{ id: string }> }>) => (
-  subjects.flatMap((subject) => (subject.topics || []).map((topic) => ({
-    subjectId: subject.id,
-    topicId: topic.id,
-  })))
 )
 
 const toDayKey = (ts: number): string => {
@@ -251,18 +247,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setTopicProgress(localProgress)
     setLessonHistory(localHistory)
-
-    try {
-      const subjects = await subjectService.getAll()
-      const nextCatalog = buildTopicCatalog(subjects)
-      if (nextCatalog.length > 0) {
-        setTopicCatalog(nextCatalog)
-      } else {
-        setTopicCatalog(TOPIC_CATALOG)
-      }
-    } catch {
-      setTopicCatalog(TOPIC_CATALOG)
-    }
+    setTopicCatalog(TOPIC_CATALOG)
 
     try {
       const remote = await progressService.getProgress(user.token)

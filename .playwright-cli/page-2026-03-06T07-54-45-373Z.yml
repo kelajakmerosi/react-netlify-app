@@ -1,0 +1,354 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - link "KM Kelajak Merosi" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e7]: KM
+      - generic [ref=e8]: Kelajak Merosi
+    - navigation [ref=e9]:
+      - link "Home" [ref=e10] [cursor=pointer]:
+        - /url: "#home"
+      - link "Courses" [ref=e11] [cursor=pointer]:
+        - /url: "#courses"
+      - link "Instructors" [ref=e12] [cursor=pointer]:
+        - /url: "#instructors"
+      - link "Schedules" [ref=e13] [cursor=pointer]:
+        - /url: "#schedules"
+      - link "Contact Us" [ref=e14] [cursor=pointer]:
+        - /url: "#contact"
+    - generic [ref=e15]:
+      - link "Login" [ref=e16] [cursor=pointer]:
+        - /url: /auth?mode=login
+      - link "Register" [ref=e17] [cursor=pointer]:
+        - /url: /auth?mode=signup
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Classical Education
+        - heading "A Classical Education for the Future" [level=1] [ref=e22]:
+          - text: A Classical Education for the
+          - generic [ref=e23]: Future
+        - paragraph [ref=e24]: We prepare ambitious learners for a world that demands discipline, deep knowledge, and measurable outcomes across courses, examinations, and competitions.
+        - link "Get started" [ref=e26] [cursor=pointer]:
+          - /url: /auth?mode=signup
+      - generic [ref=e27]:
+        - img "Student with headphones and backpack" [ref=e29]
+        - button "Scroll to top" [ref=e30] [cursor=pointer]:
+          - img [ref=e31]
+    - generic [ref=e34]:
+      - article [ref=e35]:
+        - img [ref=e37]
+        - heading "Live Chat" [level=3] [ref=e39]
+        - paragraph [ref=e40]: Stay close to mentors and receive direct academic guidance during your preparation.
+      - article [ref=e41]:
+        - img [ref=e43]
+        - heading "Examination" [level=3] [ref=e46]
+        - paragraph [ref=e47]: Practice structured online exams with realistic timing and measurable performance.
+      - article [ref=e48]:
+        - img [ref=e50]
+        - heading "Competition" [level=3] [ref=e56]
+        - paragraph [ref=e57]: Join challenges that build consistency, confidence, and visible achievement.
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - heading "Top categories" [level=2] [ref=e60]
+        - link "See all" [ref=e61] [cursor=pointer]:
+          - /url: "#courses"
+      - generic [ref=e62]:
+        - button "Previous category" [ref=e63] [cursor=pointer]:
+          - img [ref=e64]
+        - article [ref=e66]:
+          - img "Marketing" [ref=e67]
+          - strong [ref=e69]: Marketing
+        - article [ref=e70]:
+          - img "Design" [ref=e71]
+          - strong [ref=e73]: Design
+        - article [ref=e74]:
+          - img "Programming" [ref=e75]
+          - strong [ref=e77]: Programming
+        - article [ref=e78]:
+          - img "Technology" [ref=e79]
+          - strong [ref=e81]: Technology
+        - button "Next category" [ref=e82] [cursor=pointer]:
+          - img [ref=e83]
+    - generic [ref=e85]:
+      - generic [ref=e86]:
+        - img "Instructor portrait" [ref=e88]
+        - generic [ref=e89]:
+          - img [ref=e90]
+          - generic [ref=e95]:
+            - strong [ref=e96]: Outstanding
+            - generic [ref=e97]: Instructors
+      - generic [ref=e98]:
+        - heading "We are Experts Learning Institution" [level=2] [ref=e99]:
+          - text: We are
+          - generic [ref=e100]: Experts
+          - text: Learning Institution
+        - paragraph [ref=e101]: Kelajak Merosi combines structured teaching, progress accountability, and exam-ready preparation so learners can move from curiosity to mastery without friction.
+        - link "Enroll now" [ref=e102] [cursor=pointer]:
+          - /url: /auth?mode=signup
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - heading "Explore Our Popular Course" [level=2] [ref=e105]
+        - button "Sort by" [ref=e106] [cursor=pointer]
+      - generic [ref=e107]:
+        - article [ref=e108]:
+          - img "Learn Marketing From Top Instructors." [ref=e109]
+          - generic [ref=e110]:
+            - generic [ref=e111]:
+              - heading "Learn Marketing From Top Instructors." [level=3] [ref=e112]
+              - generic [ref=e113]: "4.5"
+            - generic [ref=e114]:
+              - generic [ref=e115]: 6 weeks
+              - generic [ref=e116]: 1.5k Students
+              - strong [ref=e117]: 30.5$
+        - article [ref=e118]:
+          - img "Front-End Development Is Not Hard As You Think" [ref=e119]
+          - generic [ref=e120]:
+            - generic [ref=e121]:
+              - heading "Front-End Development Is Not Hard As You Think" [level=3] [ref=e122]
+              - generic [ref=e123]: "4.5"
+            - generic [ref=e124]:
+              - generic [ref=e125]: 6 weeks
+              - generic [ref=e126]: 1.5k Students
+              - strong [ref=e127]: 30.5$
+        - article [ref=e128]:
+          - img "Everything You Need To Know In UX" [ref=e129]
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - heading "Everything You Need To Know In UX" [level=3] [ref=e132]
+              - generic [ref=e133]: "4.5"
+            - generic [ref=e134]:
+              - generic [ref=e135]: 6 weeks
+              - generic [ref=e136]: 1.5k Students
+              - strong [ref=e137]: 30.5$
+        - article [ref=e138]:
+          - img "Learn Photography With Ease" [ref=e139]
+          - generic [ref=e140]:
+            - generic [ref=e141]:
+              - heading "Learn Photography With Ease" [level=3] [ref=e142]
+              - generic [ref=e143]: "4.5"
+            - generic [ref=e144]:
+              - generic [ref=e145]: 6 weeks
+              - generic [ref=e146]: 1.5k Students
+              - strong [ref=e147]: 30.5$
+        - article [ref=e148]:
+          - img "Be A Pro In Data Analysis" [ref=e149]
+          - generic [ref=e150]:
+            - generic [ref=e151]:
+              - heading "Be A Pro In Data Analysis" [level=3] [ref=e152]
+              - generic [ref=e153]: "4.5"
+            - generic [ref=e154]:
+              - generic [ref=e155]: 6 weeks
+              - generic [ref=e156]: 1.5k Students
+              - strong [ref=e157]: 30.5$
+        - article [ref=e158]:
+          - img "Ethical Hacking Is Not Hard As You Think" [ref=e159]
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - heading "Ethical Hacking Is Not Hard As You Think" [level=3] [ref=e162]
+              - generic [ref=e163]: "4.5"
+            - generic [ref=e164]:
+              - generic [ref=e165]: 6 weeks
+              - generic [ref=e166]: 1.5k Students
+              - strong [ref=e167]: 30.5$
+    - generic [ref=e168]:
+      - generic [ref=e169]:
+        - heading "Our online examination is top-notch" [level=2] [ref=e170]:
+          - text: Our online
+          - generic [ref=e171]: examination
+          - text: is top-notch
+        - paragraph [ref=e172]: Prepare yourself for greater challenges with our online examinations, practical timing controls, and verified feedback loops.
+        - link "Take a test" [ref=e173] [cursor=pointer]:
+          - /url: /exams
+      - generic [ref=e174]:
+        - img "Learner ready for examination" [ref=e176]
+        - generic [ref=e177]:
+          - img [ref=e178]
+          - generic [ref=e190]:
+            - strong [ref=e191]: Increase
+            - generic [ref=e192]: Your Job Opportunity
+    - generic [ref=e193]:
+      - generic [ref=e194]:
+        - heading "Popular examination" [level=2] [ref=e195]
+        - link "See all" [ref=e196] [cursor=pointer]:
+          - /url: "#register"
+      - generic [ref=e197]:
+        - button "Previous examination" [ref=e198] [cursor=pointer]:
+          - img [ref=e199]
+        - article [ref=e201]:
+          - img "Nature Of Science" [ref=e202]
+          - generic [ref=e203]:
+            - generic [ref=e204]: Popular examination
+            - strong [ref=e205]: Nature Of Science
+        - article [ref=e206]:
+          - img "2022 Astro Report" [ref=e207]
+          - generic [ref=e208]:
+            - generic [ref=e209]: Annual report
+            - strong [ref=e210]: 2022 Astro Report
+        - article [ref=e211]:
+          - img "Data Analysis With Python" [ref=e212]
+          - generic [ref=e213]:
+            - generic [ref=e214]: Applied skills
+            - strong [ref=e215]: Data Analysis With Python
+        - article [ref=e216]:
+          - img "Advanced UX Designs" [ref=e217]
+          - generic [ref=e218]:
+            - generic [ref=e219]: Digital systems
+            - strong [ref=e220]: Advanced UX Designs
+        - button "Next examination" [ref=e221] [cursor=pointer]:
+          - img [ref=e222]
+    - generic [ref=e224]:
+      - generic [ref=e225]:
+        - img "Scholar ready to register" [ref=e227]
+        - generic [ref=e228]:
+          - img [ref=e229]
+          - generic [ref=e234]:
+            - strong [ref=e235]: Den
+            - generic [ref=e236]: of Scholars
+      - generic [ref=e237]:
+        - paragraph [ref=e238]: Registration to get notified about new competition and article we publish.
+        - textbox "Full name" [ref=e239]
+        - textbox "Email" [ref=e240]
+        - textbox "Phone number" [ref=e241]
+        - combobox [ref=e242]:
+          - option "List of courses goes here" [disabled] [selected]
+          - option "Frontend Development"
+          - option "Data Analysis"
+          - option "Exam Preparation"
+        - link "Register" [ref=e243] [cursor=pointer]:
+          - /url: /auth?mode=signup
+    - generic [ref=e244]:
+      - generic [ref=e245]:
+        - heading "Featured Competition" [level=2] [ref=e246]
+        - link "See all" [ref=e247] [cursor=pointer]:
+          - /url: "#contact"
+      - generic [ref=e248]:
+        - button "Previous competition" [ref=e249] [cursor=pointer]:
+          - img [ref=e250]
+        - article [ref=e252]:
+          - img "Marketing Contest" [ref=e253]
+          - generic [ref=e254]:
+            - strong [ref=e255]: Marketing Contest
+            - generic [ref=e256]: The Future Economy
+        - article [ref=e257]:
+          - img "UI/UX Design Contest" [ref=e258]
+          - generic [ref=e259]:
+            - strong [ref=e260]: UI/UX Design Contest
+            - generic [ref=e261]: Accessibility in design
+        - article [ref=e262]:
+          - img "Programming Contest" [ref=e263]
+          - generic [ref=e264]:
+            - strong [ref=e265]: Programming Contest
+            - generic [ref=e266]: The Future of AI
+        - article [ref=e267]:
+          - img "Photography Contest" [ref=e268]
+          - generic [ref=e269]:
+            - strong [ref=e270]: Photography Contest
+            - generic [ref=e271]: The Beauty of Art
+        - button "Next competition" [ref=e272] [cursor=pointer]:
+          - img [ref=e273]
+    - generic [ref=e275]:
+      - generic [ref=e276]:
+        - heading "Get Publications from best Authors around the Globe" [level=2] [ref=e277]:
+          - text: Get
+          - generic [ref=e278]: Publications
+          - text: from best Authors around the Globe
+        - paragraph [ref=e279]: Access curated reading materials, scholarly publications, and structured notes that extend each learning track beyond video lessons.
+        - link "Register" [ref=e280] [cursor=pointer]:
+          - /url: /materials/library
+      - generic [ref=e281]:
+        - img "Reader with publications" [ref=e283]
+        - generic [ref=e284]:
+          - img [ref=e285]
+          - generic [ref=e288]:
+            - strong [ref=e289]: Readers
+            - generic [ref=e290]: are leaders
+    - generic [ref=e291]:
+      - generic [ref=e292]:
+        - heading "Recent Publications" [level=2] [ref=e293]
+        - link "See all" [ref=e294] [cursor=pointer]:
+          - /url: /materials/library
+      - generic [ref=e295]:
+        - button "Previous publication" [ref=e296] [cursor=pointer]:
+          - img [ref=e297]
+        - article [ref=e299]:
+          - img "Nature Of Science" [ref=e300]
+          - strong [ref=e302]: Nature Of Science
+        - article [ref=e303]:
+          - img "2022 Astro Report" [ref=e304]
+          - strong [ref=e306]: 2022 Astro Report
+        - article [ref=e307]:
+          - img "Data Analysis With Python" [ref=e308]
+          - strong [ref=e310]: Data Analysis With Python
+        - article [ref=e311]:
+          - img "Advanced UX Designs" [ref=e312]
+          - strong [ref=e314]: Advanced UX Designs
+        - button "Next publication" [ref=e315] [cursor=pointer]:
+          - img [ref=e316]
+    - generic [ref=e318]:
+      - generic [ref=e319]:
+        - paragraph [ref=e320]: Reviews
+        - heading "What Our Students Say About Us" [level=2] [ref=e321]:
+          - text: What Our
+          - generic [ref=e322]: Students
+          - text: Say About Us
+        - generic [ref=e323]:
+          - button "Previous review" [ref=e324] [cursor=pointer]:
+            - img [ref=e325]
+          - button "Next review" [ref=e327] [cursor=pointer]:
+            - img [ref=e328]
+      - generic [ref=e330]:
+        - article [ref=e331]:
+          - generic [ref=e332]:
+            - img "Mohh Jumah" [ref=e333]
+            - generic [ref=e334]:
+              - strong [ref=e335]: Mohh Jumah
+              - text: Senior Developer
+          - paragraph [ref=e336]: Kelajak Merosi gave me a disciplined learning path instead of random scattered lessons. The exam flow feels serious and useful.
+        - article [ref=e337]:
+          - generic [ref=e338]:
+            - img "John Mark" [ref=e339]
+            - generic [ref=e340]:
+              - strong [ref=e341]: John Mark
+              - text: Data Analyst
+          - paragraph [ref=e342]: The platform is calm, structured, and easy to trust. I always know the next step I should take.
+      - generic [ref=e343]:
+        - generic [ref=e344]: axon
+        - generic [ref=e345]: Jetstar
+        - generic [ref=e346]: Expedia
+        - generic [ref=e347]: Qantas
+        - generic [ref=e348]: Alitalia
+  - contentinfo [ref=e349]:
+    - generic [ref=e350]:
+      - generic [ref=e351]:
+        - generic [ref=e352]:
+          - generic [ref=e353]: KM
+          - generic [ref=e354]: Kelajak Merosi
+        - paragraph [ref=e355]: We are not here to sell products, we sell value through expertise and disciplined educational systems.
+        - generic [ref=e356]:
+          - generic [ref=e357]: fb
+          - generic [ref=e358]: tw
+          - generic [ref=e359]: ig
+          - generic [ref=e360]: in
+      - generic [ref=e361]:
+        - generic [ref=e362]:
+          - strong [ref=e363]: "Address:"
+          - paragraph [ref=e364]: Tashkent, Uzbekistan
+        - generic [ref=e365]:
+          - strong [ref=e366]: "Phone:"
+          - paragraph [ref=e367]: +998 90 123 45 67
+        - generic [ref=e368]:
+          - strong [ref=e369]: "Email:"
+          - paragraph [ref=e370]: support@kelajakmerosi.app
+      - generic [ref=e371]:
+        - strong [ref=e372]: Company
+        - link "About Us" [ref=e373] [cursor=pointer]:
+          - /url: "#instructors"
+        - link "Features" [ref=e374] [cursor=pointer]:
+          - /url: "#courses"
+        - link "Pricing" [ref=e375] [cursor=pointer]:
+          - /url: /auth?mode=signup
+    - generic [ref=e376]:
+      - heading "Subscribe to get latest updates" [level=3] [ref=e377]
+      - generic [ref=e378]:
+        - textbox "Your Email address" [ref=e379]
+        - button "Subscribe" [ref=e380] [cursor=pointer]

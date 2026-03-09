@@ -22,9 +22,7 @@ import {
   type FinanceSummary,
   type PricingCatalog,
   type PricingPlan,
-  type SubjectQuestion,
   type SubjectRecord,
-  type SubjectTopic,
   type SystemInfo,
 } from '../../services/admin.service'
 import AdminHeader from './components/AdminHeader'
@@ -42,50 +40,15 @@ import ChartLegend from './components/ChartLegend'
 import AdminAccessToolbar from './components/AdminAccessToolbar'
 import AdminsTable from './components/AdminsTable'
 import UsersTable from './components/UsersTable'
-import SubjectsRail from './components/SubjectsRail'
-import SubjectEditorPanel from './components/SubjectEditorPanel'
-import TopicEditorPanel from './components/TopicEditorPanel'
-import ExamImportReviewPanel from './components/ExamImportReviewPanel'
+import UserDetailPanel from './components/UserDetailPanel'
 import ContentBuilderShell from './content/ContentBuilderShell'
 import {
-  NEW_SUBJECT_ID,
   buildDefaultRange,
-  emptySubjectDraft,
-  emptyTopicDraft,
-  toSubjectDraft,
-  toTopicDraft,
   type AdminTab,
   type ConfirmDeleteState,
-  type SubjectDraft,
-  type TopicDraft,
-  type TopicQuestionDraft,
 } from './types'
 import styles from './AdminWorkspace.module.css'
 import { resolveUiErrorMessage } from '../../utils/errorPresentation'
-
-const toTopicPayload = (draft: TopicDraft): SubjectTopic => ({
-  id: draft.id.trim(),
-  title: draft.title.trim(),
-  videoId: draft.videoId.trim(),
-  videoUrl: draft.videoUrl?.trim() || undefined,
-  questions: draft.questions.map((question) => {
-    const options = question.optionsText
-      .split('|')
-      .map((option) => option.trim())
-      .filter(Boolean)
-
-    const payload: SubjectQuestion = {
-      text: question.text.trim(),
-      imageUrl: question.imageUrl?.trim() || undefined,
-      options,
-      answer: Number(question.answer) || 0,
-    }
-
-    if (question.id) payload.id = question.id
-    if (question.concept?.trim()) payload.concept = question.concept.trim()
-    return payload
-  }),
-})
 
 const LOCALE_BY_LANG = {
   uz: 'uz-UZ',
@@ -131,7 +94,6 @@ export function AdminWorkspacePage(): JSX.Element {
   const { user: currentUser, logout } = useAuth()
   const { t, lang } = useLang()
   const isSuperAdmin = currentUser?.role === 'superadmin'
-  const useContentV2 = import.meta.env.VITE_ADMIN_CONTENT_V2 !== 'false'
   const localizeError = (err: unknown, fallbackKey = 'adminActionFailed') => resolveUiErrorMessage(err, t, fallbackKey)
 
   const [tab, setTab] = useState<AdminTab>('overview')
@@ -157,6 +119,7 @@ export function AdminWorkspacePage(): JSX.Element {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
   const [savingPlanKey, setSavingPlanKey] = useState<PricingPlan['key'] | null>(null)
   const [savingCourseId, setSavingCourseId] = useState<string | null>(null)
+  const [bootstrappingDemo, setBootstrappingDemo] = useState(false)
   const [fatalError, setFatalError] = useState<string | null>(null)
   const [panelError, setPanelError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -169,23 +132,31 @@ export function AdminWorkspacePage(): JSX.Element {
 
   const [identityInput, setIdentityInput] = useState('')
   const [identityActionLoading, setIdentityActionLoading] = useState(false)
+  const [selectedInspectUser, setSelectedInspectUser] = useState<AdminUserSummary | null>(null)
 
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null)
-  const [subjectDraft, setSubjectDraft] = useState<SubjectDraft>(emptySubjectDraft())
-  const [savingSubject, setSavingSubject] = useState(false)
+  const [presetDays, setPresetDays] = useState(() => {
+    const saved = localStorage.getItem('km_admin_presetDays')
+    return saved ? parseInt(saved, 10) : 30
+  })
+  const [range, setRange] = useState(() => {
+    const saved = localStorage.getItem('km_admin_range')
+    return saved ? JSON.parse(saved) : buildDefaultRange(presetDays)
+  })
+  const [analyticsSubjectFilter, setAnalyticsSubjectFilter] = useState(() => {
+    return localStorage.getItem('km_admin_subjectFilter') || ''
+  })
 
-  const [topicDraft, setTopicDraft] = useState<TopicDraft>(emptyTopicDraft())
-  const [editingTopicId, setEditingTopicId] = useState<string | null>(null)
-  const [savingTopic, setSavingTopic] = useState(false)
+  useEffect(() => {
+    localStorage.setItem('km_admin_presetDays', presetDays.toString())
+  }, [presetDays])
 
-  const [presetDays, setPresetDays] = useState(30)
-  const [range, setRange] = useState(buildDefaultRange(30))
-  const [analyticsSubjectFilter, setAnalyticsSubjectFilter] = useState('')
+  useEffect(() => {
+    localStorage.setItem('km_admin_range', JSON.stringify(range))
+  }, [range])
 
-  const selectedSubject = useMemo(
-    () => subjects.find((subject) => subject.id === selectedSubjectId) ?? null,
-    [subjects, selectedSubjectId],
-  )
+  useEffect(() => {
+    localStorage.setItem('km_admin_subjectFilter', analyticsSubjectFilter)
+  }, [analyticsSubjectFilter])
 
   const searchedUsers = useMemo(() => {
     const needle = search.trim().toLowerCase()
@@ -219,24 +190,13 @@ export function AdminWorkspacePage(): JSX.Element {
       return {
         subjectId: subject.id,
         subjectTitle: subject.title,
+        subjectIcon: subject.icon,
+        subjectColor: subject.color,
         priceUzs: current?.priceUzs ?? 0,
         isActive: current?.isActive ?? false,
       }
     })
   ), [subjects, coursePriceBySubject])
-
-  const applySubjectUpdate = (subject: SubjectRecord) => {
-    setSubjects((prev) => {
-      const exists = prev.some((entry) => entry.id === subject.id)
-      const next = exists
-        ? prev.map((entry) => (entry.id === subject.id ? subject : entry))
-        : [...prev, subject]
-
-      return next.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    })
-    setSelectedSubjectId(subject.id)
-    setSubjectDraft(toSubjectDraft(subject))
-  }
 
   const loadCore = async () => {
     setLoadingCore(true)
@@ -250,10 +210,6 @@ export function AdminWorkspacePage(): JSX.Element {
       setInfo(nextInfo)
       setUsers(nextUsers)
       setSubjects(nextSubjects.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
-
-      if (nextSubjects.length > 0) {
-        setSelectedSubjectId((current) => current ?? nextSubjects[0].id)
-      }
     } finally {
       setLoadingCore(false)
     }
@@ -337,17 +293,15 @@ export function AdminWorkspacePage(): JSX.Element {
   }, [isSuperAdmin])
 
   useEffect(() => {
-    if (!selectedSubject) return
-    setSubjectDraft(toSubjectDraft(selectedSubject))
-    setEditingTopicId(null)
-    setTopicDraft(emptyTopicDraft())
-  }, [selectedSubject])
-
-  useEffect(() => {
     if (!isSuperAdmin && tab === 'users') {
       setTab('overview')
     }
   }, [isSuperAdmin, tab])
+
+  useEffect(() => {
+    setPanelError(null)
+    setSuccess(null)
+  }, [tab])
 
   const handleRefreshAll = async () => {
     setSuccess(null)
@@ -454,8 +408,6 @@ export function AdminWorkspacePage(): JSX.Element {
     const isActive = Boolean(current?.isActive)
 
     setSavingCourseId(subjectId)
-    setPanelError(null)
-    setSuccess(null)
     try {
       const updated = await adminService.updateCoursePrice(subjectId, {
         subjectId,
@@ -471,11 +423,24 @@ export function AdminWorkspacePage(): JSX.Element {
           : [...prev.coursePrices, updated]
         return { ...prev, coursePrices: nextCoursePrices }
       })
-      setSuccess(t('adminCoursePricingSaved'))
+      return t('adminCoursePricingSaved')
     } catch (err) {
-      setPanelError(localizeError(err))
+      throw new Error(localizeError(err))
     } finally {
       setSavingCourseId(null)
+    }
+  }
+
+  const handleBootstrapDemo = async (subjectId?: string) => {
+    setBootstrappingDemo(true)
+    try {
+      const result = await adminService.bootstrapDemoDataset({ subjectId, force: true })
+      await Promise.all([loadCore(), isSuperAdmin ? loadBilling() : Promise.resolve()])
+      return t('adminContentDemoBootstrapSuccess').replace('{title}', result.exam.title)
+    } catch (err) {
+      throw new Error(localizeError(err, 'errorDemoBootstrapFailed'))
+    } finally {
+      setBootstrappingDemo(false)
     }
   }
 
@@ -542,166 +507,6 @@ export function AdminWorkspacePage(): JSX.Element {
     } finally {
       setIdentityActionLoading(false)
     }
-  }
-
-  const handleSaveSubject = async () => {
-    setSavingSubject(true)
-    setPanelError(null)
-    setSuccess(null)
-    try {
-      const payload = {
-        title: subjectDraft.title,
-        description: subjectDraft.description,
-        icon: subjectDraft.icon,
-        color: subjectDraft.color,
-        order: Number(subjectDraft.order) || 0,
-        topics: subjectDraft.topics,
-      }
-
-      if (selectedSubjectId && selectedSubjectId !== NEW_SUBJECT_ID) {
-        const updated = await adminService.updateSubject(selectedSubjectId, payload)
-        applySubjectUpdate(updated)
-        setSuccess(t('adminSubjectUpdated'))
-      } else {
-        const created = await adminService.createSubject(payload)
-        applySubjectUpdate(created)
-        setSuccess(t('adminSubjectCreated'))
-      }
-    } catch (err) {
-      setPanelError(localizeError(err))
-    } finally {
-      setSavingSubject(false)
-    }
-  }
-
-  const handleDeleteSubject = async () => {
-    if (!selectedSubject || selectedSubjectId === NEW_SUBJECT_ID) {
-      setSelectedSubjectId(null)
-      setSubjectDraft(emptySubjectDraft())
-      return
-    }
-
-    setPanelError(null)
-    setSuccess(null)
-    try {
-      await adminService.deleteSubject(selectedSubject.id)
-      setSubjects((prev) => prev.filter((entry) => entry.id !== selectedSubject.id))
-      setSelectedSubjectId(null)
-      setSubjectDraft(emptySubjectDraft())
-      setSuccess(t('adminSubjectDeleted'))
-    } catch (err) {
-      setPanelError(localizeError(err))
-    }
-  }
-
-  const handleStartNewSubject = () => {
-    setSelectedSubjectId(NEW_SUBJECT_ID)
-    setSubjectDraft(emptySubjectDraft())
-    setEditingTopicId(null)
-    setTopicDraft(emptyTopicDraft())
-  }
-
-  const handleSaveTopic = async () => {
-    if (!topicDraft.id.trim()) {
-      setPanelError(t('adminTopicIdRequired'))
-      return
-    }
-
-    const topicPayload = toTopicPayload(topicDraft)
-    setSavingTopic(true)
-    setPanelError(null)
-    setSuccess(null)
-    try {
-      if (!selectedSubjectId || selectedSubjectId === NEW_SUBJECT_ID) {
-        const nextTopics = editingTopicId
-          ? subjectDraft.topics.map((topic) => (topic.id === editingTopicId ? topicPayload : topic))
-          : [...subjectDraft.topics, topicPayload]
-        setSubjectDraft((prev) => ({ ...prev, topics: nextTopics }))
-        setSuccess(editingTopicId ? t('adminTopicUpdatedDraft') : t('adminTopicCreatedDraft'))
-      } else if (editingTopicId) {
-        const updated = await adminService.updateTopic(selectedSubjectId, editingTopicId, topicPayload)
-        applySubjectUpdate(updated)
-        setSuccess(t('adminTopicUpdated'))
-      } else {
-        const updated = await adminService.createTopic(selectedSubjectId, topicPayload)
-        applySubjectUpdate(updated)
-        setSuccess(t('adminTopicCreated'))
-      }
-
-      setEditingTopicId(null)
-      setTopicDraft(emptyTopicDraft())
-    } catch (err) {
-      setPanelError(localizeError(err))
-    } finally {
-      setSavingTopic(false)
-    }
-  }
-
-  const handleDeleteTopic = async (topicId: string) => {
-    setPanelError(null)
-    setSuccess(null)
-    try {
-      if (!selectedSubjectId || selectedSubjectId === NEW_SUBJECT_ID) {
-        setSubjectDraft((prev) => ({
-          ...prev,
-          topics: prev.topics.filter((topic) => topic.id !== topicId),
-        }))
-        setSuccess(t('adminTopicDeletedDraft'))
-        return
-      }
-
-      const updated = await adminService.deleteTopic(selectedSubjectId, topicId)
-      applySubjectUpdate(updated)
-      setSuccess(t('adminTopicDeleted'))
-    } catch (err) {
-      setPanelError(localizeError(err))
-    }
-  }
-
-  const handleReorderTopic = async (topicId: string, direction: 'up' | 'down') => {
-    const topics = [...subjectDraft.topics]
-    const index = topics.findIndex((topic) => topic.id === topicId)
-    if (index < 0) return
-
-    const targetIndex = direction === 'up' ? index - 1 : index + 1
-    if (targetIndex < 0 || targetIndex >= topics.length) return
-
-    const [moved] = topics.splice(index, 1)
-    topics.splice(targetIndex, 0, moved)
-    setSubjectDraft((prev) => ({ ...prev, topics }))
-
-    if (!selectedSubjectId || selectedSubjectId === NEW_SUBJECT_ID) return
-
-    try {
-      const updated = await adminService.reorderTopics(selectedSubjectId, topics.map((topic) => topic.id))
-      applySubjectUpdate(updated)
-      setSuccess(t('adminTopicOrderUpdated'))
-    } catch (err) {
-      setPanelError(localizeError(err))
-    }
-  }
-
-  const handleQuestionChange = (index: number, patch: Partial<TopicQuestionDraft>) => {
-    setTopicDraft((prev) => ({
-      ...prev,
-      questions: prev.questions.map((question, questionIdx) => (
-        questionIdx === index ? { ...question, ...patch } : question
-      )),
-    }))
-  }
-
-  const handleQuestionAdd = () => {
-    setTopicDraft((prev) => ({
-      ...prev,
-      questions: [...prev.questions, { text: '', imageUrl: '', optionsText: '', answer: 0, concept: '' }],
-    }))
-  }
-
-  const handleQuestionRemove = (index: number) => {
-    setTopicDraft((prev) => ({
-      ...prev,
-      questions: prev.questions.filter((_, idx) => idx !== index),
-    }))
   }
 
   const handleApplyAnalytics = async () => {
@@ -786,8 +591,12 @@ export function AdminWorkspacePage(): JSX.Element {
 
         <div className={styles.alertRail}>
           {fatalError ? <Alert variant="error">{fatalError}</Alert> : null}
-          {panelError ? <Alert variant="warning">{panelError}</Alert> : null}
-          {success ? <Alert variant="success">{success}</Alert> : null}
+          {tab !== 'content' && (
+            <>
+              {panelError ? <Alert variant="warning">{panelError}</Alert> : null}
+              {success ? <Alert variant="success">{success}</Alert> : null}
+            </>
+          )}
         </div>
 
         {tab === 'overview' ? (
@@ -939,7 +748,19 @@ export function AdminWorkspacePage(): JSX.Element {
                         <tbody>
                           {coursePricingRows.map((row) => (
                             <tr key={row.subjectId}>
-                              <td>{row.subjectTitle}</td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                  <div style={{
+                                    width: 32, height: 32, borderRadius: 6,
+                                    backgroundColor: `${row.subjectColor || '#6366f1'}15`,
+                                    color: row.subjectColor || '#6366f1',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                  }}>
+                                    <BookOpen size={16} />
+                                  </div>
+                                  <span style={{ fontWeight: 500 }}>{row.subjectTitle}</span>
+                                </div>
+                              </td>
                               <td>
                                 <input
                                   className={styles.input}
@@ -1057,83 +878,37 @@ export function AdminWorkspacePage(): JSX.Element {
                 }}
                 onPromote={(entry) => void handleRoleChange(entry, 'admin')}
                 onDelete={(entry) => setConfirmDelete({ open: true, user: entry })}
+                onInspect={(entry) => setSelectedInspectUser(entry)}
               />
             </SectionCard>
           </div>
         ) : null}
 
+        {selectedInspectUser && (
+          <UserDetailPanel
+            user={selectedInspectUser}
+            onClose={() => setSelectedInspectUser(null)}
+            onUserUpdated={(updated) => {
+              setUsers(prev => prev.map(u => u.id === updated.id ? updated : u))
+              setSelectedInspectUser(updated)
+            }}
+          />
+        )}
+
         {tab === 'content' ? (
           <div className={styles.sectionGrid}>
-            <ExamImportReviewPanel
-              subjects={subjects.map((subject) => ({ id: subject.id, title: subject.title }))}
-              onSuccess={(message) => {
-                setPanelError(null)
-                setSuccess(message)
-              }}
-              onError={(message) => {
-                setSuccess(null)
-                setPanelError(message)
-              }}
+            <ContentBuilderShell
+              subjects={subjects}
+              currentUserId={currentUser?.id}
+              canManagePricing={isSuperAdmin}
+              pricingRows={coursePricingRows}
+              savingCourseId={savingCourseId}
+              bootstrappingDemo={bootstrappingDemo}
+              onBootstrapDemo={handleBootstrapDemo}
+              onCoursePricingChange={handleCourseDraftChange}
+              onSaveCoursePrice={handleSaveCoursePrice}
+              onSubjectsChange={(nextSubjects) => setSubjects(nextSubjects)}
             />
-            {useContentV2 ? (
-              <ContentBuilderShell
-                subjects={subjects}
-                currentUserId={currentUser?.id}
-                onSubjectsChange={(nextSubjects) => setSubjects(nextSubjects)}
-                onSuccess={(message) => {
-                  setPanelError(null)
-                  setSuccess(message)
-                }}
-                onError={(message) => {
-                  setSuccess(null)
-                  setPanelError(message)
-                }}
-              />
-            ) : (
-              <div className={styles.contentLayout}>
-                <SubjectsRail
-                  subjects={subjects}
-                  selectedSubjectId={selectedSubjectId}
-                  onSelect={setSelectedSubjectId}
-                  onCreate={handleStartNewSubject}
-                />
-
-                <SubjectEditorPanel
-                  draft={subjectDraft}
-                  saving={savingSubject}
-                  topics={subjectDraft.topics}
-                  onDraftChange={(patch) => setSubjectDraft((prev) => ({ ...prev, ...patch }))}
-                  onSaveSubject={() => void handleSaveSubject()}
-                  onDeleteSubject={() => void handleDeleteSubject()}
-                  onCreateTopic={() => {
-                    setEditingTopicId(null)
-                    setTopicDraft(emptyTopicDraft())
-                  }}
-                  onEditTopic={(topic) => {
-                    setEditingTopicId(topic.id)
-                    setTopicDraft(toTopicDraft(topic))
-                  }}
-                  onDeleteTopic={(topicId) => void handleDeleteTopic(topicId)}
-                  onReorderTopic={(topicId, direction) => void handleReorderTopic(topicId, direction)}
-                  topicEditor={(
-                    <TopicEditorPanel
-                      topicDraft={topicDraft}
-                      editingTopicId={editingTopicId}
-                      saving={savingTopic}
-                      onDraftChange={(patch) => setTopicDraft((prev) => ({ ...prev, ...patch }))}
-                      onQuestionAdd={handleQuestionAdd}
-                      onQuestionChange={handleQuestionChange}
-                      onQuestionRemove={handleQuestionRemove}
-                      onSave={() => void handleSaveTopic()}
-                      onClear={() => {
-                        setEditingTopicId(null)
-                        setTopicDraft(emptyTopicDraft())
-                      }}
-                    />
-                  )}
-                />
-              </div>
-            )}
           </div>
         ) : null}
 
@@ -1146,8 +921,8 @@ export function AdminWorkspacePage(): JSX.Element {
                 subjectId={analyticsSubjectFilter}
                 subjects={subjects.map((subject) => ({ id: subject.id, title: subject.title }))}
                 presetDays={presetDays}
-                onFromChange={(value) => setRange((prev) => ({ ...prev, from: value }))}
-                onToChange={(value) => setRange((prev) => ({ ...prev, to: value }))}
+                onFromChange={(value) => setRange((prev: { from: string; to: string }) => ({ ...prev, from: value }))}
+                onToChange={(value) => setRange((prev: { from: string; to: string }) => ({ ...prev, to: value }))}
                 onSubjectChange={setAnalyticsSubjectFilter}
                 onPresetChange={handlePresetChange}
                 onApply={() => void handleApplyAnalytics()}

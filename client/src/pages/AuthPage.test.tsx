@@ -75,13 +75,10 @@ vi.mock('../hooks', () => ({
   useLang: () => ({
     t: (key: string) => messages[key] || key,
   }),
-}))
-
-vi.mock('../app/feature-flags', () => ({
-  UI_MIGRATION_FLAGS: {
-    adminUseSharedFormPrimitives: true,
-    adminUseSharedSegmentedControls: true,
-  },
+  useTheme: () => ({
+    theme: 'light',
+    toggleTheme: vi.fn(),
+  }),
 }))
 
 const renderAuthPage = async () => {
@@ -183,13 +180,10 @@ describe('AuthPage password-first flow', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
-  it('keeps Google sign in available', async () => {
-    const popup = { closed: true, location: { hash: '' }, close: vi.fn() }
-    vi.spyOn(window, 'open').mockReturnValue(popup as any)
-
+  it('shows unavailable error when Google Identity Services is not loaded', async () => {
     await renderAuthPage()
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }))
 
-    await waitFor(() => expect(window.open).toHaveBeenCalled())
+    expect(await screen.findByText('Google unavailable')).not.toBeNull()
   })
 })

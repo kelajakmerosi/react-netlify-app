@@ -1,5 +1,4 @@
-import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, ListTree, PlusCircle, Trash2 } from 'lucide-react'
-import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
+import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, PlusCircle, Trash2 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { IconButton, Input } from '../../../components/ui'
 import { useLang } from '../../../hooks'
@@ -30,7 +29,6 @@ export default function TopicSetupStep({
   onEditTopicIndex,
 }: TopicSetupStepProps): JSX.Element {
   const { t } = useLang()
-  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
 
   const selectedTopic = editingTopicIndex != null ? draft.topics[editingTopicIndex] : null
 
@@ -116,25 +114,9 @@ export default function TopicSetupStep({
                   </span>
 
                   <div className={styles.iconActions}>
-                    {useSharedPrimitives ? (
-                      <>
-                        <IconButton icon={<ArrowUp size={14} aria-hidden="true" />} label={t('adminContentMoveUp')} onClick={() => moveTopic(index, 'up')} />
-                        <IconButton icon={<ArrowDown size={14} aria-hidden="true" />} label={t('adminContentMoveDown')} onClick={() => moveTopic(index, 'down')} />
-                        <IconButton icon={<Trash2 size={14} aria-hidden="true" />} label={t('adminContentDelete')} onClick={() => removeTopic(index)} />
-                      </>
-                    ) : (
-                      <>
-                        <button type="button" onClick={() => moveTopic(index, 'up')} aria-label={t('adminContentMoveUp')}>
-                          <ArrowUp size={14} aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={() => moveTopic(index, 'down')} aria-label={t('adminContentMoveDown')}>
-                          <ArrowDown size={14} aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={() => removeTopic(index)} aria-label={t('adminContentDelete')}>
-                          <Trash2 size={14} aria-hidden="true" />
-                        </button>
-                      </>
-                    )}
+                    <IconButton icon={<ArrowUp size={14} aria-hidden="true" />} label={t('adminContentMoveUp')} onClick={() => moveTopic(index, 'up')} />
+                    <IconButton icon={<ArrowDown size={14} aria-hidden="true" />} label={t('adminContentMoveDown')} onClick={() => moveTopic(index, 'down')} />
+                    <IconButton icon={<Trash2 size={14} aria-hidden="true" />} label={t('adminContentDelete')} onClick={() => removeTopic(index)} />
                   </div>
                 </div>
               </div>
@@ -146,10 +128,6 @@ export default function TopicSetupStep({
       <section className={styles.editorPanel}>
         <div className={styles.rowHeader}>
           <h4>{t('adminContentStep2')}</h4>
-          <span className={styles.stepHintInline}>
-            <ListTree size={14} aria-hidden="true" />
-            {t('adminContentStep2Hint')}
-          </span>
         </div>
 
         {!selectedTopic ? (
@@ -158,56 +136,31 @@ export default function TopicSetupStep({
           <div className={styles.formGrid}>
             <label className={styles.field}>
               <span>{t('adminContentTopicId')}</span>
-              {useSharedPrimitives ? (
-                <Input value={selectedTopic.id} onChange={(event) => setTopicPatch({ id: event.target.value })} />
-              ) : (
-                <input className={styles.input} value={selectedTopic.id} onChange={(event) => setTopicPatch({ id: event.target.value })} />
-              )}
+              <Input value={selectedTopic.id} onChange={(event) => setTopicPatch({ id: event.target.value })} />
             </label>
 
             <label className={styles.field}>
               <span>{t('adminContentTitle')}</span>
-              {useSharedPrimitives ? (
-                <Input value={selectedTopic.title} onChange={(event) => setTopicPatch({ title: event.target.value })} />
-              ) : (
-                <input className={styles.input} value={selectedTopic.title} onChange={(event) => setTopicPatch({ title: event.target.value })} />
-              )}
+              <Input value={selectedTopic.title} onChange={(event) => setTopicPatch({ title: event.target.value })} />
             </label>
 
             <label className={styles.field}>
               <span>{t('adminContentVideoId')}</span>
-              {useSharedPrimitives ? (
-                <Input value={selectedTopic.videoId} onChange={(event) => setTopicPatch({ videoId: event.target.value })} />
-              ) : (
-                <input className={styles.input} value={selectedTopic.videoId} onChange={(event) => setTopicPatch({ videoId: event.target.value })} />
-              )}
+              <Input value={selectedTopic.videoId} onChange={(event) => setTopicPatch({ videoId: event.target.value })} />
             </label>
 
             <label className={styles.field}>
               <span>{t('adminContentOrder')}</span>
-              {useSharedPrimitives ? (
-                <Input
-                  type="number"
-                  value={String(selectedTopic.order)}
-                  onChange={(event) => setTopicPatch({ order: Number(event.target.value) || 0 })}
-                />
-              ) : (
-                <input
-                  className={styles.input}
-                  type="number"
-                  value={selectedTopic.order}
-                  onChange={(event) => setTopicPatch({ order: Number(event.target.value) || 0 })}
-                />
-              )}
+              <Input
+                type="number"
+                value={String(selectedTopic.order)}
+                onChange={(event) => setTopicPatch({ order: Number(event.target.value) || 0 })}
+              />
             </label>
 
             <label className={styles.fieldWide}>
               <span>{t('adminContentVideoUrl')}</span>
-              {useSharedPrimitives ? (
-                <Input value={selectedTopic.videoUrl} onChange={(event) => setTopicPatch({ videoUrl: event.target.value })} />
-              ) : (
-                <input className={styles.input} value={selectedTopic.videoUrl} onChange={(event) => setTopicPatch({ videoUrl: event.target.value })} />
-              )}
+              <Input value={selectedTopic.videoUrl} onChange={(event) => setTopicPatch({ videoUrl: event.target.value })} />
             </label>
           </div>
         )}

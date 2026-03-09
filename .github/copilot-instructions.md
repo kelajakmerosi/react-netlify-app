@@ -32,6 +32,14 @@ This document provides context, patterns, and guidelines for AI agents working i
   ```
 - **Theming**: Colors and spacing are defined in `src/styles/tokens.css`. Use CSS variables (e.g., `var(--accent)`, `var(--radius-md)`) instead of hardcoded hex values.
 
+## 🧭 Brand UI Direction
+- Public-facing and first-impression surfaces such as landing, auth, onboarding, and checkout-adjacent pages should follow the **Soft Academic SaaS** visual language.
+- **Soft Academic SaaS** means calm, structured, trustworthy, and education-first. Prefer light gray-blue backgrounds, white or near-white surfaces, purple accent hierarchy, dark navy text, rounded geometry, and restrained motion.
+- Auth must feel like a quieter extension of the landing page, not a separate futuristic, neon, or overly glassy product.
+- Shared primitives like `<GlassCard>` may still be used, but composition should remain soft, grounded, and highly legible.
+- Preserve strong hierarchy, obvious next actions, and minimal visual noise.
+- Reference [docs/design-language.md](../docs/design-language.md) when designing new public-facing components.
+
 ## 🛠 Developer Workflows (CLI)
 - **Dev Server**: `npm run dev` (Vite, runs on port 5173).
 - **Build**: `npm run build` serves a production build.

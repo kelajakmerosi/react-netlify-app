@@ -1,40 +1,53 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import type { PageId } from '../../types'
+import { resolveActivePage } from '../../app/route-meta'
 import { useAuth } from '../../hooks/useAuth'
 import { useLang } from '../../hooks'
 import { cn } from '../../utils'
-import { Avatar } from '../ui/index'
 import { Button } from '../ui/Button'
 import styles from './Sidebar.module.css'
-import { LayoutDashboard, BookOpen, User, LogOut, Shield, FileCheck2, Library, ShoppingBag } from 'lucide-react'
+import {
+  BookOpen,
+  CircleDashed,
+  LayoutDashboard,
+  LogOut,
+  Sparkles,
+  SquareCheckBig,
+  Shield,
+} from 'lucide-react'
 
 interface SidebarProps {
   mobileOpen: boolean
   onClose: () => void
 }
 
-const NAV_ITEMS = [
-  { id: 'dashboard' as PageId, path: '/dashboard', icon: <LayoutDashboard size={20} /> },
-  { id: 'subjects' as PageId, path: '/subjects', icon: <BookOpen size={20} /> },
-  { id: 'exams' as PageId, path: '/exams', icon: <FileCheck2 size={20} /> },
-  { id: 'materials' as PageId, path: '/materials', icon: <ShoppingBag size={20} /> },
-  { id: 'materialLibrary' as PageId, path: '/materials/library', icon: <Library size={20} /> },
-  { id: 'profile' as PageId, path: '/profile', icon: <User size={20} /> },
-  { id: 'admin' as PageId, path: '/admin', icon: <Shield size={20} />, adminOnly: true },
+type SidebarItem = {
+  id: string
+  label: string
+  icon: ReactNode
+  path?: string
+  soon?: boolean
+  adminOnly?: boolean
+}
+
+const NAV_ITEMS: SidebarItem[] = [
+  { id: 'dashboard', label: 'dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
+  { id: 'lesson', label: 'lessons', icon: <BookOpen size={20} />, path: '/subjects' },
+  { id: 'task', label: 'exams', icon: <SquareCheckBig size={20} />, path: '/exams' },
+  { id: 'admin', label: 'admin', icon: <Shield size={19} />, path: '/admin', adminOnly: true },
 ]
 
-const resolveActivePage = (pathname: string): PageId => {
-  if (pathname.startsWith('/payments/')) return 'payment'
-  if (pathname.startsWith('/exam-attempts/')) return 'examAttempt'
-  if (pathname.startsWith('/exams/')) return 'exam'
-  if (pathname.startsWith('/exams')) return 'exams'
-  if (pathname.startsWith('/materials/')) return pathname.startsWith('/materials/library') ? 'materialLibrary' : 'materialCheckout'
-  if (pathname.startsWith('/materials')) return 'materials'
-  if (pathname.startsWith('/subjects/')) return pathname.includes('/topics/') ? 'topic' : 'subject'
-  if (pathname.startsWith('/subjects')) return 'subjects'
-  if (pathname.startsWith('/profile')) return 'profile'
-  if (pathname.startsWith('/admin')) return 'admin'
-  return 'dashboard'
+const isActiveForItem = (
+  itemId: string,
+  activePage: PageId,
+  paymentKind: string | null,
+) => {
+  if (itemId === 'dashboard') return activePage === 'dashboard'
+  if (itemId === 'lesson') return activePage === 'subjects' || activePage === 'subject' || activePage === 'topic'
+  if (itemId === 'task') return activePage === 'exams' || activePage === 'exam' || activePage === 'examAttempt' || (activePage === 'payment' && paymentKind !== 'material')
+  if (itemId === 'admin') return activePage === 'admin'
+  return false
 }
 
 export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
@@ -46,10 +59,15 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const activePage = resolveActivePage(location.pathname)
   const paymentKind = new URLSearchParams(location.search).get('kind')
 
-  const handleNav = (path: string) => {
+  const handleNav = (path?: string) => {
+    if (!path) return
     navigate(path)
     onClose()
   }
+
+  const visibleNavItems = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || user?.role === 'admin' || user?.role === 'superadmin',
+  )
 
   return (
     <>
@@ -57,71 +75,63 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
       <aside className={cn(styles.sidebar, mobileOpen && styles.mobileOpen)}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}>KM</div>
-          <span className={styles.logoText}>KelajakMerosi</span>
+          <div className={styles.logoIcon}>
+            <Sparkles size={18} />
+          </div>
+          <div className={styles.logoCopy}>
+            <span className={styles.logoText}>KelajakMerosi</span>
+          </div>
         </div>
 
-        <nav className={styles.nav}>
-          {NAV_ITEMS
-            .filter((item) => !item.adminOnly || user?.role === 'admin' || user?.role === 'superadmin')
-            .map((item) => {
-              const isActive = activePage === item.id
-                || (item.id === 'exams' && (activePage === 'exam' || activePage === 'examAttempt'))
-                || (item.id === 'materials' && (activePage === 'materialCheckout' || (activePage === 'payment' && paymentKind === 'material')))
-                || (item.id === 'exams' && activePage === 'payment' && paymentKind !== 'material')
+        <p className={styles.menuLabel}>{t('overview')}</p>
 
-              return (
-                <Button
-                  key={item.id}
-                  variant="nav"
-                  active={isActive}
-                  onClick={() => handleNav(item.path)}
-                  fullWidth
-                >
-                  <span className={styles.navIcon}>{item.icon}</span>
-                  {t(item.id as any)}
-                </Button>
-              )
-            })}
+        <nav className={styles.nav} aria-label={t('menu')}>
+          {visibleNavItems.map((item) => {
+            const active = isActiveForItem(item.id, activePage, paymentKind)
+
+            return (
+              <Button
+                key={item.id}
+                variant="nav"
+                active={active}
+                onClick={() => handleNav(item.path)}
+                disabled={item.soon}
+                className={styles.navButton}
+                fullWidth
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navText}>{t(item.label)}</span>
+                {item.soon && <span className={styles.soonBadge}>{t('soon')}</span>}
+              </Button>
+            )
+          })}
         </nav>
 
         <div className={styles.footer}>
           {user ? (
             <>
-              <div className={styles.userRow}>
-                <Avatar name={user.name} size={34} />
-                <div className={styles.userInfo}>
-                  <span className={styles.userName}>{user.name}</span>
-                  <span className={styles.userRole}>
-                    {user.role === 'superadmin' ? t('superadmin') : (user.role === 'admin' ? t('admin') : t('learner'))}
-                  </span>
-                </div>
-              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 fullWidth
                 onClick={logout}
-                style={{ marginTop: 10, justifyContent: 'center', gap: 8 }}
+                className={styles.logoutButton}
               >
-                <LogOut size={16} /> {t('logout')}
+                <LogOut size={16} />
+                {t('logout')}
               </Button>
             </>
           ) : isGuest ? (
-            <div>
-              <span className={styles.guestBadge}>
-                <User size={14} /> {t('guest')}
-              </span>
-              <Button
-                variant="primary"
-                size="sm"
-                fullWidth
-                onClick={logout}
-                style={{ marginTop: 8, justifyContent: 'center' }}
-              >
-                {t('login')}
-              </Button>
-            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              fullWidth
+              onClick={logout}
+              className={styles.logoutButton}
+            >
+              <CircleDashed size={16} />
+              {t('login')}
+            </Button>
           ) : null}
         </div>
       </aside>

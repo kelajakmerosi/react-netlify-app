@@ -4,6 +4,7 @@ import { Alert, Input, Textarea } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
 import { useLang } from '../hooks'
+import { useToast } from '../app/providers/ToastProvider'
 import { ApiError } from '../services/api'
 import examService from '../services/exam.service'
 import paymentService from '../services/payment.service'
@@ -20,8 +21,8 @@ export function PaymentGatewayPage() {
   const { paymentId } = useParams<{ paymentId: string }>()
   const [query] = useSearchParams()
   const { t, lang } = useLang()
+  const toast = useToast()
 
-  const checkoutKind = query.get('kind') === 'material' ? 'material' : 'exam'
   const resourceId = query.get('resourceId') || ''
 
   const [session, setSession] = useState<{
@@ -39,8 +40,6 @@ export function PaymentGatewayPage() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
-  const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
 
   const [payerName, setPayerName] = useState('')
   const [payerPhone, setPayerPhone] = useState('')
@@ -65,7 +64,6 @@ export function PaymentGatewayPage() {
     if (!paymentId) return
     try {
       setLoading(true)
-      setError('')
       const payload = await paymentService.getSession(paymentId)
       setSession({
         payment: payload.payment,
@@ -74,7 +72,7 @@ export function PaymentGatewayPage() {
         redirectUrl: payload.session.redirectUrl,
       })
     } catch (err) {
-      setError(resolveUiErrorMessage(err, t, 'errorPaymentSessionLoadFailed'))
+      toast.error(resolveUiErrorMessage(err, t, 'errorPaymentSessionLoadFailed'))
     } finally {
       setLoading(false)
     }
@@ -106,11 +104,6 @@ export function PaymentGatewayPage() {
   const continueAfterPaid = async () => {
     if (!session || session.payment.status !== 'paid') return
 
-    if (checkoutKind === 'material') {
-      navigate('/materials/library')
-      return
-    }
-
     if (!resourceId) {
       navigate('/exams')
       return
@@ -121,7 +114,7 @@ export function PaymentGatewayPage() {
       const started = await examService.startAttempt(resourceId)
       navigate(`/exam-attempts/${started.attempt.id}`)
     } catch (err) {
-      setError(resolveUiErrorMessage(err, t, 'errorExamStartFailed'))
+      toast.error(resolveUiErrorMessage(err, t, 'errorExamStartFailed'))
     } finally {
       setProcessing(false)
     }
@@ -131,9 +124,6 @@ export function PaymentGatewayPage() {
     if (!paymentId || !session) return
 
     setProcessing(true)
-    setError('')
-    setNotice('')
-
     try {
       const payload = await paymentService.startSession(paymentId, {
         payerName: payerName.trim(),
@@ -147,18 +137,18 @@ export function PaymentGatewayPage() {
       const nextUrl = payload.session.redirectUrl
       if (nextUrl) {
         window.open(nextUrl, '_blank', 'noopener,noreferrer')
-        setNotice(t('paymentGatewayProviderOpened'))
+        toast.info(t('paymentGatewayProviderOpened'))
       } else {
-        setNotice(t('paymentGatewayProviderRedirectMissing'))
+        toast.info(t('paymentGatewayProviderRedirectMissing'))
       }
 
       await loadSession()
     } catch (err) {
       if (err instanceof ApiError && err.code === 'FEATURE_DISABLED') {
-        setError(resolveUiErrorMessage(err, t, 'errorFeatureDisabled'))
+        toast.error(resolveUiErrorMessage(err, t, 'errorFeatureDisabled'))
         return
       }
-      setError(resolveUiErrorMessage(err, t, 'errorPaymentSessionStartFailed'))
+      toast.error(resolveUiErrorMessage(err, t, 'errorPaymentSessionStartFailed'))
     } finally {
       setProcessing(false)
     }
@@ -167,14 +157,12 @@ export function PaymentGatewayPage() {
   const handleConfirmDemo = async () => {
     if (!paymentId) return
     setProcessing(true)
-    setError('')
-    setNotice('')
     try {
       await paymentService.confirmDemo(paymentId)
-      setNotice(t('paymentGatewayDemoConfirmed'))
+      toast.info(t('paymentGatewayDemoConfirmed'))
       await loadSession()
     } catch (err) {
-      setError(resolveUiErrorMessage(err, t, 'errorPaymentConfirmFailed'))
+      toast.error(resolveUiErrorMessage(err, t, 'errorPaymentConfirmFailed'))
     } finally {
       setProcessing(false)
     }
@@ -190,8 +178,6 @@ export function PaymentGatewayPage() {
       </div>
 
       {loading ? <Alert variant="info">{t('paymentGatewayLoading')}</Alert> : null}
-      {error ? <Alert variant="error">{error}</Alert> : null}
-      {notice ? <Alert variant="info">{notice}</Alert> : null}
       {!loading && !session ? <Alert variant="warning">{t('paymentGatewayNotFound')}</Alert> : null}
 
       {session ? (
@@ -267,7 +253,7 @@ export function PaymentGatewayPage() {
                 <p className={styles.muted}>{t('paymentGatewayVerifiedHint')}</p>
                 <div className={styles.actions}>
                   <Button onClick={() => void continueAfterPaid()} disabled={processing}>
-                    {checkoutKind === 'material' ? t('paymentGatewayOpenLibrary') : t('paymentGatewayStartExamAttempt')}
+                    {t('paymentGatewayStartExamAttempt')}
                   </Button>
                 </div>
               </GlassCard>

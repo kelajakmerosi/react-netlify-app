@@ -19,6 +19,7 @@ export const AuthPayloadSchema: z.ZodTypeAny
 export const RegisterRequestSchema: z.ZodTypeAny
 export const LoginRequestSchema: z.ZodTypeAny
 export const GoogleAuthRequestSchema: z.ZodTypeAny
+export const GoogleAuthCodeRequestSchema: z.ZodTypeAny
 export const PasswordSchema: z.ZodTypeAny
 export const NameSchema: z.ZodTypeAny
 export const PhoneSchema: z.ZodTypeAny

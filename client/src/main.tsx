@@ -4,6 +4,7 @@ import App from './app/App'
 import './app/i18n'
 import './styles/globals.css'
 import './styles/tokens.css'
+import './styles/tailwind.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

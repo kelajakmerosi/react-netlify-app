@@ -1,0 +1,283 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - link " Kelajak Merosi" [ref=e5] [cursor=pointer]:
+      - /url: "#home"
+      - generic [ref=e6]: 
+      - text: Kelajak Merosi
+    - generic [ref=e7]:
+      - link "Bosh sahifa" [ref=e8] [cursor=pointer]:
+        - /url: "#home"
+      - link "Biz haqimizda" [ref=e9] [cursor=pointer]:
+        - /url: "#about"
+      - link "Yo'nalishlar" [ref=e10] [cursor=pointer]:
+        - /url: "#courses"
+      - link "Ustozlar" [ref=e11] [cursor=pointer]:
+        - /url: "#team"
+      - link "Fikrlar" [ref=e12] [cursor=pointer]:
+        - /url: "#testimonials"
+      - link "Aloqa" [ref=e13] [cursor=pointer]:
+        - /url: "#contact"
+    - button "Boshlash " [ref=e14] [cursor=pointer]:
+      - text: Boshlash
+      - generic [ref=e15]: 
+  - generic [ref=e16]:
+    - generic [ref=e17]:
+      - img "Kelajak Merosi platformasi" [ref=e18]
+      - generic [ref=e21]:
+        - heading "Tartibli ta'lim platformasi" [level=6] [ref=e22]
+        - heading "Dars, imtihon va materiallarni bitta oqimda boshqaring" [level=1] [ref=e23]
+        - paragraph [ref=e24]: "Kelajak Merosi foydalanuvchiga keyingi qadamni aniq ko'rsatadi: darsni davom ettirish, attestatsiya imtihonini topshirish va kerakli materiallarni kutubxonadan topish."
+        - generic [ref=e25]:
+          - link "Batafsil" [ref=e26] [cursor=pointer]:
+            - /url: "#about"
+          - button "Ro'yxatdan o'tish" [ref=e27] [cursor=pointer]
+    - generic:
+      - img "O'zbekcha o'quv tajribasi"
+      - generic:
+        - generic:
+          - generic:
+            - heading "O'zbekcha o'quv tajribasi" [level=6]
+            - heading "Natija ko'rinadigan o'qish tizimi" [level=1]
+            - paragraph: Dashboard, fanlar, imtihon katalogi va materiallar kutubxonasi bir xil mantiqda ishlaydi. Foydalanuvchi har sahifada yangi interfeysni o'rganishga majbur bo'lmaydi.
+            - generic:
+              - button "Ilovani ochish"
+              - link "Bo'limlarni ko'rish":
+                - /url: "#courses"
+    - button "Oldingi" [ref=e28] [cursor=pointer]:
+      - img [ref=e29]
+    - button "Keyingi" [ref=e31] [cursor=pointer]:
+      - img [ref=e32]
+  - generic [ref=e36]:
+    - button " Darslar Fanlar, mavzular va progress bilan bosqichma-bosqich o'qish jarayoni." [ref=e37] [cursor=pointer]:
+      - generic [ref=e38]: 
+      - heading "Darslar" [level=5] [ref=e39]
+      - paragraph [ref=e40]: Fanlar, mavzular va progress bilan bosqichma-bosqich o'qish jarayoni.
+    - button " Imtihonlar Attestatsiya va tayyorlov imtihonlari aniq mezonlar bilan." [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]: 
+      - heading "Imtihonlar" [level=5] [ref=e43]
+      - paragraph [ref=e44]: Attestatsiya va tayyorlov imtihonlari aniq mezonlar bilan.
+  - generic [ref=e46]:
+    - generic [ref=e47]:
+      - heading "Biz haqimizda" [level=6] [ref=e48]
+      - heading "Kelajak Merosi'ga xush kelibsiz" [level=2] [ref=e49]
+    - generic [ref=e50]:
+      - img "Kelajak Merosi haqida" [ref=e52]
+      - generic [ref=e53]:
+        - paragraph [ref=e54]: Kelajak Merosi - bu darslar, attestatsiya imtihonlari va materiallar kutubxonasini birlashtirgan tartibli o'quv platformasi. Biz dekor emas, tushunarlilik va natijaga yo'naltirilgan tajribani ustun qo'yamiz.
+        - paragraph [ref=e55]: Foydalanuvchi kirgan zahoti nimani o'qishi, nimani sotib olishi yoki qaysi imtihonni boshlashi kerakligini aniq tushunishi kerak. Shu sababli barcha sahifalar bir xil mantiqda ishlaydi.
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]: 
+            - text: Progressga asoslangan dashboard
+          - generic [ref=e59]:
+            - generic [ref=e60]: 
+            - text: Uzbek tilidagi foydalanuvchi oqimi
+          - generic [ref=e61]:
+            - generic [ref=e62]: 
+            - text: Vaqtli attestatsiya imtihonlari
+          - generic [ref=e63]:
+            - generic [ref=e64]: 
+            - text: Material pack va kutubxona
+          - generic [ref=e65]:
+            - generic [ref=e66]: 
+            - text: Qayta urinish va natija ko'rinishi
+          - generic [ref=e67]:
+            - generic [ref=e68]: 
+            - text: Bitta mahsulot, bitta mantiq
+  - generic [ref=e70]:
+    - generic [ref=e71]:
+      - heading "Yo'nalishlar" [level=6] [ref=e72]
+      - heading "Platforma bo'limlari" [level=2] [ref=e73]
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - link "Darslar Darslar Fanlar va mavzular" [ref=e77] [cursor=pointer]:
+          - /url: /subjects
+          - img "Darslar" [ref=e78]
+          - generic [ref=e79]:
+            - strong [ref=e80]: Darslar
+            - generic [ref=e81]: Fanlar va mavzular
+        - generic [ref=e82]:
+          - link "Imtihonlar Imtihonlar Attestatsiya oqimi" [ref=e83] [cursor=pointer]:
+            - /url: /exams
+            - img "Imtihonlar" [ref=e84]
+            - generic [ref=e85]:
+              - strong [ref=e86]: Imtihonlar
+              - generic [ref=e87]: Attestatsiya oqimi
+          - link "Dashboard Dashboard Davom etish va tavsiyalar" [ref=e88] [cursor=pointer]:
+            - /url: /dashboard
+            - img "Dashboard" [ref=e89]
+            - generic [ref=e90]:
+              - strong [ref=e91]: Dashboard
+              - generic [ref=e92]: Davom etish va tavsiyalar
+      - link "Ro'yxatdan o'tish Ro'yxatdan o'tish Platformaga tez kirish" [ref=e93] [cursor=pointer]:
+        - /url: /auth?mode=signup
+        - img "Ro'yxatdan o'tish" [ref=e94]
+        - generic [ref=e95]:
+          - strong [ref=e96]: Ro'yxatdan o'tish
+          - generic [ref=e97]: Platformaga tez kirish
+  - generic [ref=e99]:
+    - generic [ref=e100]:
+      - heading "Ommabop oqimlar" [level=6] [ref=e101]
+      - heading "Platformadagi asosiy foydalanuvchi yo'llari" [level=2] [ref=e102]
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - img "Dashboard'dan davom etish" [ref=e106]
+        - generic [ref=e107]:
+          - heading "Dashboard'dan davom etish" [level=4] [ref=e108]
+          - paragraph [ref=e109]: Oxirgi mavzudan davom etish va keyingi tavsiyani ko'rish
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - generic [ref=e112]: 
+            - text: Progress
+          - generic [ref=e113]:
+            - generic [ref=e114]: 
+            - text: Faoliyat
+          - link " Ochish" [ref=e115] [cursor=pointer]:
+            - generic [ref=e116]: 
+            - text: Ochish
+      - generic [ref=e117]:
+        - img "Attestatsiya imtihoni" [ref=e119]
+        - generic [ref=e120]:
+          - heading "Attestatsiya imtihoni" [level=4] [ref=e121]
+          - paragraph [ref=e122]: Savollar soni, davomiylik va o'tish foizi bir qarashda
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]: 
+            - text: Vaqtli
+          - generic [ref=e126]:
+            - generic [ref=e127]: 
+            - text: 80% me'yor
+          - link " Ko'rish" [ref=e128] [cursor=pointer]:
+            - generic [ref=e129]: 
+            - text: Ko'rish
+      - generic [ref=e130]:
+        - img "Fanlar katalogi" [ref=e132]
+        - generic [ref=e133]:
+          - heading "Fanlar katalogi" [level=4] [ref=e134]
+          - paragraph [ref=e135]: Barcha fanlar, progress va keyingi darslar bir oqimda ko'rinadi
+        - generic [ref=e136]:
+          - generic [ref=e137]:
+            - generic [ref=e138]: 
+            - text: Fanlar
+          - generic [ref=e139]:
+            - generic [ref=e140]: 
+            - text: Progress
+          - link " Ochish" [ref=e141] [cursor=pointer]:
+            - generic [ref=e142]: 
+            - text: Ochish
+  - generic [ref=e144]:
+    - generic [ref=e145]:
+      - heading "Ustozlar" [level=6] [ref=e146]
+      - heading "Ekspert mentorlar" [level=2] [ref=e147]
+    - generic [ref=e148]:
+      - generic [ref=e149]:
+        - img "Shahzod Karimov" [ref=e151]
+        - generic [ref=e152]:
+          - heading "Shahzod Karimov" [level=5] [ref=e153]
+          - text: Matematika va attestatsiya
+      - generic [ref=e154]:
+        - img "Madina Ismoilova" [ref=e156]
+        - generic [ref=e157]:
+          - heading "Madina Ismoilova" [level=5] [ref=e158]
+          - text: Dasturlash va amaliy loyiha
+      - generic [ref=e159]:
+        - img "Bekzod Yoqubov" [ref=e161]
+        - generic [ref=e162]:
+          - heading "Bekzod Yoqubov" [level=5] [ref=e163]
+          - text: Analitika va yechim tahlili
+      - generic [ref=e164]:
+        - img "Dilnoza Xasanova" [ref=e166]
+        - generic [ref=e167]:
+          - heading "Dilnoza Xasanova" [level=5] [ref=e168]
+          - text: Materiallar va metodika
+  - generic [ref=e170]:
+    - generic [ref=e171]:
+      - heading "Fikrlar" [level=6] [ref=e172]
+      - heading "O'quvchilar nima deydi?" [level=2] [ref=e173]
+    - generic [ref=e174]:
+      - generic [ref=e175]:
+        - img "Selena" [ref=e176]
+        - heading "Selena" [level=5] [ref=e177]
+        - generic [ref=e178]: Talaba
+        - paragraph [ref=e180]: Platforma menga qaysi darsdan davom etishni o'ylab o'tirmasdan darhol ish boshlash imkonini berdi.
+      - generic:
+        - img "Cris Levon"
+        - heading "Cris Levon" [level=5]
+        - generic: Talaba
+        - generic:
+          - paragraph: Imtihon sahifalarida ortiqcha bezak yo'q. Savollar soni, vaqt va keyingi harakat darhol tushunarli.
+      - generic:
+        - img "Magnus Carlson"
+        - heading "Magnus Carlson" [level=5]
+        - generic: Talaba
+        - generic:
+          - paragraph: Materiallar kutubxonasida pack va fayllar ajratilgani sabab kerakli resursni tez topaman.
+      - generic:
+        - img "Nyra Carl"
+        - heading "Nyra Carl" [level=5]
+        - generic: Talaba
+        - generic:
+          - paragraph: Bitta tizim ichida dars, imtihon va materiallar ishlagani uchun mahsulot ishonchli ko'rinadi.
+      - generic [ref=e181]:
+        - button "1-fikr" [ref=e182] [cursor=pointer]
+        - button "2-fikr" [ref=e183] [cursor=pointer]
+        - button "3-fikr" [ref=e184] [cursor=pointer]
+        - button "4-fikr" [ref=e185] [cursor=pointer]
+  - contentinfo [ref=e186]:
+    - generic [ref=e188]:
+      - generic [ref=e189]:
+        - heading "Tezkor havolalar" [level=4] [ref=e190]
+        - link "Biz haqimizda" [ref=e191] [cursor=pointer]:
+          - /url: "#about"
+        - link "Yo'nalishlar" [ref=e192] [cursor=pointer]:
+          - /url: "#courses"
+        - link "Ro'yxatdan o'tish" [ref=e193] [cursor=pointer]
+        - link "Dashboard" [ref=e194] [cursor=pointer]
+        - link "Imtihonlar" [ref=e195] [cursor=pointer]
+      - generic [ref=e196]:
+        - heading "Aloqa" [level=4] [ref=e197]
+        - paragraph [ref=e198]:
+          - generic [ref=e199]: 
+          - text: Toshkent, O'zbekiston
+        - paragraph [ref=e200]:
+          - generic [ref=e201]: 
+          - text: +998 90 000 00 00
+        - paragraph [ref=e202]:
+          - generic [ref=e203]: 
+          - text: support@kelajakmerosi.uz
+        - generic [ref=e204]:
+          - link "Telegram" [ref=e205] [cursor=pointer]:
+            - /url: "#home"
+            - generic [ref=e206]: 
+          - link "Instagram" [ref=e207] [cursor=pointer]:
+            - /url: "#home"
+            - generic [ref=e208]: 
+          - link "YouTube" [ref=e209] [cursor=pointer]:
+            - /url: "#home"
+            - generic [ref=e210]: 
+          - link "LinkedIn" [ref=e211] [cursor=pointer]:
+            - /url: "#home"
+            - generic [ref=e212]: 
+      - generic [ref=e213]:
+        - heading "Galereya" [level=4] [ref=e214]
+        - generic [ref=e215]:
+          - img "Galereya" [ref=e216]
+          - img "Galereya" [ref=e217]
+          - img "Galereya" [ref=e218]
+          - img "Galereya" [ref=e219]
+          - img "Galereya" [ref=e220]
+          - img "Galereya" [ref=e221]
+      - generic [ref=e222]:
+        - heading "Yangiliklar" [level=4] [ref=e223]
+        - paragraph [ref=e224]: Yangi imtihonlar, material packlar va platforma yangilanishlari haqida xabardor bo'ling.
+    - generic [ref=e226]:
+      - generic [ref=e227]: © Kelajak Merosi, barcha huquqlar himoyalangan.
+      - generic [ref=e228]:
+        - link "Bosh sahifa" [ref=e229] [cursor=pointer]:
+          - /url: "#home"
+        - link "Biz haqimizda" [ref=e230] [cursor=pointer]:
+          - /url: "#about"
+        - link "Fikrlar" [ref=e231] [cursor=pointer]:
+          - /url: "#testimonials"
+        - link "Aloqa" [ref=e232] [cursor=pointer]:
+          - /url: "#contact"

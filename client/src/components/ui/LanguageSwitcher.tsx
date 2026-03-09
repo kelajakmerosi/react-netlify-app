@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useLang }   from '../../hooks'
+import { useLang } from '../../hooks'
 import type { LocaleKey } from '../../types'
-import { Button }    from './Button'
+import { Button } from './Button'
 import { Globe, ChevronDown } from 'lucide-react'
 import { SUPPORTED_LOCALES } from '../../app/i18n'
 
@@ -16,7 +16,7 @@ export function LanguageSwitcher() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div style={{ position:'relative' }}>
+    <div style={{ position: 'relative' }}>
       <Button variant="ghost" size="sm" onClick={() => setOpen(o => !o)}
         style={{ gap: 6, fontWeight: 600, fontSize: 12, letterSpacing: '0.06em' }}>
         <Globe size={15} />
@@ -26,23 +26,23 @@ export function LanguageSwitcher() {
 
       {open && (
         <div style={{
-          position:'absolute', right:0, top:'calc(100% + 8px)',
-          background:'var(--glass)', backdropFilter:'blur(20px)',
-          border:'1px solid var(--glass-border)', borderRadius:'var(--radius-md)',
-          boxShadow:'var(--shadow-md)', minWidth:110, padding:6, zIndex:200,
+          position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+          background: 'var(--surface)',
+          border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)', minWidth: 110, padding: 6, zIndex: 200,
         }}>
           {SUPPORTED_LOCALES.map(l => (
             <button key={l}
               onClick={() => { changeLang(l); setOpen(false) }}
               style={{
-                display:'flex', alignItems:'center', gap: 8,
-                padding:'8px 12px', width:'100%', border:'none', cursor:'pointer',
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 12px', width: '100%', border: 'none', cursor: 'pointer',
                 background: l === lang ? 'var(--accent-light)' : 'transparent',
                 color: l === lang ? 'var(--accent)' : 'var(--text-2)',
-                borderRadius:'var(--radius-sm)', fontFamily:'var(--font-main)',
+                borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-main)',
                 fontSize: 13, fontWeight: l === lang ? 700 : 400,
                 letterSpacing: '0.06em',
-                transition:'all var(--transition)',
+                transition: 'all var(--transition)',
               }}
             >
               {LOCALE_LABELS[l]}

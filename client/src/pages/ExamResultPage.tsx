@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Alert } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
@@ -25,9 +25,12 @@ interface ResultPayload {
   review: ReviewRow[]
 }
 
-export function ExamResultPage() {
+interface ExamResultPageProps {
+  attemptId: string
+}
+
+export function ExamResultPage({ attemptId }: ExamResultPageProps) {
   const navigate = useNavigate()
-  const { attemptId } = useParams<{ attemptId: string }>()
   const { t } = useLang()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -53,8 +56,6 @@ export function ExamResultPage() {
     void load()
     return () => { mounted = false }
   }, [attemptId, t])
-
-  if (!attemptId) return <div className="page-content"><Alert variant="error">{t('examResultInvalidAttemptId')}</Alert></div>
 
   return (
     <div className="page-content fade-in">

@@ -27,7 +27,7 @@
   padding: 0 14px;
   background: var(--bg-2);
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-main);
   font-size: 14px;
   color: var(--text);
@@ -41,7 +41,7 @@
   padding: 10px 12px;
   background: var(--bg-2);
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-main);
   font-size: 14px;
   color: var(--text);

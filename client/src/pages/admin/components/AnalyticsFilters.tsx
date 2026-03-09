@@ -1,5 +1,4 @@
 import { Button } from '../../../components/ui/Button'
-import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Input, Select } from '../../../components/ui'
 import styles from '../AdminWorkspace.module.css'
 
@@ -42,44 +41,25 @@ export function AnalyticsFilters({
   loading = false,
   labels,
 }: AnalyticsFiltersProps): JSX.Element {
-  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
-
   return (
     <div className={styles.analyticsFilterRail}>
       <div className={styles.analyticsFilterFields}>
         <label className={styles.field}>
           <span>{labels.from}</span>
-          {useSharedPrimitives ? (
-            <Input type="date" value={from} onChange={(event) => onFromChange(event.target.value)} />
-          ) : (
-            <input className={styles.input} type="date" value={from} onChange={(event) => onFromChange(event.target.value)} />
-          )}
+          <Input type="date" value={from} onChange={(event) => onFromChange(event.target.value)} />
         </label>
         <label className={styles.field}>
           <span>{labels.to}</span>
-          {useSharedPrimitives ? (
-            <Input type="date" value={to} onChange={(event) => onToChange(event.target.value)} />
-          ) : (
-            <input className={styles.input} type="date" value={to} onChange={(event) => onToChange(event.target.value)} />
-          )}
+          <Input type="date" value={to} onChange={(event) => onToChange(event.target.value)} />
         </label>
         <label className={styles.field}>
           <span>{labels.subject}</span>
-          {useSharedPrimitives ? (
-            <Select value={subjectId} onChange={(event) => onSubjectChange(event.target.value)}>
-              <option value="">{labels.allSubjects}</option>
-              {subjects.map((subject) => (
-                <option key={subject.id} value={subject.id}>{subject.title}</option>
-              ))}
-            </Select>
-          ) : (
-            <select className={styles.input} value={subjectId} onChange={(event) => onSubjectChange(event.target.value)}>
-              <option value="">{labels.allSubjects}</option>
-              {subjects.map((subject) => (
-                <option key={subject.id} value={subject.id}>{subject.title}</option>
-              ))}
-            </select>
-          )}
+          <Select value={subjectId} onChange={(event) => onSubjectChange(event.target.value)}>
+            <option value="">{labels.allSubjects}</option>
+            {subjects.map((subject) => (
+              <option key={subject.id} value={subject.id}>{subject.title}</option>
+            ))}
+          </Select>
         </label>
       </div>
 

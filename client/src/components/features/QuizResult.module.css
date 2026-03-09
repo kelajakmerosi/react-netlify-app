@@ -1,171 +1,228 @@
-.scoreCard {
-  text-align: center;
-  max-width: 760px;
+/* ── Result container ── */
+.resultContainer {
+  max-width: 680px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.circle {
-  width: 152px;
-  height: 152px;
+/* ── Hero banner ── */
+.heroBanner {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 28px 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+}
+
+.heroRing {
+  flex-shrink: 0;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px;
   position: relative;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
-  background: conic-gradient(var(--accent) var(--score-angle, 0deg), color-mix(in srgb, var(--bg-3) 80%, transparent) 0deg);
+  background: conic-gradient(
+    var(--ring-color, var(--accent)) var(--score-angle, 0deg),
+    color-mix(in srgb, var(--surface-border) 60%, transparent) 0deg
+  );
 }
 
-.circleInner {
+.heroRingInner {
   position: absolute;
-  inset: 11px;
+  inset: 8px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--bg-2) 95%, transparent);
-  border: 1px solid color-mix(in srgb, var(--surface-border) 75%, transparent);
+  background: var(--bg-2);
 }
 
-.pctText {
-  font-size: 36px;
-  font-weight: 700;
+.heroPct {
+  font-size: 28px;
+  font-weight: 800;
   color: var(--text);
   line-height: 1;
-  margin-bottom: 4px;
   font-family: var(--font-display);
 }
 
-.fraction {
-  font-size: 13px;
+.heroFraction {
+  font-size: 12px;
   color: var(--text-3);
   font-weight: 600;
   font-family: var(--font-mono);
+  margin-top: 2px;
 }
 
-.resultIcon {
+.heroContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.heroLabel {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.heroSub {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.5;
   margin-bottom: 14px;
 }
 
-.resultMessage {
-  font-size: clamp(24px, 3vw, 30px);
-  font-weight: 700;
-  margin-bottom: 18px;
-  letter-spacing: -0.02em;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.stat {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-md);
-  padding: 12px 10px;
-  background: color-mix(in srgb, var(--bg-2) 82%, transparent);
-}
-
-.statVal {
-  display: block;
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 4px;
-  line-height: 1;
-  font-family: var(--font-display);
-}
-
-.statLabel {
-  font-size: 10px;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-}
-
-.alert {
-  margin-bottom: 16px;
-}
-
-.primaryAction {
+.heroStats {
   display: flex;
-  justify-content: center;
+  gap: 16px;
 }
 
-.attemptList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.attemptRow {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
+.heroStatChip {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
   border: 1px solid var(--surface-border);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--bg-2) 82%, transparent);
+  background: var(--bg-3);
+  color: var(--text-2);
 }
 
-.attemptLabel {
+.heroStatChip svg {
+  flex-shrink: 0;
+}
+
+.chipCorrect {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  background: color-mix(in srgb, var(--success) 6%, transparent);
+}
+
+.chipWrong {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+  background: color-mix(in srgb, var(--danger) 6%, transparent);
+}
+
+.chipAttempts {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* ── Actions bar ── */
+.actionsBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.actionsBar .alertInline {
+  flex: 1;
+  margin: 0;
+}
+
+/* ── Section header ── */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--surface-border);
+  margin-bottom: 12px;
+}
+
+/* ── Attempt history - compact table ── */
+.attemptTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.attemptTable th {
+  text-align: left;
   font-size: 11px;
   font-weight: 700;
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--surface-border);
 }
 
-.attemptScore {
-  font-size: 13px;
+.attemptTable td {
+  padding: 8px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--surface-border) 50%, transparent);
+  color: var(--text-2);
+}
+
+.attemptTable tr:last-child td {
+  border-bottom: none;
+}
+
+.attemptScoreCell {
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--text);
 }
 
-.attemptTime {
-  justify-self: end;
-  font-size: 12px;
-  color: var(--text-3);
+/* ── Study next - compact chips ── */
+.studyChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.reviewTitle {
-  display: flex;
+.studyChip {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  margin-bottom: 14px;
-  letter-spacing: -0.01em;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 13px;
+  color: var(--text-2);
+  background: var(--bg-3);
+  border: 1px solid var(--surface-border);
 }
 
-.studyList {
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--text-2);
-  font-size: 14px;
-  line-height: 1.55;
+/* ── Question review ── */
+.reviewSection {
+  padding: 20px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
 }
 
 .reviewList {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .reviewItem {
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--surface-border);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--bg-2) 86%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
 }
 
 .reviewQ {
@@ -173,54 +230,101 @@
   font-size: 14px;
   margin-bottom: 10px;
   line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.reviewQ svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .reviewOpts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 .reviewOpt {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--bg-2) 88%, transparent);
+  background: var(--bg-2);
   color: var(--text-2);
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .correct {
-  border-color: color-mix(in srgb, var(--success) 52%, transparent) !important;
-  background: color-mix(in srgb, var(--success) 16%, transparent) !important;
+  border-color: color-mix(in srgb, var(--success) 50%, transparent) !important;
+  background: color-mix(in srgb, var(--success) 10%, transparent) !important;
   color: var(--success) !important;
+  font-weight: 600;
 }
 
 .wrong {
-  border-color: color-mix(in srgb, var(--danger) 52%, transparent) !important;
-  background: color-mix(in srgb, var(--danger) 16%, transparent) !important;
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent) !important;
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
   color: var(--danger) !important;
+  font-weight: 600;
 }
 
 .explanation {
-  margin-top: 10px;
-  color: var(--text-2);
-  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-3);
   line-height: 1.6;
+  border-left: 2px solid color-mix(in srgb, var(--warning) 50%, transparent);
+  background: color-mix(in srgb, var(--warning) 4%, transparent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-@media (max-width: 768px) {
-  .stats {
+/* ── Footer feedback ── */
+.footerFeedback {
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.feedbackPositive {
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+.feedbackNegative {
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .heroBanner {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .heroStats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .heroLabel {
+    justify-content: center;
+  }
+
+  .reviewOpts {
     grid-template-columns: 1fr;
   }
 
-  .attemptRow {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  .attemptTime {
-    justify-self: start;
+  .actionsBar {
+    flex-direction: column;
   }
 }

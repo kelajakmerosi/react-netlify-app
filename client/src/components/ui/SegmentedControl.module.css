@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: stretch;
   border: 1px solid var(--surface-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   padding: 4px;
   gap: 4px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -36,7 +36,7 @@
 .itemActive {
   color: #fff;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 6px 14px rgba(29, 111, 201, 0.22);
+  box-shadow: var(--shadow-sm);
 }
 
 .itemActive:hover:not(:disabled),

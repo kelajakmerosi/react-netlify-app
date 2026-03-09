@@ -8,93 +8,83 @@ export type QuizDifficulty = 'easy' | 'medium' | 'hard'
 export type ModuleTrack = 'foundation' | 'practice'
 
 export interface Question {
-  id:      number
-  text:    string
+  id: number
+  text: string
   imageUrl?: string
   options: string[]
-  answer:  number          // index of correct option
+  answer: number          // index of correct option
   difficulty?: QuizDifficulty
   explanation?: string
   concept?: string
 }
 
 export interface Topic {
-  id:        string
-  title?:    string
-  videoId:   string        // YouTube video ID
+  id: string
+  title?: string
+  videoId: string        // YouTube video ID
   videoUrl?: string
   questions: Question[]
   estimatedMinutes?: number
 }
 
 export interface SubjectModule {
-  id:      string
-  track:   ModuleTrack
+  id: string
+  track: ModuleTrack
   topicIds: string[]
 }
 
 export interface Subject {
-  id:       string
-  title?:   string
+  id: string
+  title?: string
   description?: string
   iconName?: string
-  icon:     ReactNode
-  color:    string
+  icon: ReactNode
+  color: string
   gradient: string
-  topics:   Topic[]
-  modules:  SubjectModule[]
+  topics: Topic[]
+  modules: SubjectModule[]
 }
 
 // ─── Auth types ───────────────────────────────────────────
 
-export interface User {
-  id:    string
-  name:  string
-  firstName?: string | null
-  lastName?: string | null
-  email?: string | null
-  phone?: string | null
+import type { PublicUser } from '@shared/contracts'
+
+export interface User extends Omit<PublicUser, 'createdAt'> {
   phoneVerified?: boolean
-  role?: 'student' | 'admin' | 'superadmin'
-  capabilities?: {
-    canTeach?: boolean
-    canBuy?: boolean
-    canLearn?: boolean
-  }
   passwordSetAt?: string | null
   token: string            // JWT-ready
 }
 
 export interface AuthState {
-  user:    User | null
+  user: User | null
   isGuest: boolean
 }
 
 // ─── Progress & history types ─────────────────────────────
 
 export interface TopicProgressData {
-  status?:        TopicStatus
-  videoWatched?:  boolean
-  quizScore?:     number
-  quizTotalQuestions?: number
-  quizAnswers?:   Record<number, number>
+  status?: TopicStatus
+  videoWatched?: boolean
+  quizScore?: number | null
+  quizTotalQuestions?: number | null
+  quizAnswers?: Record<number, number>
   quizSubmitted?: boolean
-  masteryScore?:  number
-  quizAttempts?:  number
+  masteryScore?: number | null
+  quizAttempts?: number
   quizAttemptHistory?: QuizAttemptEntry[]
   timeOnTaskSec?: number
-  lastActivityAt?: number
-  completedAt?:   number | null
+  lastActivityAt?: number | null
+  completedAt?: number | null
   resumeQuestionIndex?: number
 }
 
 export type TopicProgressMap = Record<string, TopicProgressData>
 
 export interface LessonHistoryEntry {
-  subjectId:  string
-  topicId:    string
-  quizScore?: number
-  timestamp:  number
+  subjectId: string
+  topicId: string
+  quizScore?: number | null
+  timestamp: number
 }
 
 export interface QuizAttemptEntry {
@@ -107,35 +97,35 @@ export interface QuizAttemptEntry {
 
 export interface ResumeTarget {
   subjectId: string
-  topicId:   string
-  reason:    'resume' | 'weak' | 'next'
+  topicId: string
+  reason: 'resume' | 'weak' | 'next'
 }
 
 export interface WeakTopicInsight {
-  subjectId:  string
-  topicId:    string
-  score:      number
-  attempts:   number
-  updatedAt:  number
+  subjectId: string
+  topicId: string
+  score: number
+  attempts: number
+  updatedAt: number
 }
 
 export interface DueTodayItem {
   subjectId: string
-  topicId:   string
-  reason:    'inprogress' | 'weak' | 'planned'
+  topicId: string
+  reason: 'inprogress' | 'weak' | 'planned'
 }
 
 export interface LearningSummary {
-  totalTopics:       number
-  completedTopics:   number
-  completionPct:     number
-  streakDays:        number
-  timeOnTaskSec:     number
-  lastActivityAt:    number | null
-  resumeTarget:      ResumeTarget | null
-  dueToday:          DueTodayItem[]
-  weakTopics:        WeakTopicInsight[]
-  recommendedNext:   ResumeTarget | null
+  totalTopics: number
+  completedTopics: number
+  completionPct: number
+  streakDays: number
+  timeOnTaskSec: number
+  lastActivityAt: number | null
+  resumeTarget: ResumeTarget | null
+  dueToday: DueTodayItem[]
+  weakTopics: WeakTopicInsight[]
+  recommendedNext: ResumeTarget | null
 }
 
 export interface ProgressMetrics {
@@ -147,14 +137,14 @@ export interface ProgressMetrics {
 // ─── Context types ────────────────────────────────────────
 
 export interface ThemeContextValue {
-  theme:       'light' | 'dark'
+  theme: 'light' | 'dark'
   toggleTheme: () => void
 }
 
 export interface LanguageContextValue {
-  lang:       LocaleKey
+  lang: LocaleKey
   changeLang: (l: LocaleKey) => void
-  t:          (key: string) => string
+  t: (key: string) => string
 }
 
 export interface AuthContextValue extends AuthState {
@@ -173,24 +163,25 @@ export interface AuthContextValue extends AuthState {
   passwordResetConfirmCode: (payload: { phone: string; code: string }) => Promise<{ resetToken: string; resetTokenTtlSec: number }>
   passwordResetComplete: (payload: { phone: string; resetToken: string; newPassword: string }) => Promise<void>
   passwordSetupComplete: (newPassword: string) => Promise<User>
-  loginWithGoogle:   (idToken: string) => Promise<User>
-  logout:            () => void
-  continueAsGuest:   () => void
+  loginWithGoogle: (idToken: string) => Promise<User>
+  loginWithGoogleCode: (code: string, redirectUri: string) => Promise<User>
+  logout: () => void
+  continueAsGuest: () => void
 }
 
 export interface AppContextValue {
-  topicProgress:      TopicProgressMap
-  lessonHistory:      LessonHistoryEntry[]
-  learningSummary:    LearningSummary
-  progressMetrics:    ProgressMetrics
-  isHydrating:        boolean
-  loadError:          string | null
-  updateTopicProgress:(subjectId: string, topicId: string, data: Partial<TopicProgressData>) => void
-  addLessonHistory:   (entry: Omit<LessonHistoryEntry, 'timestamp'>) => void
-  recordTimeOnTask:   (subjectId: string, topicId: string, sec: number) => void
-  retryLoad:          () => void
-  getTopicStatus:     (subjectId: string, topicId: string) => TopicStatus
-  getTopicData:       (subjectId: string, topicId: string) => TopicProgressData
+  topicProgress: TopicProgressMap
+  lessonHistory: LessonHistoryEntry[]
+  learningSummary: LearningSummary
+  progressMetrics: ProgressMetrics
+  isHydrating: boolean
+  loadError: string | null
+  updateTopicProgress: (subjectId: string, topicId: string, data: Partial<TopicProgressData>) => void
+  addLessonHistory: (entry: Omit<LessonHistoryEntry, 'timestamp'>) => void
+  recordTimeOnTask: (subjectId: string, topicId: string, sec: number) => void
+  retryLoad: () => void
+  getTopicStatus: (subjectId: string, topicId: string) => TopicStatus
+  getTopicData: (subjectId: string, topicId: string) => TopicProgressData
 }
 
 // ─── Page / routing types ─────────────────────────────────
@@ -206,11 +197,8 @@ export type PageId =
   | 'exam'
   | 'examAttempt'
   | 'payment'
-  | 'materials'
-  | 'materialCheckout'
-  | 'materialLibrary'
 
 export interface CurrentTopic {
   subjectId: string
-  topicId:   string
+  topicId: string
 }

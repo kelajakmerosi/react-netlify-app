@@ -160,6 +160,12 @@ export function QuizPanel({ topic, subjectId, videoWatched }: QuizPanelProps) {
 
       <h3 className={styles.question}>{currentQ.text}</h3>
 
+      {currentQ.imageUrl ? (
+        <div className={styles.questionMedia}>
+          <img src={currentQ.imageUrl} alt={currentQ.concept ?? currentQ.text} className={styles.questionImage} />
+        </div>
+      ) : null}
+
       <div className={styles.metaLine}>
         <span>{t('difficulty')}: <strong>{currentQ.difficulty ?? 'easy'}</strong></span>
       </div>

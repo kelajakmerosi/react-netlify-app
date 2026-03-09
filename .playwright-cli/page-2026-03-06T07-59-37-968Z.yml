@@ -1,0 +1,37 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - text: KelajakMerosi
+    - paragraph [ref=e6]: Education platform in Uzbek
+  - generic [ref=e7]:
+    - tablist "Authentication mode" [ref=e8]:
+      - tab "Login" [ref=e10] [cursor=pointer]
+      - tab "Register" [selected] [ref=e11] [cursor=pointer]
+    - paragraph [ref=e12]: Enter first name, last name, phone and password. OTP confirmation opens in a modal.
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: First Name
+        - textbox "First Name" [ref=e16]
+      - generic [ref=e17]:
+        - generic [ref=e18]: Last Name
+        - textbox "Last Name" [ref=e19]
+    - generic [ref=e20]:
+      - generic [ref=e21]: +998XXXXXXXXX
+      - textbox "+998XXXXXXXXX" [ref=e22]
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]: Password
+        - textbox "Password" [ref=e26]
+      - button "Show password" [ref=e27] [cursor=pointer]:
+        - img [ref=e28]
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - generic [ref=e33]: Confirm Password
+        - textbox "Confirm Password" [ref=e34]
+      - button "Show password" [ref=e35] [cursor=pointer]:
+        - img [ref=e36]
+    - button "Continue" [ref=e39] [cursor=pointer]
+    - generic [ref=e42]: or
+    - button "Continue with Google" [ref=e45] [cursor=pointer]:
+      - img [ref=e46]
+      - text: Continue with Google
+    - button "Continue as Guest" [ref=e52] [cursor=pointer]

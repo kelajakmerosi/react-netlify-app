@@ -70,6 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return u
   }, [])
 
+  const loginWithGoogleCode = useCallback(async (code: string, redirectUri: string): Promise<User> => {
+    const u = await authService.loginWithGoogleCode(code, redirectUri)
+    setUser(u)
+    setIsGuest(false)
+    return u
+  }, [])
+
   const logout = useCallback(() => {
     authService.logout()
     setUser(null)
@@ -108,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         passwordResetComplete,
         passwordSetupComplete,
         loginWithGoogle,
+        loginWithGoogleCode,
         logout,
         continueAsGuest,
       }}

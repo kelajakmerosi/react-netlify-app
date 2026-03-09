@@ -1,71 +1,17 @@
 import { z } from 'zod'
 import type { User } from '../types'
 import api, { ApiError } from './api'
+import {
+  AuthPayloadSchema,
+  OtpRequestCodeResponseSchema,
+  PasswordResetConfirmCodeResponseSchema,
+  SignupConfirmSchema,
+  LoginWithPasswordSchema,
+  LegacyLoginOtpConfirmSchema,
+  PasswordResetCompleteSchema,
+} from '@shared/contracts'
 
 const STORAGE_KEY = 'auth_user'
-
-const UserSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  firstName: z.string().nullable().optional(),
-  lastName: z.string().nullable().optional(),
-  email: z.string().email().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  phoneVerified: z.boolean().optional(),
-  role: z.enum(['student', 'admin', 'superadmin']).optional(),
-  capabilities: z.object({
-    canTeach: z.boolean().optional(),
-    canBuy: z.boolean().optional(),
-    canLearn: z.boolean().optional(),
-  }).optional(),
-  passwordSetAt: z.string().nullable().optional(),
-})
-
-const AuthResponseSchema = z.object({
-  token: z.string(),
-  user: UserSchema,
-  requiresPasswordSetup: z.boolean().optional(),
-})
-
-const OtpRequestResponseSchema = z.object({
-  sent: z.boolean(),
-  phone: z.string(),
-  ttlSec: z.number().int().positive(),
-  resendCooldownSec: z.number().int().positive(),
-})
-
-const PasswordResetConfirmResponseSchema = z.object({
-  verified: z.boolean(),
-  resetToken: z.string().min(1),
-  resetTokenTtlSec: z.number().int().positive(),
-})
-
-const PhoneSchema = z.string().regex(/^\+998\d{9}$/)
-const CodeSchema = z.string().regex(/^\d{6}$/)
-
-const SignupConfirmRequestSchema = z.object({
-  firstName: z.string().trim().min(1).max(80),
-  lastName: z.string().trim().min(1).max(80),
-  phone: PhoneSchema,
-  password: z.string().min(8).max(128),
-  code: CodeSchema,
-})
-
-const LoginWithPasswordRequestSchema = z.object({
-  phone: PhoneSchema,
-  password: z.string().min(1).max(128),
-})
-
-const LegacyLoginOtpConfirmRequestSchema = z.object({
-  phone: PhoneSchema,
-  code: CodeSchema,
-})
-
-const PasswordResetCompleteRequestSchema = z.object({
-  phone: PhoneSchema,
-  resetToken: z.string().min(1),
-  newPassword: z.string().min(8).max(128),
-})
 
 export const tokenStore = {
   get: () => localStorage.getItem('access_token'),
@@ -73,7 +19,7 @@ export const tokenStore = {
   clear: () => localStorage.removeItem('access_token'),
 }
 
-const persistUser = (payload: z.infer<typeof AuthResponseSchema>): User => {
+const persistUser = (payload: z.infer<typeof AuthPayloadSchema>): User => {
   const user: User = {
     id: payload.user.id,
     name: payload.user.name,
@@ -81,10 +27,10 @@ const persistUser = (payload: z.infer<typeof AuthResponseSchema>): User => {
     lastName: payload.user.lastName ?? null,
     email: payload.user.email ?? null,
     phone: payload.user.phone ?? null,
-    phoneVerified: payload.user.phoneVerified ?? false,
+    phoneVerified: false, // The public user schema doesn't have phoneVerified. Let's provide a default.
     role: payload.user.role,
     capabilities: payload.user.capabilities,
-    passwordSetAt: payload.user.passwordSetAt ?? null,
+    passwordSetAt: null, // Default
     token: payload.token,
   }
 
@@ -103,7 +49,7 @@ const requireToken = () => {
 
 export const authService = {
   signupRequestCode: async (phone: string): Promise<void> => {
-    await api.post('/auth/signup/request-code', { phone }, undefined, OtpRequestResponseSchema)
+    await api.post('/auth/signup/request-code', { phone }, undefined, OtpRequestCodeResponseSchema)
   },
 
   signupConfirm: async (payload: {
@@ -113,40 +59,40 @@ export const authService = {
     password: string
     code: string
   }): Promise<User> => {
-    const body = SignupConfirmRequestSchema.parse(payload)
-    const res = await api.post('/auth/signup/confirm', body, undefined, AuthResponseSchema)
+    const body = SignupConfirmSchema.parse(payload)
+    const res = await api.post('/auth/signup/confirm', body, undefined, AuthPayloadSchema)
     return persistUser(res)
   },
 
   loginWithPassword: async (payload: { phone: string; password: string }): Promise<User> => {
-    const body = LoginWithPasswordRequestSchema.parse(payload)
-    const res = await api.post('/auth/login/password', body, undefined, AuthResponseSchema)
+    const body = LoginWithPasswordSchema.parse(payload)
+    const res = await api.post('/auth/login/password', body, undefined, AuthPayloadSchema)
     return persistUser(res)
   },
 
   legacyLoginOtpRequestCode: async (phone: string): Promise<void> => {
-    await api.post('/auth/login/otp/request-code', { phone }, undefined, OtpRequestResponseSchema)
+    await api.post('/auth/login/otp/request-code', { phone }, undefined, OtpRequestCodeResponseSchema)
   },
 
   legacyLoginOtpConfirm: async (payload: { phone: string; code: string }): Promise<{ user: User; requiresPasswordSetup: boolean }> => {
-    const body = LegacyLoginOtpConfirmRequestSchema.parse(payload)
-    const res = await api.post('/auth/login/otp/confirm', body, undefined, AuthResponseSchema)
+    const body = LegacyLoginOtpConfirmSchema.parse(payload)
+    const res = await api.post('/auth/login/otp/confirm', body, undefined, AuthPayloadSchema)
     const user = persistUser(res)
     return { user, requiresPasswordSetup: Boolean(res.requiresPasswordSetup) }
   },
 
   passwordResetRequestCode: async (phone: string): Promise<void> => {
-    await api.post('/auth/password/reset/request-code', { phone }, undefined, OtpRequestResponseSchema)
+    await api.post('/auth/password/reset/request-code', { phone }, undefined, OtpRequestCodeResponseSchema)
   },
 
   passwordResetConfirmCode: async (payload: { phone: string; code: string }): Promise<{ resetToken: string; resetTokenTtlSec: number }> => {
-    const body = LegacyLoginOtpConfirmRequestSchema.parse(payload)
-    const res = await api.post('/auth/password/reset/confirm-code', body, undefined, PasswordResetConfirmResponseSchema)
+    const body = LegacyLoginOtpConfirmSchema.parse(payload)
+    const res = await api.post('/auth/password/reset/confirm-code', body, undefined, PasswordResetConfirmCodeResponseSchema)
     return { resetToken: res.resetToken, resetTokenTtlSec: res.resetTokenTtlSec }
   },
 
   passwordResetComplete: async (payload: { phone: string; resetToken: string; newPassword: string }): Promise<void> => {
-    const body = PasswordResetCompleteRequestSchema.parse(payload)
+    const body = PasswordResetCompleteSchema.parse(payload)
     await api.post('/auth/password/reset/complete', body, undefined, z.object({ reset: z.boolean() }))
   },
 
@@ -156,13 +102,18 @@ export const authService = {
       '/auth/password/setup/complete',
       { newPassword },
       token,
-      AuthResponseSchema,
+      AuthPayloadSchema,
     )
     return persistUser(res)
   },
 
   loginWithGoogle: async (idToken: string): Promise<User> => {
-    const res = await api.post('/auth/google', { idToken }, undefined, AuthResponseSchema)
+    const res = await api.post('/auth/google', { idToken }, undefined, AuthPayloadSchema)
+    return persistUser(res)
+  },
+
+  loginWithGoogleCode: async (code: string, redirectUri: string): Promise<User> => {
+    const res = await api.post('/auth/google/code', { code, redirectUri }, undefined, AuthPayloadSchema)
     return persistUser(res)
   },
 

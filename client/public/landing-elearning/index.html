@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kelajak Merosi</title>
+    <meta
+      name="description"
+      content="Kelajak Merosi: darslar, attestatsiya imtihonlari va materiallar kutubxonasini birlashtirgan o'zbekcha ta'lim platformasi."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link href="/landing-elearning/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow-sm sticky-top p-0">
+      <a href="#home" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <h2 class="m-0 text-primary"><i class="fa fa-book me-3"></i>Kelajak Merosi</h2>
+      </a>
+      <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-label="Menyuni ochish">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <div class="navbar-nav ms-auto p-4 p-lg-0">
+          <a href="#home" class="nav-item nav-link active">Bosh sahifa</a>
+          <a href="#about" class="nav-item nav-link">Biz haqimizda</a>
+          <a href="#courses" class="nav-item nav-link">Yo'nalishlar</a>
+          <a href="#team" class="nav-item nav-link">Ustozlar</a>
+          <a href="#testimonials" class="nav-item nav-link">Fikrlar</a>
+          <a href="#contact" class="nav-item nav-link">Aloqa</a>
+        </div>
+        <a class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" href="/auth?mode=signup" target="_top">Boshlash<i class="fa fa-arrow-right ms-3"></i></a>
+      </div>
+    </nav>
+
+    <div id="home" class="carousel slide carousel-fade header-carousel" data-bs-ride="carousel" data-bs-interval="12000" data-bs-pause="hover">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="owl-carousel-item position-relative hero-slide hero-slide-1">
+            <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
+              <div class="container">
+                <div class="row justify-content-start">
+                  <div class="col-sm-10 col-lg-8">
+                    <h6 class="text-primary text-uppercase mb-3">Tartibli ta'lim platformasi</h6>
+                    <h1 class="display-4 text-white">Dars, imtihon va materiallarni bitta oqimda boshqaring</h1>
+                    <p class="fs-5 text-white mb-4 pb-2">Kelajak Merosi foydalanuvchiga keyingi qadamni aniq ko'rsatadi: darsni davom ettirish, attestatsiya imtihonini topshirish va kerakli materiallarni kutubxonadan topish.</p>
+                    <a href="#about" class="btn btn-primary py-md-3 px-md-5 me-3">Batafsil</a>
+                    <a href="/auth?mode=signup" target="_top" class="btn btn-light py-md-3 px-md-5">Ro'yxatdan o'tish</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="owl-carousel-item position-relative hero-slide hero-slide-2">
+            <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
+              <div class="container">
+                <div class="row justify-content-start">
+                  <div class="col-sm-10 col-lg-8">
+                    <h6 class="text-primary text-uppercase mb-3">O'zbekcha o'quv tajribasi</h6>
+                    <h1 class="display-4 text-white">Natija ko'rinadigan o'qish tizimi</h1>
+                    <p class="fs-5 text-white mb-4 pb-2">Dashboard, fanlar, imtihon katalogi va materiallar kutubxonasi bir xil mantiqda ishlaydi. Foydalanuvchi har sahifada yangi interfeysni o'rganishga majbur bo'lmaydi.</p>
+                    <a href="/dashboard" target="_top" class="btn btn-primary py-md-3 px-md-5 me-3">Ilovani ochish</a>
+                    <a href="#courses" class="btn btn-light py-md-3 px-md-5">Bo'limlarni ko'rish</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#home" data-bs-slide="prev" aria-label="Oldingi slayd">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#home" data-bs-slide="next" aria-label="Keyingi slayd">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <div class="container-xxl py-5">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-3 col-sm-6">
+            <div class="service-item text-center pt-3 h-100">
+              <a href="/subjects" target="_top" class="text-decoration-none text-reset d-block h-100">
+                <div class="p-4">
+                  <i class="fa fa-3x fa-book-open text-primary mb-4"></i>
+                  <h5 class="mb-3">Darslar</h5>
+                  <p>Fanlar, mavzular va progress bilan bosqichma-bosqich o'qish jarayoni.</p>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="service-item text-center pt-3 h-100">
+              <a href="/exams" target="_top" class="text-decoration-none text-reset d-block h-100">
+                <div class="p-4">
+                  <i class="fa fa-3x fa-graduation-cap text-primary mb-4"></i>
+                  <h5 class="mb-3">Imtihonlar</h5>
+                  <p>Attestatsiya va tayyorlov imtihonlari aniq mezonlar bilan.</p>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="service-item text-center pt-3 h-100">
+              <a href="/materials" target="_top" class="text-decoration-none text-reset d-block h-100">
+                <div class="p-4">
+                  <i class="fa fa-3x fa-layer-group text-primary mb-4"></i>
+                  <h5 class="mb-3">Materiallar</h5>
+                  <p>Yuklab olinadigan packlar, qo'llanmalar va tayyorlov resurslari.</p>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="service-item text-center pt-3 h-100">
+              <a href="/materials/library" target="_top" class="text-decoration-none text-reset d-block h-100">
+                <div class="p-4">
+                  <i class="fa fa-3x fa-book-reader text-primary mb-4"></i>
+                  <h5 class="mb-3">Kutubxona</h5>
+                  <p>Sotib olingan materiallar va ochilgan fayllar bir joyda boshqariladi.</p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="about" class="container-xxl py-5">
+      <div class="container">
+        <div class="row g-5">
+          <div class="col-lg-6" style="min-height: 400px">
+            <div class="position-relative h-100">
+              <img class="img-fluid position-absolute w-100 h-100" src="/landing-elearning/img/about.jpg" alt="Kelajak Merosi haqida" style="object-fit: cover" />
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <h6 class="section-title bg-white text-start text-primary pe-3">Biz haqimizda</h6>
+            <h1 class="mb-4">Kelajak Merosi'ga xush kelibsiz</h1>
+            <p class="mb-4">Kelajak Merosi - bu darslar, attestatsiya imtihonlari va materiallar kutubxonasini birlashtirgan tartibli o'quv platformasi. Biz dekor emas, tushunarlilik va natijaga yo'naltirilgan tajribani ustun qo'yamiz.</p>
+            <p class="mb-4">Foydalanuvchi kirgan zahoti nimani o'qishi, nimani sotib olishi yoki qaysi imtihonni boshlashi kerakligini aniq tushunishi kerak. Shu sababli barcha sahifalar bir xil mantiqda ishlaydi.</p>
+            <div class="row gy-2 gx-4 mb-4">
+              <div class="col-sm-6"><p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Progressga asoslangan dashboard</p></div>
+              <div class="col-sm-6"><p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Uzbek tilidagi foydalanuvchi oqimi</p></div>
+              <div class="col-sm-6"><p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Vaqtli attestatsiya imtihonlari</p></div>
+              <div class="col-sm-6"><p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Material pack va kutubxona</p></div>
+              <div class="col-sm-6"><p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Qayta urinish va natija ko'rinishi</p></div>
+              <div class="col-sm-6"><p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Bitta mahsulot, bitta mantiq</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="courses" class="container-xxl py-5 category">
+      <div class="container">
+        <div class="text-center">
+          <h6 class="section-title bg-white text-center text-primary px-3">Yo'nalishlar</h6>
+          <h1 class="mb-5">Platforma bo'limlari</h1>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-7 col-md-6">
+            <div class="row g-3">
+              <div class="col-lg-12 col-md-12">
+                <a class="position-relative d-block overflow-hidden" href="/subjects" target="_top">
+                  <img class="img-fluid" src="/landing-elearning/img/cat-1.jpg" alt="Darslar" />
+                  <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px">
+                    <h5 class="m-0">Darslar</h5>
+                    <small class="text-primary">Fanlar va mavzular</small>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-6 col-md-12">
+                <a class="position-relative d-block overflow-hidden" href="/exams" target="_top">
+                  <img class="img-fluid" src="/landing-elearning/img/cat-2.jpg" alt="Imtihonlar" />
+                  <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px">
+                    <h5 class="m-0">Imtihonlar</h5>
+                    <small class="text-primary">Attestatsiya oqimi</small>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-6 col-md-12">
+                <a class="position-relative d-block overflow-hidden" href="/materials" target="_top">
+                  <img class="img-fluid" src="/landing-elearning/img/cat-3.jpg" alt="Materiallar" />
+                  <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px">
+                    <h5 class="m-0">Materiallar</h5>
+                    <small class="text-primary">Yuklab olinadigan packlar</small>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-6" style="min-height: 350px">
+            <a class="position-relative d-block h-100 overflow-hidden" href="/materials/library" target="_top">
+              <img class="img-fluid position-absolute w-100 h-100" src="/landing-elearning/img/cat-4.jpg" alt="Kutubxona" style="object-fit: cover" />
+              <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px">
+                <h5 class="m-0">Kutubxona</h5>
+                <small class="text-primary">Ochilgan materiallar</small>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-xxl py-5">
+      <div class="container">
+        <div class="text-center">
+          <h6 class="section-title bg-white text-center text-primary px-3">Ommabop oqimlar</h6>
+          <h1 class="mb-5">Platformadagi asosiy foydalanuvchi yo'llari</h1>
+        </div>
+        <div class="row g-4 justify-content-center">
+          <div class="col-lg-4 col-md-6">
+            <div class="course-item bg-light h-100">
+              <div class="position-relative overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/course-1.jpg" alt="Davom etish" /></div>
+              <div class="text-center p-4 pb-0"><h3 class="mb-0">Dashboard'dan davom etish</h3><div class="mb-3"><small>Oxirgi mavzudan davom etish va keyingi tavsiyani ko'rish</small></div></div>
+              <div class="d-flex border-top"><small class="flex-fill text-center border-end py-2"><i class="fa fa-chart-line text-primary me-2"></i>Progress</small><small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>Faoliyat</small><small class="flex-fill text-center py-2"><i class="fa fa-arrow-right text-primary me-2"></i><a href="/dashboard" target="_top">Ochish</a></small></div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="course-item bg-light h-100">
+              <div class="position-relative overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/java.jpg" alt="Attestatsiya" /></div>
+              <div class="text-center p-4 pb-0"><h3 class="mb-0">Attestatsiya imtihoni</h3><div class="mb-3"><small>Savollar soni, davomiylik va o‘tish foizi bir qarashda</small></div></div>
+              <div class="d-flex border-top"><small class="flex-fill text-center border-end py-2"><i class="fa fa-stopwatch text-primary me-2"></i>Vaqtli</small><small class="flex-fill text-center border-end py-2"><i class="fa fa-percent text-primary me-2"></i>80% me'yor</small><small class="flex-fill text-center py-2"><i class="fa fa-arrow-right text-primary me-2"></i><a href="/exams" target="_top">Ko'rish</a></small></div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="course-item bg-light h-100">
+              <div class="position-relative overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/course-3.jpg" alt="Material kutubxonasi" /></div>
+              <div class="text-center p-4 pb-0"><h3 class="mb-0">Material kutubxonasi</h3><div class="mb-3"><small>Pack holati, fayllar va amallar aralashmaydigan foydalanish oqimi</small></div></div>
+              <div class="d-flex border-top"><small class="flex-fill text-center border-end py-2"><i class="fa fa-folder-open text-primary me-2"></i>Packlar</small><small class="flex-fill text-center border-end py-2"><i class="fa fa-file-alt text-primary me-2"></i>Fayllar</small><small class="flex-fill text-center py-2"><i class="fa fa-arrow-right text-primary me-2"></i><a href="/materials/library" target="_top">Ochish</a></small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="team" class="container-xxl py-5">
+      <div class="container">
+        <div class="text-center">
+          <h6 class="section-title bg-white text-center text-primary px-3">Ustozlar</h6>
+          <h1 class="mb-5">Ekspert mentorlar</h1>
+        </div>
+        <div class="row g-4">
+          <div class="col-lg-3 col-md-6"><div class="team-item bg-light"><div class="overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/team-1.jpg" alt="Matematika ustoz" /></div><div class="text-center p-4"><h5 class="mb-0">Shahzod Karimov</h5><small>Matematika va attestatsiya</small></div></div></div>
+          <div class="col-lg-3 col-md-6"><div class="team-item bg-light"><div class="overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/team-2.jpg" alt="Dasturlash ustoz" /></div><div class="text-center p-4"><h5 class="mb-0">Madina Ismoilova</h5><small>Dasturlash va amaliy loyiha</small></div></div></div>
+          <div class="col-lg-3 col-md-6"><div class="team-item bg-light"><div class="overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/team-3.jpg" alt="Analitika ustoz" /></div><div class="text-center p-4"><h5 class="mb-0">Bekzod Yoqubov</h5><small>Analitika va yechim tahlili</small></div></div></div>
+          <div class="col-lg-3 col-md-6"><div class="team-item bg-light"><div class="overflow-hidden"><img class="img-fluid" src="/landing-elearning/img/team-4.jpg" alt="Resurslar ustoz" /></div><div class="text-center p-4"><h5 class="mb-0">Dilnoza Xasanova</h5><small>Materiallar va metodika</small></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="testimonials" class="container-xxl py-5">
+      <div class="container">
+        <div class="text-center">
+          <h6 class="section-title bg-white text-center text-primary px-3">Fikrlar</h6>
+          <h1 class="mb-5">O'quvchilar nima deydi?</h1>
+        </div>
+        <div id="testimonialCarousel" class="carousel slide">
+          <div class="carousel-inner position-relative">
+            <div class="carousel-item active testimonial-item text-center">
+              <img class="border rounded-circle p-2 mx-auto mb-3" src="/landing-elearning/img/testimonial-1.jpg" style="width: 80px; min-height: 80px" alt="Fikr 1" />
+              <h5 class="mb-0">Selena</h5>
+              <p>Talaba</p>
+              <div class="testimonial-text bg-light text-center p-4"><p class="mb-0">Platforma menga qaysi darsdan davom etishni o'ylab o'tirmasdan darhol ish boshlash imkonini berdi.</p></div>
+            </div>
+            <div class="carousel-item text-center">
+              <img class="d-block border rounded-circle p-2 mx-auto mb-3" src="/landing-elearning/img/testimonial-2.jpg" style="width: 80px; min-height: 80px" alt="Fikr 2" />
+              <h5 class="mb-0">Cris Levon</h5>
+              <p>Talaba</p>
+              <div class="testimonial-text bg-light text-center p-4"><p class="mb-0">Imtihon sahifalarida ortiqcha bezak yo'q. Savollar soni, vaqt va keyingi harakat darhol tushunarli.</p></div>
+            </div>
+            <div class="carousel-item text-center">
+              <img class="d-block border rounded-circle p-2 mx-auto mb-3" src="/landing-elearning/img/testimonial-3.jpg" style="width: 80px; min-height: 80px" alt="Fikr 3" />
+              <h5 class="mb-0">Magnus Carlson</h5>
+              <p>Talaba</p>
+              <div class="testimonial-text bg-light text-center p-4"><p class="mb-0">Materiallar kutubxonasida pack va fayllar ajratilgani sabab kerakli resursni tez topaman.</p></div>
+            </div>
+            <div class="carousel-item text-center">
+              <img class="d-block border rounded-circle p-2 mx-auto mb-3" src="/landing-elearning/img/testimonial-4.jpg" style="width: 80px; min-height: 80px" alt="Fikr 4" />
+              <h5 class="mb-0">Nyra Carl</h5>
+              <p>Talaba</p>
+              <div class="testimonial-text bg-light text-center p-4"><p class="mb-0">Bitta tizim ichida dars, imtihon va materiallar ishlagani uchun mahsulot ishonchli ko'rinadi.</p></div>
+            </div>
+          </div>
+          <div class="carousel-indicators position-relative mt-4">
+            <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="1-fikr"></button>
+            <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="1" aria-label="2-fikr"></button>
+            <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="2" aria-label="3-fikr"></button>
+            <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="3" aria-label="4-fikr"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="contact" class="container-fluid bg-dark text-light footer pt-5 mt-5">
+      <div class="container py-5">
+        <div class="row g-5">
+          <div class="col-lg-3 col-md-6">
+            <h4 class="text-white mb-3">Tezkor havolalar</h4>
+            <a class="btn btn-link" href="#about">Biz haqimizda</a>
+            <a class="btn btn-link" href="#courses">Yo'nalishlar</a>
+            <a class="btn btn-link" href="/auth?mode=signup" target="_top">Ro'yxatdan o'tish</a>
+            <a class="btn btn-link" href="/dashboard" target="_top">Dashboard</a>
+            <a class="btn btn-link" href="/materials/library" target="_top">Kutubxona</a>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h4 class="text-white mb-3">Aloqa</h4>
+            <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Toshkent, O'zbekiston</p>
+            <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+998 90 000 00 00</p>
+            <p class="mb-2"><i class="fa fa-envelope me-3"></i>support@kelajakmerosi.uz</p>
+            <div class="d-flex pt-2">
+              <a class="btn btn-outline-light btn-social" href="#home"><i class="fab fa-telegram-plane"></i></a>
+              <a class="btn btn-outline-light btn-social" href="#home"><i class="fab fa-instagram"></i></a>
+              <a class="btn btn-outline-light btn-social" href="#home"><i class="fab fa-youtube"></i></a>
+              <a class="btn btn-outline-light btn-social" href="#home"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h4 class="text-white mb-3">Galereya</h4>
+            <div class="row g-2 pt-2">
+              <div class="col-4"><img class="img-fluid bg-light p-1" src="/landing-elearning/img/course-1.jpg" alt="Galereya 1" /></div>
+              <div class="col-4"><img class="img-fluid bg-light p-1" src="/landing-elearning/img/course-2.jpg" alt="Galereya 2" /></div>
+              <div class="col-4"><img class="img-fluid bg-light p-1" src="/landing-elearning/img/course-3.jpg" alt="Galereya 3" /></div>
+              <div class="col-4"><img class="img-fluid bg-light p-1" src="/landing-elearning/img/cat-2.jpg" alt="Galereya 4" /></div>
+              <div class="col-4"><img class="img-fluid bg-light p-1" src="/landing-elearning/img/cat-3.jpg" alt="Galereya 5" /></div>
+              <div class="col-4"><img class="img-fluid bg-light p-1" src="/landing-elearning/img/about.jpg" alt="Galereya 6" /></div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h4 class="text-white mb-3">Yangiliklar</h4>
+            <p>Yangi imtihonlar, material packlar va platforma yangilanishlari haqida xabardor bo'ling.</p>
+            <div class="position-relative mx-auto" style="max-width: 400px">
+              <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Email manzilingiz" />
+              <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">Yuborish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="copyright">
+          <div class="row">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">© <a class="border-bottom" href="#home">Kelajak Merosi</a>, barcha huquqlar himoyalangan.</div>
+            <div class="col-md-6 text-center text-md-end">
+              <div class="footer-menu">
+                <a href="#home">Bosh sahifa</a>
+                <a href="#about">Biz haqimizda</a>
+                <a href="#testimonials">Fikrlar</a>
+                <a href="#contact">Aloqa</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#home" class="btn btn-lg btn-primary btn-lg-square back-to-top" aria-label="Yuqoriga qaytish"><i class="bi bi-arrow-up"></i><i class="fa fa-arrow-up"></i></a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      const backToTop = document.querySelector('.back-to-top');
+      const postHeight = () => {
+        const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+        parent.postMessage({ type: 'landing-height', height }, '*');
+      };
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) backToTop.style.display = 'flex';
+        else backToTop.style.display = 'none';
+      });
+      window.addEventListener('load', postHeight);
+      window.addEventListener('resize', postHeight);
+      setTimeout(postHeight, 300);
+    </script>
+  </body>
+</html>

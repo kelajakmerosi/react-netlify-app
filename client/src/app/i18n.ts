@@ -57,6 +57,7 @@ void i18n
     interpolation: {
       escapeValue: false,
     },
+    showSupportNotice: false,
     returnNull: false,
     parseMissingKeyHandler: (key) => key,
   })

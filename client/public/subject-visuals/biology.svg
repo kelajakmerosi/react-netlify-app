@@ -1,0 +1,24 @@
+<svg width="640" height="420" viewBox="0 0 640 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="420" rx="36" fill="#EEF8F3"/>
+  <path d="M470 -14C562 6 616 62 640 150V420H278C288 304 338 194 470 -14Z" fill="#DDF1E5"/>
+  <ellipse cx="118" cy="344" rx="124" ry="108" fill="#E6F4EB"/>
+  <rect x="84" y="88" width="472" height="248" rx="34" fill="#FBFDFB" stroke="#D0E5D8" stroke-width="10"/>
+  <rect x="122" y="120" width="188" height="18" rx="9" fill="#E7F3EB"/>
+  <rect x="122" y="148" width="242" height="14" rx="7" fill="#F0F8F3"/>
+  <ellipse cx="334" cy="296" rx="140" ry="22" fill="#DCEEE4"/>
+  <rect x="312" y="230" width="44" height="72" rx="16" fill="#7B5C40"/>
+  <path d="M334 152C372 152 406 178 416 220C454 228 480 258 480 294C480 336 444 364 400 364H268C218 364 180 334 180 290C180 254 206 226 244 220C254 178 290 152 334 152Z" fill="url(#leafTree)"/>
+  <path d="M280 206C294 194 312 188 332 188C352 188 370 194 386 206" stroke="#2F925F" stroke-width="8" stroke-linecap="round"/>
+  <path d="M252 250C274 230 300 220 332 220C362 220 390 230 414 250" stroke="#2F925F" stroke-width="8" stroke-linecap="round"/>
+  <path d="M290 170C300 194 310 212 334 230" stroke="#A9DAB8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M382 176C370 198 360 212 336 230" stroke="#A9DAB8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="266" cy="274" r="8" fill="#C5E9D1"/>
+  <circle cx="404" cy="266" r="8" fill="#C5E9D1"/>
+  <circle cx="334" cy="248" r="8" fill="#C5E9D1"/>
+  <defs>
+    <linearGradient id="leafTree" x1="180" y1="152" x2="480" y2="364" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7BCC98"/>
+      <stop offset="1" stop-color="#2F925F"/>
+    </linearGradient>
+  </defs>
+</svg>

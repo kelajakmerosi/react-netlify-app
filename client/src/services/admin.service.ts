@@ -20,7 +20,46 @@ export interface AdminUserSummary {
   dbRole?: 'student' | 'admin' | 'superadmin'
   adminSource?: AdminSource
   phoneVerified?: boolean
+  isSuspended?: boolean
   createdAt?: string | number
+}
+
+export interface UserTransaction {
+  id: string
+  userId: string
+  paymentType: string
+  planKey?: string | null
+  subjectId?: string | null
+  amountUzs: number
+  provider: string
+  status: string
+  externalId: string
+  paidAt?: string | null
+  createdAt: string
+}
+
+export interface UserExamAttempt {
+  id: string
+  examId: string
+  examTitle?: string | null
+  status: string
+  startedAt: string
+  submittedAt?: string | null
+  scorePercent?: number
+  passed?: boolean
+}
+
+export interface UserCompletedSubject {
+  id: string
+  title: string
+  lastCompletedAt: string
+}
+
+export interface UserAuditProfile {
+  profile: AdminUserSummary
+  transactions: UserTransaction[]
+  exams: UserExamAttempt[]
+  completedSubjects: UserCompletedSubject[]
 }
 
 export interface SystemInfo {
@@ -62,6 +101,7 @@ export interface SubjectRecord {
   color?: string | null
   order?: number
   topics?: SubjectTopic[]
+  isHidden?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -186,6 +226,7 @@ const AdminUserSchema = z.object({
   dbRole: z.enum(['student', 'admin', 'superadmin']).optional(),
   adminSource: z.enum(['none', 'allowlist', 'db_role', 'both']).optional(),
   phoneVerified: z.boolean().optional(),
+  isSuspended: z.boolean().optional(),
   createdAt: z.union([z.string(), z.number()]).optional(),
 })
 
@@ -216,6 +257,7 @@ const SubjectSchema = z.object({
   color: z.string().nullable().optional(),
   order: z.number().int().optional(),
   topics: z.array(SubjectTopicSchema).default([]),
+  isHidden: z.boolean().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
 })
@@ -414,6 +456,10 @@ export const adminService = {
     await api.delete<{ deleted: boolean }>(`/subjects/${subjectId}`, resolveToken())
   },
 
+  toggleSubjectVisibility: async (subjectId: string, isHidden: boolean): Promise<SubjectRecord> => {
+    return api.put<SubjectRecord>(`/subjects/${subjectId}`, { is_hidden: isHidden }, resolveToken(), SubjectSchema)
+  },
+
   createTopic: async (subjectId: string, topic: SubjectTopic): Promise<SubjectRecord> => {
     return api.post<SubjectRecord>(`/subjects/${subjectId}/topics`, topic, resolveToken(), SubjectSchema)
   },
@@ -507,6 +553,23 @@ export const adminService = {
     payload: { subjectId?: string; force?: boolean } = {},
   ): Promise<DemoBootstrapResult> => {
     return api.post<DemoBootstrapResult>('/admin/demo/bootstrap', payload, resolveToken(), DemoBootstrapSchema)
+  },
+
+  getUserAudit: async (userId: string): Promise<UserAuditProfile> => {
+    return api.get<UserAuditProfile>(`/admin/users/${userId}/audit`, resolveToken())
+  },
+
+  updateUserProfile: async (
+    userId: string,
+    payload: { firstName?: string; lastName?: string; email?: string; phone?: string }
+  ): Promise<AdminUserSummary> => {
+    const data = await api.patch<{ profile: AdminUserSummary }>(`/admin/users/${userId}/profile`, payload, resolveToken())
+    return data.profile
+  },
+
+  toggleUserSuspension: async (userId: string, isSuspended: boolean): Promise<AdminUserSummary> => {
+    const data = await api.patch<{ profile: AdminUserSummary }>(`/admin/users/${userId}/suspend`, { isSuspended }, resolveToken())
+    return data.profile
   },
 }
 

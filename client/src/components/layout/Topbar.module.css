@@ -1,13 +1,12 @@
 .topbar {
-  background: color-mix(in srgb, var(--glass) 88%, transparent);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--surface-border);
-  padding: 0 30px;
+  background: var(--topbar-bg);
+  border-bottom: 1px solid var(--topbar-border);
+  padding: 0 24px;
   height: var(--topbar-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   position: sticky;
   top: 0;
   z-index: 70;
@@ -16,7 +15,9 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
 
 .right {
@@ -25,52 +26,280 @@
   gap: 10px;
 }
 
-.title {
-  font-size: 11px;
+.pageTitle {
+  font-family: var(--font-display);
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-3);
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.divider {
+  width: 1px;
+  height: 34px;
+  background: var(--surface-border);
+  margin: 0 4px;
+}
+
+.userMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  cursor: pointer;
+  text-align: left;
+}
+
+.userMeta:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.userCopy {
+  display: grid;
+  gap: 1px;
+}
+
+.userCopy strong {
+  font-size: 16px;
   line-height: 1;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.userCopy span {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .hamburger {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: none;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
   cursor: pointer;
-  padding: 7px;
   border: 1px solid var(--surface-border);
-  background: var(--bg-2);
+  background: color-mix(in srgb, var(--bg-2) 88%, transparent);
+  color: var(--text-2);
   border-radius: var(--radius-sm);
-  transition: border-color var(--transition), background var(--transition);
 }
 
-.hamburger:hover {
-  border-color: color-mix(in srgb, var(--accent) 36%, transparent);
-  background: color-mix(in srgb, var(--accent-light) 48%, var(--bg-2));
+/* ─── Language Dropdown ──────────────────────────────────── */
+.langWrap {
+  position: relative;
 }
 
-.hamburger span {
+.langDropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 140px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+}
+
+.langOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  height: 2px;
-  background: var(--text);
-  border-radius: 2px;
-  transition: all var(--transition);
-  display: block;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
 }
 
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
+.langOption:hover {
+  background: var(--bg-3);
+  color: var(--text);
+}
+
+.langOptionActive {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.langOptionLabel {
+  white-space: nowrap;
+}
+
+/* ─── Settings Modal Body ────────────────────────────────── */
+.settingsBody {
+  display: grid;
+  gap: 12px;
+}
+
+.settingsCard {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.settingsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settingsUserCopy {
+  display: grid;
+  gap: 2px;
+}
+
+.settingsUserCopy strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.settingsUserCopy span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.settingsInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.settingsInfoCell {
+  padding: 8px 10px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-3) 50%, var(--bg-2));
+}
+
+.settingsInfoLabel {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+
+.settingsInfoCell strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.settingsSection {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.settingsSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.settingsSectionHeader strong {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.settingsLangRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.settingsLangBtn {
+  padding: 6px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.settingsLangBtn:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--surface-border));
+  color: var(--text);
+}
+
+.settingsLangBtnActive {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1020px) {
+  .topbar {
+    padding: 0 14px;
+    height: 72px;
+    gap: 8px;
   }
 
-  .topbar {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 0 16px;
+  .hamburger {
+    display: inline-flex;
+  }
+
+  .userCopy {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .right {
+    gap: 6px;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .pageTitle {
+    display: none;
   }
 }

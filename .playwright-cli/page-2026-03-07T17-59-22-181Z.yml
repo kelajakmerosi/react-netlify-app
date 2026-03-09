@@ -1,0 +1,267 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e11]: KelajakMerosi
+      - paragraph [ref=e12]: Overview
+      - navigation "Menu" [ref=e13]:
+        - button "Dashboard" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e21]: Dashboard
+        - button "Lessons" [ref=e22] [cursor=pointer]:
+          - img [ref=e24]
+          - generic [ref=e26]: Lessons
+        - button "Exams" [ref=e27] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e32]: Exams
+        - button "Admin" [ref=e33] [cursor=pointer]:
+          - img [ref=e35]
+          - generic [ref=e37]: Admin
+      - button "Logout" [ref=e39] [cursor=pointer]:
+        - img [ref=e40]
+        - text: Logout
+    - generic [ref=e43]:
+      - banner [ref=e44]:
+        - heading "Admin" [level=1] [ref=e46]
+        - generic [ref=e47]:
+          - 'button "Language: EN" [ref=e48] [cursor=pointer]':
+            - img [ref=e49]
+          - button "Theme" [ref=e53] [cursor=pointer]:
+            - img [ref=e54]
+          - button "Settings" [ref=e56] [cursor=pointer]:
+            - img [ref=e57]
+          - button "Profile" [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]: EK
+            - generic [ref=e63]:
+              - strong [ref=e64]: Elshod Karimov
+              - generic [ref=e65]: Superadmin
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - banner [ref=e69]:
+            - generic [ref=e70]:
+              - heading "Admin Workspace" [level=2] [ref=e71]
+              - paragraph [ref=e72]: Operations console for users, content, and analytics.
+            - generic [ref=e73]:
+              - generic [ref=e74]:
+                - img [ref=e75]
+                - text: "Last updated: 03/07/2026, 10:56 PM"
+              - button "Export" [ref=e78] [cursor=pointer]:
+                - img [ref=e79]
+                - text: Export
+              - button "Refresh" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Refresh
+          - tablist "Admin sections" [ref=e88]:
+            - tab "Overview" [ref=e89] [cursor=pointer]
+            - tab "Admins & Users" [ref=e90] [cursor=pointer]
+            - tab "Content" [ref=e91] [cursor=pointer]
+            - tab "Analytics" [active] [selected] [ref=e92] [cursor=pointer]
+        - generic [ref=e371]:
+          - generic [ref=e372]:
+            - generic [ref=e374]:
+              - heading "Analytics filters" [level=3] [ref=e375]
+              - paragraph [ref=e376]: Choose date range and subject filters.
+            - generic [ref=e378]:
+              - generic [ref=e379]:
+                - generic [ref=e380]:
+                  - generic [ref=e381]: From
+                  - textbox "From" [ref=e382]: 2026-02-05
+                - generic [ref=e383]:
+                  - generic [ref=e384]: To
+                  - textbox "To" [ref=e385]: 2026-03-07
+                - generic [ref=e386]:
+                  - generic [ref=e387]: Subject
+                  - combobox "Subject" [ref=e388]:
+                    - option "All subjects" [selected]
+                    - option "Matematika"
+                    - option "Fizika"
+                    - option "Tarix"
+              - generic [ref=e389]:
+                - generic [ref=e390]:
+                  - button "7d" [ref=e391] [cursor=pointer]
+                  - button "30d" [ref=e392] [cursor=pointer]
+                  - button "90d" [ref=e393] [cursor=pointer]
+                - button "Apply" [ref=e394] [cursor=pointer]
+          - generic [ref=e395]:
+            - generic [ref=e396]:
+              - paragraph [ref=e397]: DAU / WAU / MAU
+              - paragraph [ref=e398]: 36 / 92 / 148
+            - generic [ref=e399]:
+              - paragraph [ref=e400]: Completion
+              - paragraph [ref=e401]: 62%
+            - generic [ref=e402]:
+              - paragraph [ref=e403]: Average quiz score
+              - paragraph [ref=e404]: 74%
+            - generic [ref=e405]:
+              - paragraph [ref=e406]: Tracked topics
+              - paragraph [ref=e407]: 11 / 18
+          - generic [ref=e408]:
+            - generic [ref=e409]:
+              - generic [ref=e410]:
+                - generic [ref=e411]:
+                  - heading "User growth" [level=4] [ref=e412]
+                  - paragraph [ref=e413]: New users by day
+                - paragraph [ref=e414]: USER GROWTH
+              - application [ref=e418]:
+                - generic [ref=e430]:
+                  - generic [ref=e431]:
+                    - generic [ref=e433]: 02-07
+                    - generic [ref=e435]: 02-10
+                    - generic [ref=e437]: 02-13
+                    - generic [ref=e439]: 02-16
+                    - generic [ref=e441]: 02-19
+                    - generic [ref=e443]: 02-23
+                    - generic [ref=e445]: 02-27
+                    - generic [ref=e447]: 03-03
+                    - generic [ref=e449]: 03-07
+                  - generic [ref=e450]:
+                    - generic [ref=e452]: "0"
+                    - generic [ref=e454]: "2"
+                    - generic [ref=e456]: "4"
+                    - generic [ref=e458]: "6"
+                    - generic [ref=e460]: "8"
+            - generic [ref=e461]:
+              - generic [ref=e462]:
+                - generic [ref=e463]:
+                  - heading "Active users trend" [level=4] [ref=e464]
+                  - paragraph [ref=e465]: Daily active users
+                - paragraph [ref=e466]: ACTIVE USERS
+              - application [ref=e470]:
+                - generic [ref=e478]:
+                  - generic [ref=e479]:
+                    - generic [ref=e481]: 02-07
+                    - generic [ref=e483]: 02-10
+                    - generic [ref=e485]: 02-13
+                    - generic [ref=e487]: 02-16
+                    - generic [ref=e489]: 02-19
+                    - generic [ref=e491]: 02-23
+                    - generic [ref=e493]: 02-27
+                    - generic [ref=e495]: 03-03
+                    - generic [ref=e497]: 03-07
+                  - generic [ref=e498]:
+                    - generic [ref=e500]: "0"
+                    - generic [ref=e502]: "6"
+                    - generic [ref=e504]: "12"
+                    - generic [ref=e506]: "18"
+                    - generic [ref=e508]: "24"
+            - generic [ref=e509]:
+              - generic [ref=e510]:
+                - generic [ref=e511]:
+                  - heading "Completion trend" [level=4] [ref=e512]
+                  - paragraph [ref=e513]: Completed topics by day
+                - paragraph [ref=e514]: COMPLETION
+              - application [ref=e518]:
+                - generic [ref=e526]:
+                  - generic [ref=e527]:
+                    - generic [ref=e529]: 02-07
+                    - generic [ref=e531]: 02-10
+                    - generic [ref=e533]: 02-13
+                    - generic [ref=e535]: 02-16
+                    - generic [ref=e537]: 02-19
+                    - generic [ref=e539]: 02-23
+                    - generic [ref=e541]: 02-27
+                    - generic [ref=e543]: 03-03
+                    - generic [ref=e545]: 03-07
+                  - generic [ref=e546]:
+                    - generic [ref=e548]: "0"
+                    - generic [ref=e550]: "3"
+                    - generic [ref=e552]: "6"
+                    - generic [ref=e554]: "9"
+                    - generic [ref=e556]: "12"
+            - generic [ref=e557]:
+              - generic [ref=e558]:
+                - generic [ref=e559]:
+                  - heading "Quiz score trend" [level=4] [ref=e560]
+                  - paragraph [ref=e561]: Average score by day
+                - paragraph [ref=e562]: QUIZ SCORE
+              - application [ref=e566]:
+                - generic [ref=e574]:
+                  - generic [ref=e575]:
+                    - generic [ref=e577]: 02-07
+                    - generic [ref=e579]: 02-10
+                    - generic [ref=e581]: 02-13
+                    - generic [ref=e583]: 02-16
+                    - generic [ref=e585]: 02-19
+                    - generic [ref=e587]: 02-23
+                    - generic [ref=e589]: 02-27
+                    - generic [ref=e591]: 03-03
+                    - generic [ref=e593]: 03-07
+                  - generic [ref=e594]:
+                    - generic [ref=e596]: "0"
+                    - generic [ref=e598]: "20"
+                    - generic [ref=e600]: "40"
+                    - generic [ref=e602]: "60"
+                    - generic [ref=e604]: "80"
+            - generic [ref=e605]:
+              - generic [ref=e606]:
+                - generic [ref=e607]:
+                  - heading "Auth source breakdown" [level=4] [ref=e608]
+                  - paragraph [ref=e609]: Sign-in source mix
+                - paragraph [ref=e610]: SIGN-IN MIX
+              - generic [ref=e611]:
+                - application [ref=e615]
+                - generic [ref=e623]:
+                  - generic [ref=e624]:
+                    - generic [ref=e627]: Phone
+                    - generic [ref=e628]: 97 (66%)
+                  - generic [ref=e629]:
+                    - generic [ref=e632]: Google
+                    - generic [ref=e633]: 51 (34%)
+            - generic [ref=e634]:
+              - generic [ref=e635]:
+                - generic [ref=e636]:
+                  - heading "Quiz distribution" [level=4] [ref=e637]
+                  - paragraph [ref=e638]: Score bucket split
+                - paragraph [ref=e639]: SCORE BUCKETS
+              - generic [ref=e640]:
+                - application [ref=e644]
+                - generic [ref=e656]:
+                  - generic [ref=e657]:
+                    - generic [ref=e660]: 90-100
+                    - generic [ref=e661]: 14 (14%)
+                  - generic [ref=e662]:
+                    - generic [ref=e665]: 75-89
+                    - generic [ref=e666]: 38 (38%)
+                  - generic [ref=e667]:
+                    - generic [ref=e670]: 50-74
+                    - generic [ref=e671]: 30 (30%)
+                  - generic [ref=e672]:
+                    - generic [ref=e675]: 0-49
+                    - generic [ref=e676]: 18 (18%)
+            - generic [ref=e678]:
+              - generic [ref=e679]:
+                - generic [ref=e680]:
+                  - heading "Subject performance" [level=4] [ref=e681]
+                  - paragraph [ref=e682]: Completion rate by subject
+                - paragraph [ref=e683]: SUBJECT PERFORMANCE
+              - application [ref=e687]:
+                - generic [ref=e702]:
+                  - generic [ref=e703]:
+                    - generic [ref=e705]: "0"
+                    - generic [ref=e707]: "20"
+                    - generic [ref=e709]: "40"
+                    - generic [ref=e711]: "60"
+                    - generic [ref=e713]: "80"
+                  - generic [ref=e714]:
+                    - generic [ref=e716]: Matematika
+                    - generic [ref=e718]: Fizika
+                    - generic [ref=e720]: Tarix
+            - generic [ref=e721]:
+              - generic [ref=e723]:
+                - heading "Supplementary legend" [level=3] [ref=e724]
+                - paragraph [ref=e725]: Text legend for chart accessibility.
+              - list [ref=e727]:
+                - listitem [ref=e728]:
+                  - generic [ref=e730]: 90-100
+                  - generic [ref=e731]: "14"
+                - listitem [ref=e732]:
+                  - generic [ref=e734]: 75-89
+                  - generic [ref=e735]: "38"
+                - listitem [ref=e736]:
+                  - generic [ref=e738]: 50-74
+                  - generic [ref=e739]: "30"
+                - listitem [ref=e740]:
+                  - generic [ref=e742]: 0-49
+                  - generic [ref=e743]: "18"
+  - generic [ref=e744]: Matematika

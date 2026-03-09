@@ -1,161 +1,16 @@
-/* ─── Button ──────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 13px;
-  font-family: var(--font-main);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: transform var(--transition), box-shadow var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
-  white-space: nowrap;
-}
-
-.btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 26%, transparent);
-}
-
-.btnPrimary {
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 10px 22px rgba(15, 111, 214, 0.2);
-}
-
-.btnPrimary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(15, 111, 214, 0.25);
-}
-
-.btnGhost {
-  color: var(--text-2);
-  background: color-mix(in srgb, var(--bg-2) 84%, transparent);
-  border-color: var(--surface-border);
-}
-
-.btnGhost:hover:not(:disabled) {
-  color: var(--text);
-  border-color: color-mix(in srgb, var(--accent) 34%, transparent);
-  background: color-mix(in srgb, var(--accent-light) 65%, var(--bg-2));
-}
-
-.btnDanger {
-  color: #fff;
-  background: linear-gradient(135deg, var(--danger), #e85d63);
-  box-shadow: 0 10px 24px rgba(207, 63, 76, 0.24);
-}
-
-.btnSm {
-  min-height: 38px;
-  padding: 0 14px;
-  font-size: 13px;
-}
-
-.btnLg {
-  min-height: 50px;
-  padding: 0 26px;
-  font-size: 16px;
-}
-
-.btnFull {
-  width: 100%;
-}
-
-.btn:disabled {
-  opacity: 0.56;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.btnIcon {
-  width: 38px;
-  height: 38px;
-  min-height: 38px;
-  padding: 0;
-  background: var(--bg-2);
-  border-color: var(--surface-border);
-  color: var(--text-2);
-}
-
-.btnIcon:hover:not(:disabled) {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  background: color-mix(in srgb, var(--accent-light) 60%, var(--bg-2));
-}
-
-.btnNav {
-  width: 100%;
-  justify-content: flex-start;
-  gap: 12px;
-  min-height: 46px;
-  padding: 0 14px;
-  border-radius: 12px;
-  border-color: transparent;
-  background: transparent;
-  color: var(--text-2);
-  font-weight: 600;
-}
-
-.btnNav:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent-light) 55%, var(--bg-2));
-  color: var(--text);
-}
-
-.btnNavActive {
-  background: color-mix(in srgb, var(--accent-light) 74%, var(--bg-2));
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-/* ─── Input ───────────────────────────────────────── */
-.input {
-  width: 100%;
-  min-height: 46px;
-  padding: 0 14px;
-  background: var(--bg-2);
-  border: 1px solid var(--surface-border);
-  border-radius: 12px;
-  font-family: var(--font-main);
-  font-size: 14px;
-  color: var(--text);
-  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-  outline: none;
-}
-
-.input::placeholder {
-  color: var(--text-3);
-}
-
-.input:focus {
-  border-color: color-mix(in srgb, var(--accent) 58%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
-}
-
-.inputError {
-  border-color: color-mix(in srgb, var(--danger) 60%, transparent) !important;
-}
+/* Shared primitive styles live in `components/ui/*.module.css`.
+   Keep this file focused on composite UI helpers exported from `components/ui/index.tsx`. */
 
 /* ─── GlassCard ───────────────────────────────────── */
 .glassCard {
-  background: var(--glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition);
 }
 
 .glassCard:hover {
-  border-color: color-mix(in srgb, var(--accent) 18%, var(--glass-border));
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08), 0 14px 30px rgba(15, 23, 42, 0.08);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--surface-border));
 }
 
 /* ─── Badge ───────────────────────────────────────── */
@@ -165,39 +20,54 @@
   gap: 6px;
   min-height: 36px;
   padding: 0 12px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
 }
 
-.badge > span {
+.badge>span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.badge > span svg {
+.badge>span svg {
   display: block;
 }
 
-.badgeCompleted  { background: var(--success-light); color: var(--success); }
-.badgeInprogress { background: var(--accent-light);  color: var(--accent); }
-.badgeOnhold     { background: var(--warning-light); color: var(--warning); }
-.badgeLocked     { background: var(--neutral-light); color: var(--neutral); }
+.badgeCompleted {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.badgeInprogress {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.badgeOnhold {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.badgeLocked {
+  background: var(--neutral-light);
+  color: var(--neutral);
+}
 
 /* ─── ProgressBar ─────────────────────────────────── */
 .progressBar {
   height: 6px;
   background: var(--bg-3);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: var(--radius-sm);
+  background: var(--accent);
   transition: width .5s cubic-bezier(.4, 0, .2, 1);
 }
 
@@ -239,15 +109,14 @@
 
 /* ─── Avatar ──────────────────────────────────────── */
 .avatar {
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: var(--accent);
   color: #fff;
   flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
 }
 
 /* ─── Alert ───────────────────────────────────────── */
@@ -261,10 +130,29 @@
   border: 1px solid transparent;
 }
 
-.alertWarning { background: var(--warning-light); color: var(--warning); border-color: color-mix(in srgb, var(--warning) 24%, transparent); }
-.alertError   { background: var(--danger-light);  color: var(--danger);  border-color: color-mix(in srgb, var(--danger) 22%, transparent); }
-.alertSuccess { background: var(--success-light); color: var(--success); border-color: color-mix(in srgb, var(--success) 22%, transparent); }
-.alertInfo    { background: var(--info-light);    color: var(--info);    border-color: color-mix(in srgb, var(--info) 22%, transparent); }
+.alertWarning {
+  background: var(--warning-light);
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 24%, transparent);
+}
+
+.alertError {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 22%, transparent);
+}
+
+.alertSuccess {
+  background: var(--success-light);
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 22%, transparent);
+}
+
+.alertInfo {
+  background: var(--info-light);
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 22%, transparent);
+}
 
 /* ─── Tabs ────────────────────────────────────────── */
 .tabs {
@@ -309,8 +197,5 @@
   font-size: 34px;
   font-weight: 800;
   font-family: var(--font-display);
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
 }

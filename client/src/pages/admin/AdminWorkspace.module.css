@@ -54,10 +54,10 @@
   display: grid;
   grid-template-columns: repeat(var(--admin-tab-count, 4), minmax(0, 1fr));
   gap: 8px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  padding: 6px;
+  background: var(--bg-2);
+  padding: 4px;
   position: static !important;
   overflow: hidden;
 }
@@ -66,42 +66,41 @@
   display: grid;
   grid-template-columns: repeat(var(--admin-tab-count, 4), minmax(0, 1fr));
   gap: 8px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  padding: 6px;
+  background: var(--bg-2);
+  padding: 4px;
   width: 100%;
   overflow: hidden;
 }
 
 .tabRailSegmented :global(button[role='tab']) {
   width: 100%;
-  min-height: 40px;
-  border-radius: 10px;
+  min-height: 38px;
+  border-radius: 8px;
   border: 1px solid transparent;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-2);
   background: transparent;
-  transition: background var(--transition), color var(--transition), box-shadow var(--transition), border-color var(--transition);
+  transition: all var(--transition);
 }
 
 .tabRailSegmented :global(button[role='tab'][aria-selected='false']:hover:not(:disabled)),
 .tabRailSegmented :global(button[role='tab'][aria-selected='false']:focus-visible:not(:disabled)) {
-  background: color-mix(in srgb, var(--surface) 76%, var(--bg-2));
-  color: var(--text-2);
+  background: var(--bg-3);
+  color: var(--text);
   outline: none;
 }
 
 .tabRailSegmented :global(button[role='tab'][aria-selected='true']) {
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 6px 14px rgba(29, 111, 201, 0.22);
+  background: var(--accent);
 }
 
 .tabRailSegmented :global(button[role='tab'][aria-selected='true']:hover:not(:disabled)),
 .tabRailSegmented :global(button[role='tab'][aria-selected='true']:focus-visible:not(:disabled)) {
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: var(--accent);
 }
 
 .tabItem {
@@ -110,34 +109,33 @@
   justify-content: center;
   gap: 8px;
   border: 1px solid transparent;
-  border-radius: 10px;
-  min-height: 40px;
+  border-radius: 8px;
+  min-height: 38px;
   cursor: pointer;
   color: var(--text-2);
   background: transparent;
-  font-weight: 700;
+  font-weight: 600;
   position: relative;
   z-index: 1;
-  transition: background var(--transition), color var(--transition), box-shadow var(--transition), border-color var(--transition);
+  transition: all var(--transition);
 }
 
 .tabItem:hover:not(.tabItemActive),
 .tabItem:focus-visible:not(.tabItemActive) {
-  background: color-mix(in srgb, var(--surface) 76%, var(--bg-2));
+  background: var(--bg-3);
   outline: none;
-  color: var(--text-2);
+  color: var(--text);
 }
 
 .tabItemActive {
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 6px 14px rgba(29, 111, 201, 0.22);
+  background: var(--accent);
 }
 
 .tabItemActive:hover,
 .tabItemActive:focus-visible {
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: var(--accent);
 }
 
 .tabItemIcon {
@@ -194,7 +192,7 @@
 }
 
 .sectionCard {
-  border-radius: 16px;
+  border-radius: var(--radius-sm);
 }
 
 .sectionHeader {
@@ -202,7 +200,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px 10px;
+  padding: 10px 14px 8px;
   border-bottom: 1px solid var(--surface-border);
 }
 
@@ -224,7 +222,7 @@
 }
 
 .sectionBody {
-  padding: 14px 16px;
+  padding: 10px 14px;
 }
 
 .quickOps {
@@ -256,7 +254,7 @@
 
 .statusItem {
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px;
 }
 
@@ -292,7 +290,7 @@
 
 .billingPlanCard {
   border: 1px solid var(--surface-border);
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 12px;
   display: grid;
   gap: 10px;
@@ -329,7 +327,7 @@
 .toggleWrap {
   min-height: 44px;
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   display: inline-flex;
   align-items: center;
@@ -341,16 +339,16 @@
 .textarea,
 .subjectItem {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  background: var(--bg-2);
   color: var(--text);
 }
 
 .input,
 .textarea {
-  min-height: 44px;
-  padding: 10px 12px;
+  min-height: 40px;
+  padding: 8px 12px;
   font: inherit;
 }
 
@@ -392,7 +390,7 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -403,7 +401,7 @@
 
 .emptyState {
   border: 1px dashed var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 16px;
   text-align: center;
   color: var(--text-2);
@@ -420,8 +418,8 @@
   position: static;
   top: auto;
   border: 1px solid var(--surface-border);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
   padding: 12px;
 }
 
@@ -467,8 +465,8 @@
 
 .subjectEditorPanel {
   border: 1px solid var(--surface-border);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
   padding: 14px;
   display: grid;
   gap: 14px;
@@ -483,7 +481,7 @@
 
 .topicItem {
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 10px 12px;
   display: flex;
   align-items: center;
@@ -531,7 +529,7 @@
 
 .questionCard {
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 10px;
   display: grid;
   gap: 8px;
@@ -562,7 +560,7 @@
 .presetRail {
   display: inline-flex;
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -610,7 +608,7 @@
   justify-content: space-between;
   gap: 10px;
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
 }
 
@@ -638,10 +636,10 @@
 
 .modal {
   width: min(460px, 96vw);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--surface-border);
   background: color-mix(in srgb, var(--surface) 94%, var(--bg-2));
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   padding: 16px;
   display: grid;
   gap: 12px;
@@ -660,6 +658,26 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.sidePanelOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: color-mix(in srgb, var(--bg) 40%, rgba(0, 0, 0, 0.4));
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sidePanel {
+  width: min(600px, 100vw);
+  height: 100vh;
+  background: var(--bg-2);
+  border-left: 1px solid var(--surface-border);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
 }
 
 @media (max-width: 1200px) {

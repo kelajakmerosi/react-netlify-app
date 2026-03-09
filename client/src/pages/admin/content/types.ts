@@ -1,6 +1,7 @@
 import type { SubjectRecord, SubjectQuestion, SubjectTopic } from '../../../services/admin.service'
 
 export type BuilderStep = 1 | 2 | 3 | 4
+export type ContentSubtab = 'overview' | 'subjects' | 'exams' | 'imports'
 
 export type TopicStatus = 'draft' | 'ready' | 'published'
 
@@ -75,7 +76,7 @@ export const emptyContentDraft = (): ContentDraft => ({
   subject: {
     title: '',
     description: '',
-    icon: '📘',
+    icon: 'calculator',
     color: '#3f68f7',
     order: 0,
   },
@@ -107,7 +108,7 @@ export const toContentDraft = (subject: SubjectRecord | null): ContentDraft => {
     subject: {
       title: subject.title ?? '',
       description: subject.description ?? '',
-      icon: subject.icon ?? '📘',
+      icon: subject.icon ?? 'calculator',
       color: subject.color ?? '#3f68f7',
       order: Number(subject.order ?? 0),
     },
@@ -158,7 +159,7 @@ const normalizeOptionalUrl = (value: string): string | undefined => {
 export const toSubjectPayload = (draft: ContentDraft): Omit<SubjectRecord, 'id'> => ({
   title: draft.subject.title.trim(),
   description: draft.subject.description.trim(),
-  icon: draft.subject.icon.trim() || '📘',
+  icon: draft.subject.icon.trim() || 'calculator',
   color: draft.subject.color.trim() || '#3f68f7',
   order: Number(draft.subject.order) || 0,
   topics: draft.topics

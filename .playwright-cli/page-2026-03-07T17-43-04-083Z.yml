@@ -1,0 +1,61 @@
+- generic [ref=e4]:
+  - region "Authentication overview" [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - img [ref=e16]
+          - generic [ref=e19]:
+            - generic [ref=e20]: Telefon raqami
+            - strong [ref=e21]: +998 90 123 45 67
+        - generic [ref=e22]:
+          - generic [ref=e24]: SMS kod
+          - generic [ref=e32]:
+            - img [ref=e34]
+            - generic [ref=e37]: Tasdiqlandi
+      - generic [ref=e38]:
+        - generic [ref=e39]: Account access
+        - generic [ref=e40]: Secure sign-in • OTP verification • One account
+    - generic [ref=e42]:
+      - generic [ref=e43]: Kelajak Merosi
+      - heading "Sign in to your Kelajak Merosi account or create a new one." [level=1] [ref=e44]
+      - paragraph [ref=e45]: Use your phone number for secure verification, quick access, and a consistent return point for lessons, exams, and materials.
+    - generic [ref=e46]:
+      - article [ref=e47]:
+        - img [ref=e49]
+        - generic [ref=e52]:
+          - heading "Secure verification" [level=3] [ref=e53]
+          - paragraph [ref=e54]: Phone number and code verification keep the sign-in flow clear and reliable.
+      - article [ref=e55]:
+        - img [ref=e57]
+        - generic [ref=e62]:
+          - heading "Continuous learning" [level=3] [ref=e63]
+          - paragraph [ref=e64]: After sign-in, your dashboard, exams, and library open under the same account.
+  - generic [ref=e66]:
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - generic [ref=e69]: Kelajak Merosi
+        - generic [ref=e70]: Account access
+      - heading "Sign in to your account" [level=2] [ref=e71]
+      - paragraph [ref=e72]: Use your phone number and password to sign in securely.
+    - generic [ref=e73]:
+      - tablist "Authentication mode" [ref=e74]:
+        - tab "Login" [selected] [ref=e76] [cursor=pointer]
+        - tab "Register" [ref=e77] [cursor=pointer]
+      - generic [ref=e78]:
+        - generic [ref=e79]: +998XXXXXXXXX
+        - textbox "+998XXXXXXXXX" [ref=e80]
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - generic [ref=e83]: Password
+          - textbox "Password" [ref=e84]
+        - button "Show password" [ref=e85] [cursor=pointer]:
+          - img [ref=e86]
+      - button "Login" [ref=e89] [cursor=pointer]
+      - generic [ref=e90]:
+        - button "Sign in via OTP" [ref=e91] [cursor=pointer]
+        - button "Forgot password?" [ref=e92] [cursor=pointer]
+      - generic [ref=e95]: or
+      - button "Continue with Google" [ref=e98] [cursor=pointer]:
+        - img [ref=e99]
+        - text: Continue with Google
+      - button "Continue as Guest" [ref=e105] [cursor=pointer]

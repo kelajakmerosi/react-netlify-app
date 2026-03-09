@@ -1,0 +1,280 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - link "KM Kelajak Merosi" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e7]: KM
+      - generic [ref=e8]: Kelajak Merosi
+    - navigation "Landing navigation" [ref=e9]:
+      - link "Lessons" [ref=e10] [cursor=pointer]:
+        - /url: "#lessons"
+      - link "Exams" [ref=e11] [cursor=pointer]:
+        - /url: "#exams"
+      - link "Library" [ref=e12] [cursor=pointer]:
+        - /url: "#library"
+      - link "Why us" [ref=e13] [cursor=pointer]:
+        - /url: "#trust"
+    - generic [ref=e14]:
+      - link "Login" [ref=e15] [cursor=pointer]:
+        - /url: /auth?mode=login
+      - link "Get started" [ref=e16] [cursor=pointer]:
+        - /url: /auth?mode=signup
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - paragraph [ref=e20]: Kelajak Merosi
+        - heading "Lessons, exams, and study materials in one disciplined learning system." [level=1] [ref=e21]
+        - paragraph [ref=e22]: Kelajak Merosi helps learners continue lessons, prepare for attestation exams, and unlock the right materials without switching between disconnected tools.
+        - generic [ref=e23]:
+          - link "Get started" [ref=e24] [cursor=pointer]:
+            - /url: /auth?mode=signup
+          - link "Explore tracks" [ref=e25] [cursor=pointer]:
+            - /url: /auth?mode=signup
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]: Track
+            - strong [ref=e29]: Lessons
+          - generic [ref=e30]:
+            - generic [ref=e31]: Proof
+            - strong [ref=e32]: Exams
+          - generic [ref=e33]:
+            - generic [ref=e34]: Resources
+            - strong [ref=e35]: Library
+      - generic [ref=e36]:
+        - img "Kelajak Merosi learning environment" [ref=e38]
+        - link "Open app" [ref=e39] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img [ref=e40]
+    - generic [ref=e42]:
+      - article [ref=e43]:
+        - img [ref=e45]
+        - heading "Structured lessons" [level=2] [ref=e48]
+        - paragraph [ref=e49]: Study subject by subject and continue exactly where you left off.
+      - article [ref=e50]:
+        - img [ref=e52]
+        - heading "Exam readiness" [level=2] [ref=e56]
+        - paragraph [ref=e57]: Timed exams, pass thresholds, and practical result review for real preparation.
+      - article [ref=e58]:
+        - img [ref=e60]
+        - heading "Material library" [level=2] [ref=e63]
+        - paragraph [ref=e64]: Purchased packs, files, and downloadable resources kept in one clear place.
+    - generic [ref=e65]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - paragraph [ref=e68]: Lessons
+          - heading "Core product areas" [level=2] [ref=e69]
+        - paragraph [ref=e70]: Dashboard, subjects, and topics use the same visual language. After sign-in, users move into a familiar flow instead of learning a different interface.
+      - generic [ref=e71]:
+        - link "Lessons Lessons Subjects, topics, and structured study." [ref=e72] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img "Lessons" [ref=e73]
+          - generic [ref=e74]:
+            - img [ref=e76]
+            - strong [ref=e78]: Lessons
+            - paragraph [ref=e79]: Subjects, topics, and structured study.
+        - link "Exams Exams Attestation and preparation exams." [ref=e80] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img "Exams" [ref=e81]
+          - generic [ref=e82]:
+            - img [ref=e84]
+            - strong [ref=e88]: Exams
+            - paragraph [ref=e89]: Attestation and preparation exams.
+        - link "Materials Materials Downloadable packs and guides." [ref=e90] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img "Materials" [ref=e91]
+          - generic [ref=e92]:
+            - img [ref=e94]
+            - strong [ref=e97]: Materials
+            - paragraph [ref=e98]: Downloadable packs and guides.
+        - link "Library Library Your unlocked and owned resources." [ref=e99] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img "Library" [ref=e100]
+          - generic [ref=e101]:
+            - img [ref=e103]
+            - strong [ref=e105]: Library
+            - paragraph [ref=e106]: Your unlocked and owned resources.
+    - generic [ref=e107]:
+      - generic [ref=e108]:
+        - paragraph [ref=e109]: Learning flow
+        - heading "The product shows the next step instead of adding noise." [level=2] [ref=e110]
+        - paragraph [ref=e111]: Dashboard, subjects, and topics use the same visual language. After sign-in, users move into a familiar flow instead of learning a different interface.
+        - link "Open app" [ref=e112] [cursor=pointer]:
+          - /url: /auth?mode=signup
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - link "01 Connected to dashboard Continue learning Resume the last useful topic with one clear action." [ref=e115] [cursor=pointer]:
+            - /url: /auth?mode=signup
+            - img [ref=e117]
+            - generic [ref=e122]:
+              - generic [ref=e123]:
+                - generic [ref=e124]: "01"
+                - strong [ref=e125]: Connected to dashboard
+              - heading "Continue learning" [level=3] [ref=e126]
+              - paragraph [ref=e127]: Resume the last useful topic with one clear action.
+            - img [ref=e128]
+          - link "02 Ordered learning flow Study by subject Track completion and momentum across every subject." [ref=e130] [cursor=pointer]:
+            - /url: /auth?mode=signup
+            - img [ref=e132]
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]: "02"
+                - strong [ref=e137]: Ordered learning flow
+              - heading "Study by subject" [level=3] [ref=e138]
+              - paragraph [ref=e139]: Track completion and momentum across every subject.
+            - img [ref=e140]
+          - link "03 Progress driven Recommended next step The app suggests the next practical lesson based on progress." [ref=e142] [cursor=pointer]:
+            - /url: /auth?mode=signup
+            - img [ref=e144]
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e149]: "03"
+                - strong [ref=e150]: Progress driven
+              - heading "Recommended next step" [level=3] [ref=e151]
+              - paragraph [ref=e152]: The app suggests the next practical lesson based on progress.
+            - img [ref=e153]
+        - generic [ref=e155]:
+          - paragraph [ref=e156]: Dashboard
+          - strong [ref=e157]: Continue learning
+          - paragraph [ref=e158]: Resume the last useful topic with one clear action.
+          - generic [ref=e159]:
+            - generic [ref=e160]:
+              - generic [ref=e161]: Track
+              - strong [ref=e162]: Lessons
+            - generic [ref=e163]:
+              - generic [ref=e164]: Proof
+              - strong [ref=e165]: Exams
+            - generic [ref=e166]:
+              - generic [ref=e167]: Resources
+              - strong [ref=e168]: Library
+    - generic [ref=e169]:
+      - generic [ref=e170]:
+        - paragraph [ref=e171]: Exams
+        - heading "Exam pages are built for decision clarity, not marketplace clutter." [level=2] [ref=e172]
+        - paragraph [ref=e173]: Catalog, checkout, attempt, and result pages are connected. Users understand what they get, how long it takes, and what happens next.
+        - link "Start exam" [ref=e174] [cursor=pointer]:
+          - /url: /auth?mode=signup
+      - generic [ref=e175]:
+        - img "Exam pages are built for decision clarity, not marketplace clutter." [ref=e176]
+        - generic [ref=e177]:
+          - img [ref=e178]
+          - generic [ref=e181]:
+            - strong [ref=e182]: 80%
+            - text: Pass threshold flow
+    - generic [ref=e183]:
+      - img "Exam pages are built for decision clarity, not marketplace clutter." [ref=e185]
+      - generic [ref=e186]:
+        - paragraph [ref=e187]: Exams
+        - heading "Exam pages are built for decision clarity, not marketplace clutter." [level=2] [ref=e188]
+        - paragraph [ref=e189]: Catalog, checkout, attempt, and result pages are connected. Users understand what they get, how long it takes, and what happens next.
+        - generic [ref=e190]:
+          - link "Attestation demo exam Clear decision area Question count, duration, and pass threshold are visible immediately." [ref=e191] [cursor=pointer]:
+            - /url: /auth?mode=signup
+            - img [ref=e193]
+            - generic [ref=e196]:
+              - strong [ref=e197]: Attestation demo exam
+              - generic [ref=e198]: Clear decision area
+              - paragraph [ref=e199]: Question count, duration, and pass threshold are visible immediately.
+          - link "From payment to attempt One coherent flow Checkout flows directly into the start of the exam experience." [ref=e200] [cursor=pointer]:
+            - /url: /auth?mode=signup
+            - img [ref=e202]
+            - generic [ref=e206]:
+              - strong [ref=e207]: From payment to attempt
+              - generic [ref=e208]: One coherent flow
+              - paragraph [ref=e209]: Checkout flows directly into the start of the exam experience.
+          - link "Result and retry Clean completion state Users see their result, status, and next action without confusion." [ref=e210] [cursor=pointer]:
+            - /url: /auth?mode=signup
+            - img [ref=e212]
+            - generic [ref=e215]:
+              - strong [ref=e216]: Result and retry
+              - generic [ref=e217]: Clean completion state
+              - paragraph [ref=e218]: Users see their result, status, and next action without confusion.
+    - generic [ref=e219]:
+      - generic [ref=e220]:
+        - img "The library is built to use owned resources, not resell them again." [ref=e221]
+        - generic [ref=e222]:
+          - img [ref=e223]
+          - generic [ref=e226]:
+            - strong [ref=e227]: Library
+            - text: Owned resources, clearly arranged
+      - generic [ref=e228]:
+        - paragraph [ref=e229]: Materials
+        - heading "The library is built to use owned resources, not resell them again." [level=2] [ref=e230]
+        - paragraph [ref=e231]: Store cards and file management do not compete in the same surface. Users first see pack status, then the files and actions they can take.
+        - link "Open library" [ref=e232] [cursor=pointer]:
+          - /url: /auth?mode=signup
+    - generic [ref=e233]:
+      - generic [ref=e234]:
+        - paragraph [ref=e235]: Materials
+        - heading "The library is built to use owned resources, not resell them again." [level=2] [ref=e236]
+        - paragraph [ref=e237]: Store cards and file management do not compete in the same surface. Users first see pack status, then the files and actions they can take.
+        - generic [ref=e238]:
+          - img "Material catalog" [ref=e239]
+          - generic [ref=e240]:
+            - strong [ref=e241]: Material catalog
+            - generic [ref=e242]: Single dominant CTA
+      - generic [ref=e243]:
+        - link "Material catalog Single dominant CTA Short, readable cards built for quick purchase decisions." [ref=e244] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img [ref=e246]
+          - generic [ref=e249]:
+            - strong [ref=e250]: Material catalog
+            - generic [ref=e251]: Single dominant CTA
+            - paragraph [ref=e252]: Short, readable cards built for quick purchase decisions.
+          - img [ref=e253]
+        - link "Unlocked packs Ownership is obvious Library views separate ownership state from file browsing." [ref=e255] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img [ref=e257]
+          - generic [ref=e259]:
+            - strong [ref=e260]: Unlocked packs
+            - generic [ref=e261]: Ownership is obvious
+            - paragraph [ref=e262]: Library views separate ownership state from file browsing.
+          - img [ref=e263]
+        - link "Resource access Utility first Users find the file they need without fighting the layout." [ref=e265] [cursor=pointer]:
+          - /url: /auth?mode=signup
+          - img [ref=e267]
+          - generic [ref=e270]:
+            - strong [ref=e271]: Resource access
+            - generic [ref=e272]: Utility first
+            - paragraph [ref=e273]: Users find the file they need without fighting the layout.
+          - img [ref=e274]
+    - generic [ref=e276]:
+      - generic [ref=e277]:
+        - paragraph [ref=e278]: Why it works
+        - heading "One accent, one background system, one product language." [level=2] [ref=e279]
+        - paragraph [ref=e280]: Landing, auth, dashboard, catalog, and library should feel like one product. That means hierarchy, consistency, and speed matter more than decoration.
+      - generic [ref=e281]:
+        - generic [ref=e282]:
+          - img [ref=e284]
+          - paragraph [ref=e286]: "One accent color: purple for active states, progress, and primary actions."
+        - generic [ref=e287]:
+          - img [ref=e289]
+          - paragraph [ref=e292]: "One background system: soft mist backgrounds, white surfaces, clear text."
+        - generic [ref=e293]:
+          - img [ref=e295]
+          - paragraph [ref=e298]: "One card logic: users should not relearn the interface on every page."
+    - generic [ref=e299]:
+      - generic [ref=e300]:
+        - paragraph [ref=e301]: Reviews
+        - heading "What learners find useful" [level=2] [ref=e302]
+        - paragraph [ref=e303]: Landing, auth, dashboard, catalog, and library should feel like one product. That means hierarchy, consistency, and speed matter more than decoration.
+      - generic [ref=e304]:
+        - article [ref=e305]:
+          - generic [ref=e306]:
+            - img [ref=e308]
+            - generic [ref=e311]:
+              - strong [ref=e312]: Mohh Jumah
+              - generic [ref=e313]: Senior Developer
+          - paragraph [ref=e314]: Kelajak Merosi gave me a disciplined learning path instead of scattered lessons. The exam flow feels serious and useful.
+        - article [ref=e315]:
+          - generic [ref=e316]:
+            - img [ref=e318]
+            - generic [ref=e321]:
+              - strong [ref=e322]: John Mark
+              - generic [ref=e323]: Data Analyst
+          - paragraph [ref=e324]: The platform is calm, structured, and easy to trust. I always know what my next step is.
+  - contentinfo [ref=e325]:
+    - generic [ref=e326]:
+      - heading "Stay updated" [level=2] [ref=e327]
+      - paragraph [ref=e328]: Get updates about new exams, materials, and platform improvements.
+    - generic [ref=e329]:
+      - textbox "Your email address" [ref=e330]
+      - button "Subscribe" [ref=e331] [cursor=pointer]

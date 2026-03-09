@@ -1,8 +1,10 @@
 import { 
+  BookOpen,
   Calculator, 
   Zap, 
   Dna, 
   FlaskConical,
+  Sigma,
 } from 'lucide-react'
 import type { Subject, LocaleKey, TopicStatus, ModuleTrack, Topic, Question, SubjectModule } from '../types'
 
@@ -28,6 +30,8 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'>> = [
           { id:8, text:'x - 7 = 5 bo\'lsa x = ?',         options:['10','11','12','13'], answer:2 },
           { id:9, text:'(x+3)(x-3) = ?',                   options:['x²-9','x²+9','x²-6','x²+6'], answer:0 },
           { id:10,text:'2(x+3) = 14 bo\'lsa x = ?',        options:['3','4','5','6'], answer:1 },
+          { id:11, text:'Rasmli algebra mashqida 4 + x = 9 bo\'lsa x nechaga teng?', imageUrl:'/quiz-media/algebra-1600.jpg', options:['3','4','5','6'], answer:2 },
+          { id:12, text:'Rasmli topshiriqda 3x = 15 bo\'lsa x = ?', imageUrl:'/quiz-media/algebra-1600.jpg', options:['3','4','5','6'], answer:2 },
         ],
       },
       {
@@ -35,6 +39,7 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'>> = [
         videoId: 'WqzK3UAXaHs',
         questions: [
           { id:1, text:'To\'g\'ri burchakli uchburchakda katetlar 3 va 4. Gipotenuza = ?', options:['5','6','7','8'], answer:0 },
+          { id:11, text:'Rasmda ko\'rsatilgan asboblar ichida burchak o\'lchash uchun qaysi biri ishlatiladi?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Sirkul','Transportir','Kalkulyator','Qalamdon'], answer:1 },
           { id:2, text:'Doira yuzi π·r², r=5 bo\'lsa = ?', options:['25π','10π','5π','50π'], answer:0 },
           { id:3, text:'Kvadrat perimetri 20. Tomoni = ?', options:['4','5','6','8'], answer:1 },
           { id:4, text:'Uchburchak burchaklari yig\'indisi = ?', options:['90°','180°','270°','360°'], answer:1 },
@@ -44,6 +49,8 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'>> = [
           { id:8, text:'Parallelogramm: asos=8, h=5. Yuzi = ?', options:['35','40','45','50'], answer:1 },
           { id:9, text:'Teng yonli uchburchak: tomon=6. Perimetri = ?', options:['12','15','18','21'], answer:2 },
           { id:10,text:'Trapetsiya: asoslar 4 va 6, h=3. Yuzi = ?', options:['12','15','18','21'], answer:1 },
+          { id:12,text:'Rasmga qarab uchburchak chizishda eng mos qizil asbob qaysi?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Transportir','Uchburchak lineyka','Oddiy lineyka','Silgi'], answer:1 },
+          { id:13,text:'Rasmli geometriya mashqida doira markazini topishda qaysi asbob foydali?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Sirkul','Kalkulyator','Qog\'oz stikeri','Bo\'yoq'], answer:0 },
         ],
       },
       {
@@ -131,6 +138,7 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'>> = [
         videoId: 'URUJD5NEXC8',
         questions: [
           { id:1, text:'Hujayra "energiya stantsiyasi" qaysi organoid?', options:['Yadro','Mitoxondriya','Ribosoma','Lizosoma'], answer:1 },
+          { id:11, text:'Rasmda markazdagi yadro atrofida joylashgan katta tuzilma qaysi?', imageUrl:'/quiz-media/cell-diagram.svg', options:['Hujayra membranasi','Sitoplazma','Yadro','Mitoxondriya'], answer:2 },
           { id:2, text:'DNK nima?', options:['Oqsil','Yog\'','Nukleotid','Uglerod'], answer:2 },
           { id:3, text:'Fotosintez qayerda sodir bo\'ladi?', options:['Mitoxondriya','Yadro','Xloroplast','Vakuola'], answer:2 },
           { id:4, text:'Oqsil sintezi qayerda?', options:['Ribosoma','Golji','ER','Yadro'], answer:0 },
@@ -187,6 +195,7 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'>> = [
         videoId: '0RRVV4Diomg',
         questions: [
           { id:1, text:'Vodorodning atom raqami = ?', options:['0','1','2','3'], answer:1 },
+          { id:11, text:'Rasmda kattalashtirilgan element qaysi atom raqamni ko\'rsatmoqda?', imageUrl:'/quiz-media/periodic-table.svg', options:['1','2','6','8'], answer:0 },
           { id:2, text:'Kislorod kimyoviy belgisi = ?', options:['K','Ki','O','Ox'], answer:2 },
           { id:3, text:'Davriy jadval nechta davrdan?', options:['5','6','7','8'], answer:2 },
           { id:4, text:'Inert gazlar qaysi guruhda?', options:['I','VII','VIII','VI'], answer:2 },
@@ -228,6 +237,109 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'>> = [
           { id:8, text:'Glukoza formulasi = ?', options:['C12H22O11','C6H12O6','C5H10O5','C3H6O3'], answer:1 },
           { id:9, text:'Saponifikatsiya reaksiyasi = ?', options:['Yonish','Sovun ishlab chiqarish','Polimerizatsiya','Oksidlanish'], answer:1 },
           { id:10,text:'Ester hosil bo\'lish reaksiyasi = ?', options:['Parchalanish','Eterifikatsiya','Polimerizatsiya','Galogenlanish'], answer:1 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'history',
+    icon: <BookOpen size={22} strokeWidth={2.35} />,
+    color: '#9b6b3d',
+    gradient: 'linear-gradient(135deg,#8f5b2c,#bc8452)',
+    topics: [
+      {
+        id: 'ancient-civilizations',
+        videoId: 'B968I6nA9xM',
+        questions: [
+          { id:1, text:'Qadimgi Misr sivilizatsiyasi asosan qaysi daryo bo\'yida rivojlangan?', imageUrl:'/quiz-media/silk-road-map.svg', options:['Nil','Yanszi','Amazonka','Volga'], answer:0 },
+          { id:2, text:'Mixxat yozuvi qaysi hududda paydo bo\'lgan?', options:['Mesopotamiya','Misr','Yunoniston','Xitoy'], answer:0 },
+          { id:3, text:'Rim imperiyasida “senat” nima edi?', options:['Harbiy lager','Maslahat kengashi','Bozor','Ibodatxona'], answer:1 },
+          { id:4, text:'Piramidalar asosan nima uchun qurilgan?', options:['Savdo ombori','Shoh qabri','Maktab','Qo\'rg\'on'], answer:1 },
+          { id:5, text:'Buyuk Ipak yo\'li eng ko\'p nimani bog\'lagan?', options:['Afrika va Amerika','Xitoy va O\'rta yer dengizi','Hindiston va Avstraliya','Sibir va Yaponiya'], answer:1 },
+          { id:6, text:'Afina shahrida demokratiya nimani anglatgan?', options:['Faqat podsho qarori','Fuqarolarning ishtiroki','Harbiy boshqaruv','Diniy boshqaruv'], answer:1 },
+          { id:7, text:'Aleksandr Makedonskiy qaysi hududlarni zabt etgan?', options:['Faqat Yevropa','Yevropa va Osiyo qismlari','Faqat Afrika','Faqat Arabiston'], answer:1 },
+          { id:8, text:'Qadimgi sivilizatsiyalarni o\'rganishda arxeologiya nimaga yordam beradi?', options:['Faqat afsonalarni yozishga','Maddiy topilmalarni talqin qilishga','Faqat xarita chizishga','Savdo qilishga'], answer:1 },
+        ],
+      },
+      {
+        id: 'world-history',
+        videoId: 'xuCn8ux2gbs',
+        questions: [
+          { id:1, text:'Rasmda ko\'rsatilgan vaqt chizig\'ida eng so\'nggi davr qaysi?', imageUrl:'/quiz-media/history-timeline.svg', options:['Sanoat inqilobi','Uyg\'onish davri','Jahon urushlari','O\'rta asrlar'], answer:2 },
+          { id:2, text:'Sanoat inqilobi avvalo qayerda kuchli boshlangan?', options:['Fransiya','Buyuk Britaniya','Hindiston','Rossiya'], answer:1 },
+          { id:3, text:'Birinchi jahon urushi qaysi yillarda bo\'lib o\'tgan?', options:['1914-1918','1939-1945','1905-1910','1920-1924'], answer:0 },
+          { id:4, text:'BMT qachon tuzilgan?', options:['1919','1945','1955','1961'], answer:1 },
+          { id:5, text:'Sovuq urushning asosiy tomoni qaysilar edi?', options:['AQSH va SSSR','Fransiya va Germaniya','Xitoy va Yaponiya','Misr va Rim'], answer:0 },
+          { id:6, text:'Matbaa texnologiyasining keng tarqalishi nimani kuchaytirdi?', options:['Ma\'lumot almashinuvi','Faqat harbiy nazoratni','Dengiz savdosini','Yer soliqlarini'], answer:0 },
+          { id:7, text:'Uyg\'onish davri ko\'proq nimaga e\'tibor qaratgan?', options:['Qadimgi bilimlarni qayta tiklashga','Faqat qurollarga','Faqat diniy jazolarga','Faqat qishloq xo\'jaligiga'], answer:0 },
+          { id:8, text:'Dekolonizatsiya nimani anglatadi?', options:['Imperiyalarning kengayishi','Mustamlakalarning mustaqillashuvi','Savdo blokadasi','Yangi sulola'], answer:1 },
+        ],
+      },
+      {
+        id: 'uzbek-heritage',
+        videoId: 't4m8Z0u0A6M',
+        questions: [
+          { id:1, text:'Samarqand qaysi tarixiy obidalari bilan mashhur?', options:['Registon maydoni','Kolizey','Eyfel minorasi','Akropol'], answer:0 },
+          { id:2, text:'Amir Temur qaysi davr hukmdori sifatida mashhur?', options:['XIV asr oxiri','XVIII asr','IX asr','XX asr'], answer:0 },
+          { id:3, text:'Mirzo Ulug\'bek ko\'proq qaysi sohada tanilgan?', options:['Astronomiya','Dengizchilik','Arxitektura','Tibbiyot'], answer:0 },
+          { id:4, text:'Ichan-Qal\'a qaysi shaharda joylashgan?', options:['Xiva','Buxoro','Termiz','Qo\'qon'], answer:0 },
+          { id:5, text:'Alisher Navoiy qaysi meros bilan mashhur?', options:['Adabiyot','Kimyo','Matematika','Geologiya'], answer:0 },
+          { id:6, text:'Buxoro tarixda ko\'proq nima bilan ajralib turgan?', options:['Ilm va savdo markazi','Faqat harbiy lager','Faqat dehqonchilik','Sanoat zavodlari'], answer:0 },
+          { id:7, text:'Qadimgi O\'zbekiston hududidagi Ipak yo\'li nimani kuchaytirgan?', options:['Madaniy almashinuvni','Faqat soliqlarni','Faqat ko\'chmanchilikni','Faqat harbiy bosqinlarni'], answer:0 },
+          { id:8, text:'Tarixiy merosni asrashning eng muhim sababi nima?', options:['Milliy xotira va identitetni saqlash','Faqat sayyohlikni','Faqat qurilish qilishni','Faqat sportni rivojlantirish'], answer:0 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'geometry',
+    icon: <Sigma size={22} strokeWidth={2.35} />,
+    color: '#6f59ef',
+    gradient: 'linear-gradient(135deg,#5a48db,#8b78ff)',
+    topics: [
+      {
+        id: 'plane-geometry',
+        videoId: 'WqzK3UAXaHs',
+        questions: [
+          { id:1, text:'Rasmli topshiriqda burchak o\'lchash uchun qaysi asbob ishlatiladi?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Transportir','Sirkul','Kalkulyator','Qalam'], answer:0 },
+          { id:2, text:'Uchburchak ichki burchaklari yig\'indisi = ?', options:['90°','180°','270°','360°'], answer:1 },
+          { id:3, text:'Kvadratning barcha tomonlari qanday bo\'ladi?', options:['Har xil','Faqat 2 tasi teng','Barchasi teng','Faqat diagonallari teng'], answer:2 },
+          { id:4, text:'Aylana diametri 12 bo\'lsa radius = ?', options:['4','5','6','8'], answer:2 },
+          { id:5, text:'To\'g\'ri to\'rtburchak yuzi qanday topiladi?', options:['a + b','2(a+b)','a × b','a ÷ b'], answer:2 },
+          { id:6, text:'Teng yonli uchburchakda qaysi tomonlar teng?', options:['Faqat asoslar','Yon tomonlar','Barcha tomonlar emas','Faqat balandliklar'], answer:1 },
+          { id:7, text:'Perimetri 24 bo\'lgan kvadratning tomoni = ?', options:['4','5','6','8'], answer:2 },
+          { id:8, text:'Parallel chiziqlar qanday kesishadi?', options:['Har doim kesishadi','Ba\'zan kesishadi','Kesishmaydi','Faqat 90° da kesishadi'], answer:2 },
+          { id:9, text:'Rasmli geometriya kartasidagi uchburchak asbobi nimaga kerak?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Burchak va chiziq chizish','Massani o\'lchash','Haroratni ko\'rish','Tenglama yechish'], answer:0 },
+        ],
+      },
+      {
+        id: 'solid-geometry',
+        videoId: 'Zn6fW1xQ4WQ',
+        questions: [
+          { id:1, text:'Kubning nechta qirrasi bor?', options:['8','10','12','14'], answer:2 },
+          { id:2, text:'Kub hajmi formulasi = ?', options:['a²','6a²','a³','2a³'], answer:2 },
+          { id:3, text:'Silindrning 2 ta ... bor.', options:['cho\'qqisi','asoslari','diagonali','burchagi'], answer:1 },
+          { id:4, text:'Shar sirtida burchak bormi?', options:['Ha, 2 ta','Ha, 1 ta','Yo\'q','Faqat markazida'], answer:2 },
+          { id:5, text:'To\'g\'ri burchakli parallelepiped hajmi = ?', options:['a+b+c','a×b×c','2(a+b+c)','ab+bc'], answer:1 },
+          { id:6, text:'Konusning nechta asosi bor?', options:['0','1','2','3'], answer:1 },
+          { id:7, text:'Rasmli topshiriqda fazoviy shakl modelini qurishda qaysi asbob foydali?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Lineyka','Termometr','Mikroskop','Kompas'], answer:0 },
+          { id:8, text:'Prizma nomi odatda nimaga qarab beriladi?', options:['Rangiga','Asos shakliga','Balandligiga','Hajmiga'], answer:1 },
+          { id:9, text:'Kubning barcha yuzlari qanday shakl?', options:['Uchburchak','Kvadrat','To\'g\'ri to\'rtburchak','Aylana'], answer:1 },
+        ],
+      },
+      {
+        id: 'coordinate-geometry',
+        videoId: 'dR4fQ0XxH4Y',
+        questions: [
+          { id:1, text:'Koordinata tekisligida (0,0) nuqta nima deyiladi?', options:['Kesma','Koordinata boshi','Vektor','Diagonali'], answer:1 },
+          { id:2, text:'(3, 5) nuqtada x koordinata = ?', options:['3','5','8','0'], answer:0 },
+          { id:3, text:'Nuqta y o\'qi ustida bo\'lsa x qiymati odatda = ?', options:['1','-1','0','5'], answer:2 },
+          { id:4, text:'Masofa formulasi qaysi teoremaga tayanadi?', options:['Pifagor','Arximed','Nyuton','Gauss'], answer:0 },
+          { id:5, text:'A(1,2) va B(1,7) orasidagi masofa = ?', options:['3','4','5','6'], answer:2 },
+          { id:6, text:'Qaysi chiziq x o\'qiga parallel?', options:['y = 4','x = 4','y = x','x + y = 1'], answer:0 },
+          { id:7, text:'Qaysi chiziq y o\'qiga parallel?', options:['y = 4','x = 4','y = x','y = 2x'], answer:1 },
+          { id:8, text:'Rasmli koordinata mashqida shaklni tekislikka ko\'chirish uchun qaysi vosita yordam beradi?', imageUrl:'/quiz-media/geometry-1600.jpg', options:['Katakli koordinata tarmog\'i','Mikroskop','Barometr','Probirka'], answer:0 },
+          { id:9, text:'O\'rta nuqta formulasi nimani topadi?', options:['Kesmaning markazini','Yuzani','Perimetrni','Burchakni'], answer:0 },
         ],
       },
     ],
@@ -280,28 +392,34 @@ export const SUBJECTS: Subject[] = SUBJECT_SEEDS.map((subject) => {
 export const TOPIC_NAMES: Record<LocaleKey, Record<string, string>> = {
   uz: {
     'algebra-basics':'Algebra asoslari','geometry':'Geometriya','statistics':'Statistika',
+    'plane-geometry':'Tekislik geometriyasi','solid-geometry':'Fazoviy geometriya','coordinate-geometry':'Koordinata geometriyasi',
     'mechanics':'Mexanika','thermodynamics':'Termodinamika','electromagnetism':'Elektromagnitizm',
     'cell-biology':'Hujayra biologiyasi','genetics':'Genetika','ecology':'Ekologiya',
     'periodic-table':'Davriy jadval','chemical-reactions':'Kimyoviy reaksiyalar','organic-chemistry':'Organik kimyo',
+    'ancient-civilizations':'Qadimgi sivilizatsiyalar','world-history':'Jahon tarixi','uzbek-heritage':'O\'zbek merosi',
   },
   en: {
     'algebra-basics':'Algebra Basics','geometry':'Geometry','statistics':'Statistics',
+    'plane-geometry':'Plane Geometry','solid-geometry':'Solid Geometry','coordinate-geometry':'Coordinate Geometry',
     'mechanics':'Mechanics','thermodynamics':'Thermodynamics','electromagnetism':'Electromagnetism',
     'cell-biology':'Cell Biology','genetics':'Genetics','ecology':'Ecology',
     'periodic-table':'Periodic Table','chemical-reactions':'Chemical Reactions','organic-chemistry':'Organic Chemistry',
+    'ancient-civilizations':'Ancient Civilizations','world-history':'World History','uzbek-heritage':'Uzbek Heritage',
   },
   ru: {
     'algebra-basics':'Основы алгебры','geometry':'Геометрия','statistics':'Статистика',
+    'plane-geometry':'Планиметрия','solid-geometry':'Стереометрия','coordinate-geometry':'Координатная геометрия',
     'mechanics':'Механика','thermodynamics':'Термодинамика','electromagnetism':'Электромагнетизм',
     'cell-biology':'Клеточная биология','genetics':'Генетика','ecology':'Экология',
     'periodic-table':'Периодическая таблица','chemical-reactions':'Химические реакции','organic-chemistry':'Органическая химия',
+    'ancient-civilizations':'Древние цивилизации','world-history':'Всемирная история','uzbek-heritage':'Наследие Узбекистана',
   },
 }
 
 export const SUBJECT_NAMES: Record<LocaleKey, Record<string, string>> = {
-  uz: { math:'Matematika', physics:'Fizika', biology:'Biologiya', chemistry:'Kimyo' },
-  en: { math:'Mathematics', physics:'Physics', biology:'Biology', chemistry:'Chemistry' },
-  ru: { math:'Математика', physics:'Физика', biology:'Биология', chemistry:'Химия' },
+  uz: { math:'Matematika', physics:'Fizika', biology:'Biologiya', chemistry:'Kimyo', history:'Tarix', geometry:'Geometriya' },
+  en: { math:'Mathematics', physics:'Physics', biology:'Biology', chemistry:'Chemistry', history:'History', geometry:'Geometry' },
+  ru: { math:'Математика', physics:'Физика', biology:'Биология', chemistry:'Химия', history:'История', geometry:'Геометрия' },
 }
 
 export const MODULE_NAMES: Record<LocaleKey, Record<ModuleTrack, string>> = {

@@ -87,21 +87,6 @@ vi.mock('../pages/ExamResultPage', () => ({
   default: () => <div>ExamResultPage</div>,
 }))
 
-vi.mock('../pages/MaterialCatalogPage', () => ({
-  MaterialCatalogPage: () => <div>MaterialCatalogPage</div>,
-  default: () => <div>MaterialCatalogPage</div>,
-}))
-
-vi.mock('../pages/MaterialCheckoutPage', () => ({
-  MaterialCheckoutPage: () => <div>MaterialCheckoutPage</div>,
-  default: () => <div>MaterialCheckoutPage</div>,
-}))
-
-vi.mock('../pages/MaterialLibraryPage', () => ({
-  MaterialLibraryPage: () => <div>MaterialLibraryPage</div>,
-  default: () => <div>MaterialLibraryPage</div>,
-}))
-
 vi.mock('../pages/PaymentGatewayPage', () => ({
   PaymentGatewayPage: () => <div>PaymentGatewayPage</div>,
   default: () => <div>PaymentGatewayPage</div>,
@@ -161,21 +146,6 @@ describe('App routing', () => {
   it('renders exam checkout route', () => {
     renderAt('/exams/abc', { user: { id: 'u1', role: 'student' }, isGuest: false })
     expect(screen.getByText('ExamCheckoutPage')).toBeTruthy()
-  })
-
-  it('renders material library route', () => {
-    renderAt('/materials/library', { user: { id: 'u1', role: 'student' }, isGuest: false })
-    expect(screen.getByText('MaterialLibraryPage')).toBeTruthy()
-  })
-
-  it('renders material catalog route', () => {
-    renderAt('/materials', { user: { id: 'u1', role: 'student' }, isGuest: false })
-    expect(screen.getByText('MaterialCatalogPage')).toBeTruthy()
-  })
-
-  it('renders material checkout route', () => {
-    renderAt('/materials/m-1', { user: { id: 'u1', role: 'student' }, isGuest: false })
-    expect(screen.getByText('MaterialCheckoutPage')).toBeTruthy()
   })
 
   it('renders payment gateway route', () => {

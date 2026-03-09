@@ -8,23 +8,776 @@
   align-items: stretch;
 }
 
-.builderShell > * {
+.builderShell>* {
   min-width: 0;
+}
+
+.contentSubtabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+}
+
+.contentSubtab {
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.contentSubtab:hover,
+.contentSubtab:focus-visible {
+  outline: none;
+  background: var(--bg-3);
+  color: var(--text);
+}
+
+.contentSubtabActive {
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contentPane {
+  display: grid;
+  gap: 12px;
+}
+
+.commandDeck {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+}
+
+.commandDeckHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.commandDeckEyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.commandDeckTitle {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.commandDeckSubtitle {
+  margin: 8px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 64ch;
+}
+
+.commandDeckStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  min-width: min(420px, 100%);
+}
+
+.commandDeckStat {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.commandDeckStat span {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.commandDeckStat strong {
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.commandDeckGrid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.commandCard {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.commandCardFeature {
+  background: var(--bg-2);
+}
+
+.commandCardWide {
+  grid-column: 1 / -1;
+}
+
+.commandCardHead {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+
+.commandCardHead h4 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.commandCardHead p {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.commandCardIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-light) 68%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  flex-shrink: 0;
+}
+
+.commandCardActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.healthList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.healthItem {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.healthItem strong {
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.healthItem span {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.commandFeatureMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.commandFeaturePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.templateGrid,
+.pricingCardGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.templateGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.templateCard,
+.pricingCard,
+.subjectCard {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+}
+
+.templateMedia,
+.pricingCardMedia,
+.subjectCardMedia {
+  min-height: 110px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  padding: 12px;
+}
+
+.templateBadge,
+.pricingCardBadge,
+.subjectCardBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(11, 10, 20, 0.34);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.templateBody,
+.pricingCardBody,
+.subjectCardBody {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.templateBody strong,
+.pricingCardBody strong,
+.subjectCardBody strong {
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.templateBody p,
+.subjectCardBody p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.templateMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.templateMeta span,
+.subjectCardHead small {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.pricingCardTop,
+.subjectCardHead {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pricingCardTop p {
+  margin: 4px 0 0;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.pricingCardValue {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.pricingCardValue span {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pricingCardControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.commandToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 0 12px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subjectCard {
+  width: 100%;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.inventorySection {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+}
+
+.inventoryHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.inventoryTitle {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.inventorySubtitle {
+  margin: 8px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.inventoryStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  min-width: min(420px, 100%);
+}
+
+.inventoryStat {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.inventoryStat span {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.inventoryStat strong {
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.inventoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.inventoryCard {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  display: grid;
+  min-width: 0;
+  transition: all var(--transition);
+}
+
+.inventoryCard:hover,
+.inventoryCard:focus-visible {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--surface-border));
+  box-shadow: var(--shadow-sm);
+  outline: none;
+}
+
+.inventoryCardActive {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--surface-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.inventoryCardCreate {
+  appearance: none;
+  align-content: center;
+  justify-items: start;
+  gap: 12px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+  background: var(--bg-2);
+  border: 1px solid var(--surface-border);
+}
+
+.inventoryCardCreate strong {
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.inventoryCardCreate p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.importCardFix {
+  padding: 18px;
+  gap: 14px;
+  align-content: start;
+}
+
+.inventoryCreateIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-light) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.inventoryMedia {
+  min-height: 118px;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  background-size: cover;
+  background-position: center;
+  padding: 12px;
+}
+
+.inventoryBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(11, 10, 20, 0.38);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.inventoryBody {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.inventoryCardHead {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.inventoryCardHead strong {
+  font-size: 20px;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.inventoryCardHead p {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.inventoryOrderPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  min-height: 34px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-light) 66%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.inventoryMetricRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.inventoryMetricRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inventoryActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.subjectWorkspace {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+}
+
+.subjectWorkspaceHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.workspaceEmptyCard,
+.workspaceLoading {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 24px;
+}
+
+.workspaceLoading {
+  color: var(--text-2);
+  text-align: center;
+}
+
+.examWorkspace {
+  display: grid;
+  gap: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 16px;
+}
+
+.examWorkspaceHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.examWorkspaceTitle {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.examWorkspaceActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+
+.statusReview {
+  color: #38bdf8;
+  background: color-mix(in srgb, #38bdf8 18%, transparent);
+  border: 1px solid color-mix(in srgb, #38bdf8 35%, transparent);
+}
+
+.statusArchived {
+  color: var(--text-2);
+  background: var(--surface-border);
+  border: 1px solid var(--surface-border);
+}
+
+.examSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.examSummaryCard {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.examSummaryCard span {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.examSummaryCard strong {
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.examEditorGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 12px;
+  align-items: start;
+}
+
+.examEditorMain,
+.examQuestionRail {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+}
+
+.examEditorMain {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.examQuestionRail {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.examQuestionList {
+  display: grid;
+  gap: 8px;
+}
+
+.examSectionBoard,
+.examQuestionEditor {
+  display: grid;
+  gap: 10px;
+}
+
+.examSectionList {
+  display: grid;
+  gap: 10px;
+}
+
+.examSectionItem {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.examOptionList {
+  display: grid;
+  gap: 8px;
+}
+
+.examOptionRow {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.examToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  width: fit-content;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--bg-2);
+  padding: 0 12px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .stepper {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  padding: 6px;
-  border-radius: 14px;
+  padding: 4px;
+  border-radius: 8px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  background: var(--bg-2);
 }
 
 .stepItem {
-  min-height: 42px;
-  border-radius: 10px;
+  min-height: 38px;
+  border-radius: 8px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-2);
@@ -45,13 +798,13 @@
 .stepItem:hover:not(:disabled),
 .stepItem:focus-visible:not(:disabled) {
   outline: none;
-  background: color-mix(in srgb, var(--surface) 78%, var(--bg-2));
+  background: var(--surface);
 }
 
 .stepItemActive {
   color: #fff;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 6px 14px rgba(29, 111, 201, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .stepIcon {
@@ -85,8 +838,8 @@
 .editorPanel,
 .previewPanel {
   border: 1px solid var(--surface-border);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-radius: 8px;
+  background: var(--surface);
   width: 100%;
   min-width: 0;
 }
@@ -132,9 +885,9 @@
 .topicItem,
 .questionNavItem {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -212,7 +965,7 @@
 
 .iconActions button:hover,
 .iconDangerBtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--surface) 76%, var(--bg-2));
+  background: var(--surface);
 }
 
 .iconDangerBtn:disabled {
@@ -224,7 +977,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   padding: 3px 10px;
   font-size: 12px;
   font-weight: 700;
@@ -270,12 +1023,172 @@
   color: var(--text-2);
 }
 
+.subjectDetailsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.subjectDetailsMain {
+  display: grid;
+  gap: 14px;
+}
+
+.presetSection {
+  display: grid;
+  gap: 12px;
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.presetCard {
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  transition:
+    transform var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.presetCard:hover,
+.presetCard:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--surface-border));
+}
+
+.presetCardActive {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--surface-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.presetCardMedia {
+  min-height: 92px;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  background-size: cover;
+  background-position: center;
+  padding: 12px;
+}
+
+.presetCardBody {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.presetCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.presetCardTop strong {
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.presetCardBody p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.presetSwatch {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--surface-border) 78%, transparent);
+  flex-shrink: 0;
+}
+
+.advancedDetails {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.advancedDetails summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.advancedDetails[open] summary {
+  margin-bottom: 12px;
+}
+
+.subjectPreviewCard {
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.subjectPreviewMedia {
+  min-height: 220px;
+  background-size: cover;
+  background-position: center;
+}
+
+.subjectPreviewBody {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.subjectPreviewBody h5 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.subjectPreviewBody p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.subjectPreviewMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.subjectPreviewMeta span {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
 .input,
 .textarea {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  background: var(--surface);
   color: var(--text);
   min-height: 44px;
   padding: 10px 12px;
@@ -304,7 +1217,7 @@
   min-width: 0;
 }
 
-.quizBuilderGrid > .questionRail {
+.quizBuilderGrid>.questionRail {
   min-width: 0;
   max-width: 100%;
   height: auto;
@@ -318,10 +1231,10 @@
   display: block;
 }
 
-.quizBuilderGrid > .questionEditor,
-.quizEditorHost > .questionEditor,
-.quizBuilderGrid > .emptyState,
-.quizEditorHost > .emptyState {
+.quizBuilderGrid>.questionEditor,
+.quizEditorHost>.questionEditor,
+.quizBuilderGrid>.emptyState,
+.quizEditorHost>.emptyState {
   min-width: 0;
   width: 100%;
   max-width: 100%;
@@ -350,7 +1263,7 @@
 .optionCorrectPick {
   min-height: 44px;
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -362,7 +1275,7 @@
   display: inline-flex;
   flex-wrap: wrap;
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 4px;
   gap: 4px;
   max-width: 100%;
@@ -402,7 +1315,7 @@
 .previewTabs {
   display: inline-flex;
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -423,7 +1336,7 @@
 .videoPreviewMock,
 .quizPreviewMock {
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px;
   display: grid;
   gap: 10px;
@@ -440,9 +1353,9 @@
 .previewWatchBtn,
 .previewNavBtn {
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  background: var(--surface);
   color: var(--text);
-  border-radius: 10px;
+  border-radius: 6px;
   min-height: 40px;
   padding: 0 12px;
   cursor: pointer;
@@ -453,7 +1366,7 @@
 
 .previewWatchBtn:hover,
 .previewNavBtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--surface) 72%, var(--bg-2));
+  background: var(--surface);
 }
 
 .previewNavBtn:disabled {
@@ -469,8 +1382,8 @@
 .previewProgressTrack {
   width: 100%;
   height: 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 64%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
 }
 
 .previewProgressFill {
@@ -487,7 +1400,7 @@
 .previewOption {
   width: 100%;
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
+  border-radius: 6px;
   background: transparent;
   color: var(--text);
   min-height: 40px;
@@ -511,7 +1424,7 @@
 
 .summaryItem {
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px;
 }
 
@@ -531,7 +1444,7 @@
 
 .validationBox {
   border: 1px solid var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px;
   display: grid;
   gap: 8px;
@@ -565,6 +1478,81 @@
   align-items: center;
   gap: 6px;
   color: #f59e0b;
+}
+
+.examActionHint {
+  margin: -2px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.validationChecklist {
+  display: grid;
+  gap: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.validationChecklistList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.validationChecklistItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.validationChecklistItemValid {
+  color: #22c55e;
+}
+
+.importGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+}
+
+.importCard {
+  display: grid;
+  gap: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 16px;
+}
+
+.importReviewStack {
+  display: grid;
+  gap: 12px;
+}
+
+.importQuestionGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.importQuestionCard {
+  display: grid;
+  gap: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.importQuestionCard p {
+  margin: 0;
+  line-height: 1.5;
 }
 
 .publishActions,
@@ -602,7 +1590,7 @@
 
 .emptyState {
   border: 1px dashed var(--surface-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 16px;
   text-align: center;
   color: var(--text-2);
@@ -616,8 +1604,6 @@
   inset: 0;
   z-index: 80;
   background: rgba(4, 10, 22, 0.24);
-  backdrop-filter: blur(0.5px);
-  -webkit-backdrop-filter: blur(0.5px);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -625,9 +1611,9 @@
 
 .modal {
   width: min(500px, 96vw);
-  border-radius: 16px;
+  border-radius: 8px;
   border: 1px solid var(--surface-border);
-  background: color-mix(in srgb, var(--surface) 94%, var(--bg-2));
+  background: var(--surface);
   padding: 16px;
   display: grid;
   gap: 12px;
@@ -662,6 +1648,27 @@
 }
 
 @media (max-width: 1240px) {
+
+  .commandDeckHeader,
+  .commandDeckGrid,
+  .inventoryHeader,
+  .examWorkspaceHeader,
+  .examEditorGrid,
+  .subjectDetailsLayout,
+  .importGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .commandDeckStats,
+  .templateGrid,
+  .inventoryStats,
+  .examSummaryGrid,
+  .healthList,
+  .presetGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .stepLayout,
   .quizBuilderGrid {
     display: grid;
@@ -672,13 +1679,17 @@
     display: block;
   }
 
-  .quizBuilderGrid > .questionRail {
+  .examWorkspaceActions {
+    justify-content: start;
+  }
+
+  .quizBuilderGrid>.questionRail {
     height: auto;
   }
 
-  .quizBuilderGrid > .questionEditor,
-  .quizEditorHost > .questionEditor,
-  .quizBuilderGrid > .emptyState {
+  .quizBuilderGrid>.questionEditor,
+  .quizEditorHost>.questionEditor,
+  .quizBuilderGrid>.emptyState {
     min-width: 0;
   }
 
@@ -688,11 +1699,26 @@
 }
 
 @media (max-width: 860px) {
+
+  .contentSubtabs,
   .stepper {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .formGrid {
+  .commandDeckStats,
+  .templateGrid,
+  .pricingCardControls,
+  .inventoryStats,
+  .examSummaryGrid,
+  .inventoryGrid,
+  .healthList,
+  .presetGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formGrid,
+  .examSectionItem,
+  .examOptionRow {
     grid-template-columns: 1fr;
   }
 }

@@ -5,17 +5,19 @@ import { SUBJECT_NAMES, TOPIC_NAMES } from '../constants'
 import useLearnerSubjects from '../hooks/useLearnerSubjects'
 import { Button } from '../components/ui/Button'
 import { Tabs, Alert } from '../components/ui/index'
+import { Skeleton } from '../components/ui/Skeleton'
 import { VideoPlayer } from '../components/features/VideoPlayer'
 import { QuizPanel } from '../components/features/QuizPanel'
 import styles from './TopicPage.module.css'
 
 interface TopicPageProps {
   subjectId: string
-  topicId:   string
-  onBack:    () => void
+  topicId: string
+  onBack: () => void
+  onGoToSubjects?: () => void
 }
 
-export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
+export function TopicPage({ subjectId, topicId, onBack, onGoToSubjects }: TopicPageProps) {
   const { t, lang } = useLang()
   const { user } = useAuth()
   const { byId, loading: loadingSubject, error: subjectLoadError } = useLearnerSubjects()
@@ -64,21 +66,25 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
       const delta = Math.floor((now - lastTick) / 1000)
       if (delta > 0) recordTimeOnTask(subjectId, topicId, delta)
     }
-  // Keep the timer session stable for this topic + user lifecycle.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Keep the timer session stable for this topic + user lifecycle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId, topicId, user?.id, subject, topic])
 
   if ((!subject || !topic) && !loadingSubject) {
     return (
       <div className="page-content fade-in">
         <Alert variant="warning">Topic not found.</Alert>
+        <Button variant="ghost" size="sm" onClick={onBack} style={{ marginTop: 12 }}>← {t('back')}</Button>
       </div>
     )
   }
   if (!subject || !topic) {
     return (
       <div className="page-content fade-in">
-        <Alert variant="info">Loading topic...</Alert>
+        <Skeleton width={240} height={18} borderRadius={6} style={{ marginBottom: 20 }} />
+        <Skeleton width={400} height={80} borderRadius={12} style={{ marginBottom: 24 }} />
+        <Skeleton width={200} height={40} borderRadius={6} style={{ marginBottom: 24 }} />
+        <Skeleton width="100%" height={400} borderRadius={12} />
       </div>
     )
   }
@@ -102,14 +108,28 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
 
   const tabs = [
     { id: 'video', label: videoWatched ? `${t('video')} • ${t('videoWatched')}` : t('video') },
-    { id: 'quiz',  label: quizLabel },
+    { id: 'quiz', label: quizLabel },
   ]
 
   return (
     <div className="page-content fade-in">
-      <Button variant="ghost" size="sm" onClick={onBack} className={styles.backButton}>
-        ← {t('back')}
-      </Button>
+      <nav className={styles.breadcrumb} aria-label="breadcrumb">
+        {onGoToSubjects && (
+          <>
+            <button type="button" className={styles.breadcrumbLink} onClick={onGoToSubjects}>
+              {t('lessons')}
+            </button>
+            <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
+          </>
+        )}
+        <button type="button" className={styles.breadcrumbLink} onClick={onBack}>
+          {subject.title || SUBJECT_NAMES[lang]?.[subjectId] || subjectId}
+        </button>
+        <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
+        <span className={styles.breadcrumbCurrent} aria-current="page">
+          {topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}
+        </span>
+      </nav>
 
       <div className={styles.header}>
         <h2 className={styles.title}>{topic.title || TOPIC_NAMES[lang]?.[topicId] || topicId}</h2>
@@ -126,6 +146,12 @@ export function TopicPage({ subjectId, topicId, onBack }: TopicPageProps) {
         <Alert variant="info" className={styles.syncWarning}>
           {loadError}
           <Button variant="ghost" size="sm" onClick={retryLoad}>{t('retry')}</Button>
+        </Alert>
+      )}
+
+      {!user && (
+        <Alert variant="warning" className={styles.syncWarning}>
+          {t('guestWarning')} — {t('loginToSave')}
         </Alert>
       )}
 

@@ -63,7 +63,7 @@
   justify-content: space-between;
   gap: 8px;
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   font-size: 13px;
 }
@@ -78,7 +78,7 @@
 .colorDot {
   width: 10px;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   flex: 0 0 auto;
 }
 

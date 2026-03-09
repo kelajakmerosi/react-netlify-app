@@ -1,0 +1,187 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e11]: KelajakMerosi
+    - paragraph [ref=e12]: Overview
+    - navigation "Menu" [ref=e13]:
+      - button "Dashboard" [ref=e14] [cursor=pointer]:
+        - img [ref=e16]
+        - generic [ref=e21]: Dashboard
+      - button "Lessons" [ref=e22] [cursor=pointer]:
+        - img [ref=e24]
+        - generic [ref=e26]: Lessons
+      - button "Exams" [ref=e27] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e32]: Exams
+      - button "Admin" [ref=e33] [cursor=pointer]:
+        - img [ref=e35]
+        - generic [ref=e37]: Admin
+    - button "Logout" [ref=e39] [cursor=pointer]:
+      - img [ref=e40]
+      - text: Logout
+  - generic [ref=e43]:
+    - banner [ref=e44]:
+      - heading "Admin" [level=1] [ref=e46]
+      - generic [ref=e47]:
+        - 'button "Language: EN" [ref=e48] [cursor=pointer]':
+          - img [ref=e49]
+        - button "Theme" [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+        - button "Settings" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+        - button "Profile" [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: EK
+          - generic [ref=e63]:
+            - strong [ref=e64]: Elshod Karimov
+            - generic [ref=e65]: Superadmin
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - banner [ref=e69]:
+          - generic [ref=e70]:
+            - heading "Admin Workspace" [level=2] [ref=e71]
+            - paragraph [ref=e72]: Operations console for users, content, and analytics.
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - img [ref=e75]
+              - text: "Last updated: 03/07/2026, 10:56 PM"
+            - button "Export" [ref=e78] [cursor=pointer]:
+              - img [ref=e79]
+              - text: Export
+            - button "Refresh" [ref=e82] [cursor=pointer]:
+              - img [ref=e83]
+              - text: Refresh
+        - tablist "Admin sections" [ref=e88]:
+          - tab "Overview" [selected] [ref=e89] [cursor=pointer]
+          - tab "Admins & Users" [ref=e90] [cursor=pointer]
+          - tab "Content" [ref=e91] [cursor=pointer]
+          - tab "Analytics" [ref=e92] [cursor=pointer]
+      - generic [ref=e93]:
+        - generic [ref=e94]:
+          - paragraph [ref=e95]: Total users
+          - paragraph [ref=e96]: "148"
+        - generic [ref=e97]:
+          - paragraph [ref=e98]: Admins
+          - paragraph [ref=e99]: "2"
+        - generic [ref=e100]:
+          - paragraph [ref=e101]: DAU
+          - paragraph [ref=e102]: "36"
+        - generic [ref=e103]:
+          - paragraph [ref=e104]: Completion
+          - paragraph [ref=e105]: 62%
+      - generic [ref=e106]:
+        - generic [ref=e108]:
+          - heading "Quick operations" [level=3] [ref=e109]
+          - paragraph [ref=e110]: Jump to the key admin workflows.
+        - generic [ref=e112]:
+          - button "Manage users" [ref=e113] [cursor=pointer]:
+            - img [ref=e114]
+            - text: Manage users
+          - button "Manage content" [ref=e119] [cursor=pointer]:
+            - img [ref=e120]
+            - text: Manage content
+          - button "View analytics" [ref=e122] [cursor=pointer]:
+            - img [ref=e123]
+            - text: View analytics
+      - generic [ref=e126]:
+        - generic [ref=e128]:
+          - heading "Status panels" [level=3] [ref=e129]
+          - paragraph [ref=e130]: Integration and system status.
+        - generic [ref=e132]:
+          - generic [ref=e133]:
+            - paragraph [ref=e134]:
+              - img [ref=e135]
+              - text: Google auth
+            - paragraph [ref=e138]: Configured
+          - generic [ref=e139]:
+            - paragraph [ref=e140]:
+              - img [ref=e141]
+              - text: Eskiz status
+            - paragraph [ref=e144]: Not configured
+          - generic [ref=e145]:
+            - paragraph [ref=e146]:
+              - img [ref=e147]
+              - text: Allowlist
+            - paragraph [ref=e150]: 3 email / 2 phone
+      - generic [ref=e151]:
+        - generic [ref=e152]:
+          - generic [ref=e153]:
+            - heading "Billing and pricing" [level=3] [ref=e154]
+            - paragraph [ref=e155]: Revenue overview and monetization controls for superadmin.
+          - img [ref=e157]
+        - generic [ref=e160]:
+          - generic [ref=e161]:
+            - generic [ref=e162]:
+              - paragraph [ref=e163]: Total revenue
+              - paragraph [ref=e164]: 12800000 UZS
+            - generic [ref=e165]:
+              - paragraph [ref=e166]: Refunded
+              - paragraph [ref=e167]: 450000 UZS
+            - generic [ref=e168]:
+              - paragraph [ref=e169]: Paid payments
+              - paragraph [ref=e170]: "214"
+            - generic [ref=e171]:
+              - paragraph [ref=e172]: Failed payments
+              - paragraph [ref=e173]: "9"
+          - generic [ref=e175]:
+            - generic [ref=e176]:
+              - strong [ref=e177]: Pro
+              - generic [ref=e178]:
+                - checkbox "Active" [checked] [ref=e179]
+                - generic [ref=e180]: Active
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - generic [ref=e183]: Monthly price (UZS)
+                - spinbutton "Monthly price (UZS)" [ref=e184]: "49000"
+              - generic [ref=e185]:
+                - generic [ref=e186]: Description
+                - textbox "Description" [ref=e187]: Monthly access
+            - button "Save pricing" [ref=e189] [cursor=pointer]:
+              - img [ref=e190]
+              - text: Save pricing
+          - generic [ref=e194]:
+            - heading "Course pricing" [level=4] [ref=e195]
+            - table [ref=e197]:
+              - rowgroup [ref=e198]:
+                - row "Subject Course price (UZS) Active Actions" [ref=e199]:
+                  - columnheader "Subject" [ref=e200]
+                  - columnheader "Course price (UZS)" [ref=e201]
+                  - columnheader "Active" [ref=e202]
+                  - columnheader "Actions" [ref=e203]
+              - rowgroup [ref=e204]:
+                - row "Matematika 25000 Configured Save pricing" [ref=e205]:
+                  - cell "Matematika" [ref=e206]
+                  - cell "25000" [ref=e207]:
+                    - spinbutton [ref=e208]: "25000"
+                  - cell "Configured" [ref=e209]:
+                    - generic [ref=e210]:
+                      - checkbox "Configured" [checked] [ref=e211]
+                      - generic [ref=e212]: Configured
+                  - cell "Save pricing" [ref=e213]:
+                    - button "Save pricing" [ref=e214] [cursor=pointer]:
+                      - img [ref=e215]
+                      - text: Save pricing
+                - row "Fizika 22000 Not configured Save pricing" [ref=e219]:
+                  - cell "Fizika" [ref=e220]
+                  - cell "22000" [ref=e221]:
+                    - spinbutton [ref=e222]: "22000"
+                  - cell "Not configured" [ref=e223]:
+                    - generic [ref=e224]:
+                      - checkbox "Not configured" [ref=e225]
+                      - generic [ref=e226]: Not configured
+                  - cell "Save pricing" [ref=e227]:
+                    - button "Save pricing" [ref=e228] [cursor=pointer]:
+                      - img [ref=e229]
+                      - text: Save pricing
+                - row "Tarix 0 Not configured Save pricing" [ref=e233]:
+                  - cell "Tarix" [ref=e234]
+                  - cell "0" [ref=e235]:
+                    - spinbutton [ref=e236]: "0"
+                  - cell "Not configured" [ref=e237]:
+                    - generic [ref=e238]:
+                      - checkbox "Not configured" [ref=e239]
+                      - generic [ref=e240]: Not configured
+                  - cell "Save pricing" [ref=e241]:
+                    - button "Save pricing" [ref=e242] [cursor=pointer]:
+                      - img [ref=e243]
+                      - text: Save pricing

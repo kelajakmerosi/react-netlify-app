@@ -1,0 +1,367 @@
+:root {
+  --primary: #6a5cf2;
+  --light: #f5f7ff;
+  --dark: #212132;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Heebo', sans-serif;
+  color: #5f6279;
+  background: #eef0f7;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.fw-bold,
+.fw-semi-bold {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700 !important;
+  color: var(--dark);
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  transition: .5s;
+}
+
+.btn.btn-primary,
+.btn.btn-secondary {
+  color: #fff;
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-light {
+  color: var(--dark);
+}
+
+.btn-square,
+.btn-sm-square,
+.btn-lg-square {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: normal;
+  border-radius: 9999px;
+}
+
+.btn-lg-square {
+  width: 48px;
+  height: 48px;
+}
+
+.back-to-top {
+  position: fixed;
+  display: none;
+  right: 32px;
+  bottom: 32px;
+  z-index: 99;
+  border-radius: 9999px;
+  box-shadow: 0 18px 36px rgba(106, 92, 242, 0.28);
+}
+
+.navbar {
+  max-width: 1320px;
+  margin: 20px auto 0;
+  border-radius: 0 0 22px 22px;
+}
+
+.navbar .dropdown-toggle::after {
+  border: none;
+  content: "\f107";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.navbar-light .navbar-nav .nav-link {
+  margin-right: 28px;
+  padding: 25px 0;
+  color: var(--dark);
+  font-size: 15px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link.active {
+  color: var(--primary);
+}
+
+.navbar-light .navbar-brand,
+.navbar-light a.btn {
+  height: 75px;
+}
+
+.navbar-light.sticky-top {
+  top: 0;
+}
+
+.header-carousel .carousel-item {
+  width: 100%;
+  height: clamp(280px, 48vh, 460px);
+  background: #24263a;
+}
+
+.header-carousel .owl-carousel-item {
+  width: 100%;
+  height: clamp(280px, 48vh, 460px);
+}
+
+.header-carousel .hero-slide {
+  width: 100%;
+  height: 100%;
+}
+
+.header-carousel .carousel-item,
+.header-carousel .carousel-item.active,
+.header-carousel .carousel-item-next,
+.header-carousel .carousel-item-prev {
+  display: block;
+}
+
+.header-carousel {
+  max-width: 1240px;
+  margin: 0 auto 2.25rem;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.hero-slide {
+  background-color: #24263a;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+
+.hero-slide-1 {
+  background-image: url('/landing-elearning/img/carousel-2.jpg');
+  background-position: center 38%;
+}
+
+.hero-slide-2 {
+  background-image: url('/landing-elearning/img/carousel-1.jpg');
+  background-position: center 42%;
+}
+
+.hero-overlay {
+  background:
+    linear-gradient(90deg, rgba(24, 29, 56, 0.52) 0%, rgba(24, 29, 56, 0.34) 34%, rgba(24, 29, 56, 0.12) 68%, rgba(24, 29, 56, 0.08) 100%);
+}
+
+.header-carousel .display-4 {
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1.05;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 8%;
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.section-title::before {
+  position: absolute;
+  content: "";
+  width: calc(100% + 80px);
+  height: 2px;
+  top: 4px;
+  left: -40px;
+  background: var(--primary);
+  z-index: -1;
+}
+
+.section-title::after {
+  position: absolute;
+  content: "";
+  width: calc(100% + 120px);
+  height: 2px;
+  bottom: 5px;
+  left: -60px;
+  background: var(--primary);
+  z-index: -1;
+}
+
+.section-title.text-start::before {
+  width: calc(100% + 40px);
+  left: 0;
+}
+
+.section-title.text-start::after {
+  width: calc(100% + 60px);
+  left: 0;
+}
+
+.service-item,
+.course-item,
+.team-item,
+.testimonial-text {
+  box-shadow: 0 10px 24px rgba(33, 33, 50, 0.07);
+}
+
+.service-item {
+  background: #fff;
+  border-radius: 18px;
+  transition: .5s;
+}
+
+.service-item:hover {
+  margin-top: -10px;
+  background: var(--primary);
+}
+
+.service-item * {
+  transition: .5s;
+}
+
+.service-item:hover * {
+  color: #fff !important;
+}
+
+.category img,
+.course-item img,
+.team-item img {
+  transition: .5s;
+}
+
+.category a:hover img,
+.course-item:hover img,
+.team-item:hover img {
+  transform: scale(1.08);
+}
+
+.course-item,
+.team-item {
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.testimonial-item img {
+  object-fit: cover;
+}
+
+.footer {
+  background: #181d38 !important;
+}
+
+.footer .btn.btn-link {
+  display: block;
+  margin-bottom: 5px;
+  padding: 0;
+  text-align: left;
+  color: #fff;
+  font-size: 15px;
+  font-weight: normal;
+  text-transform: capitalize;
+  transition: .3s;
+  text-decoration: none;
+}
+
+.footer .btn.btn-link::before {
+  position: relative;
+  content: "\f105";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-right: 10px;
+}
+
+.footer .btn.btn-link:hover {
+  letter-spacing: 1px;
+  box-shadow: none;
+}
+
+.footer .btn.btn-social {
+  margin-right: 5px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .5);
+  border-radius: 50%;
+  transition: .3s;
+}
+
+.footer .btn.btn-social:hover {
+  color: var(--primary);
+  border-color: var(--light);
+}
+
+.footer .copyright {
+  padding: 25px 0;
+  font-size: 15px;
+  border-top: 1px solid rgba(256, 256, 256, .1);
+}
+
+.footer .footer-menu a {
+  margin-right: 15px;
+  padding-right: 15px;
+  border-right: 1px solid rgba(255, 255, 255, .1);
+  text-decoration: none;
+  color: #fff;
+}
+
+.footer .footer-menu a:last-child {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: none;
+}
+
+@media (max-width: 991.98px) {
+  .navbar {
+    margin-top: 0;
+    border-radius: 0;
+  }
+
+  .navbar-light .navbar-nav .nav-link {
+    margin-right: 0;
+    padding: 10px 0;
+  }
+
+  .navbar-light .navbar-nav {
+    border-top: 1px solid #eee;
+  }
+
+  .header-carousel .carousel-item,
+  .header-carousel .owl-carousel-item,
+  .header-carousel .owl-carousel-item img {
+    height: clamp(230px, 40vh, 340px);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-carousel .display-4 {
+    font-size: 32px;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(180deg, rgba(24, 29, 56, 0.72) 0%, rgba(24, 29, 56, 0.56) 100%);
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 12%;
+  }
+}

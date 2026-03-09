@@ -70,7 +70,6 @@ export default tseslint.config(
       'src/components/ui/**/*.tsx',
       'src/**/*.test.tsx',
       'src/components/ui/LanguageSwitcher.tsx',
-      'src/components/layout/Topbar.tsx',
     ],
     rules: {
       'no-restricted-syntax': 'off',

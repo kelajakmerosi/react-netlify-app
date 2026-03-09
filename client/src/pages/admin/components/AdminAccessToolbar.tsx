@@ -1,5 +1,4 @@
 import { ShieldMinus, ShieldPlus } from 'lucide-react'
-import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Select } from '../../../components/ui/Select'
@@ -44,52 +43,28 @@ export function AdminAccessToolbar({
   onRevoke,
   labels,
 }: AdminAccessToolbarProps): JSX.Element {
-  const useSharedPrimitives = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
-
   return (
     <div className={styles.userToolbar}>
       <div className={styles.userToolbarRow}>
-        {useSharedPrimitives ? (
-          <Input
-            label={labels.searchPlaceholder}
-            hideLabel
-            placeholder={labels.searchPlaceholder}
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-          />
-        ) : (
-          <input
-            className={styles.input}
-            placeholder={labels.searchPlaceholder}
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-          />
-        )}
+        <Input
+          label={labels.searchPlaceholder}
+          hideLabel
+          placeholder={labels.searchPlaceholder}
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
 
-        {useSharedPrimitives ? (
-          <Select
-            label={labels.all}
-            hideLabel
-            value={roleFilter}
-            onChange={(event) => onRoleFilterChange(event.target.value as 'all' | 'admin' | 'superadmin' | 'student')}
-          >
-            <option value="all">{labels.all}</option>
-            <option value="admin">{labels.admins}</option>
-            <option value="superadmin">{labels.superadmins}</option>
-            <option value="student">{labels.students}</option>
-          </Select>
-        ) : (
-          <select
-            className={styles.input}
-            value={roleFilter}
-            onChange={(event) => onRoleFilterChange(event.target.value as 'all' | 'admin' | 'superadmin' | 'student')}
-          >
-            <option value="all">{labels.all}</option>
-            <option value="admin">{labels.admins}</option>
-            <option value="superadmin">{labels.superadmins}</option>
-            <option value="student">{labels.students}</option>
-          </select>
-        )}
+        <Select
+          label={labels.all}
+          hideLabel
+          value={roleFilter}
+          onChange={(event) => onRoleFilterChange(event.target.value as 'all' | 'admin' | 'superadmin' | 'student')}
+        >
+          <option value="all">{labels.all}</option>
+          <option value="admin">{labels.admins}</option>
+          <option value="superadmin">{labels.superadmins}</option>
+          <option value="student">{labels.students}</option>
+        </Select>
 
         <label className={styles.toggleWrap}>
           <input
@@ -102,22 +77,13 @@ export function AdminAccessToolbar({
       </div>
 
       <div className={styles.userToolbarRow}>
-        {useSharedPrimitives ? (
-          <Input
-            label={labels.identityPlaceholder}
-            hideLabel
-            placeholder={labels.identityPlaceholder}
-            value={identity}
-            onChange={(event) => onIdentityChange(event.target.value)}
-          />
-        ) : (
-          <input
-            className={styles.input}
-            placeholder={labels.identityPlaceholder}
-            value={identity}
-            onChange={(event) => onIdentityChange(event.target.value)}
-          />
-        )}
+        <Input
+          label={labels.identityPlaceholder}
+          hideLabel
+          placeholder={labels.identityPlaceholder}
+          value={identity}
+          onChange={(event) => onIdentityChange(event.target.value)}
+        />
         <Button variant="primary" disabled={loading} onClick={onGrant}>
           <ShieldPlus size={16} aria-hidden="true" />
           {labels.grant}

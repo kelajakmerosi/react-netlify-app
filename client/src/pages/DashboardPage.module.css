@@ -1,219 +1,733 @@
-.header {
-  margin-bottom: 28px;
+/* ─── Dashboard Page ────────────────────────────────────── */
+.dashboardPage {
+  padding-top: 8px;
+  position: relative;
 }
 
-.title {
-  font-size: clamp(30px, 4vw, 42px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin-bottom: 8px;
-  line-height: 1.08;
-}
-
-.subtitle {
-  font-size: 16px;
-  line-height: 1.55;
-  color: var(--text-2);
-  max-width: 560px;
-}
-
-.metricsGrid {
+.mainColumn {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
+  gap: 20px;
 }
 
-.metricCard {
+/* ─── Header ────────────────────────────────────────────── */
+.pageHeader {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 142px;
-  border: 1px solid color-mix(in srgb, var(--accent) 10%, var(--surface-border));
-  background:
-    radial-gradient(120% 100% at 100% 0%, color-mix(in srgb, var(--accent-light) 36%, transparent), transparent 68%),
-    var(--glass);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.metricLabel {
-  font-size: 12px;
-  color: var(--text-3);
+.headerCopy {
+  display: grid;
+  gap: 4px;
+}
+
+.headerEyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.11em;
-  font-weight: 700;
-  line-height: 1;
+  color: var(--accent);
 }
 
-.metricValue {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-family: var(--font-display);
-  font-size: clamp(24px, 3vw, 30px);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--text);
+.headerTitle {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 
-.metricMeta {
-  color: var(--text-3);
-  font-size: 13px;
-  font-weight: 600;
+.headerSubtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+  max-width: 52ch;
 }
 
-.cardGrid {
+/* ─── Primary Grid (Resume + Pulse) ─────────────────────── */
+
+
+/* ─── Resume Card ────────────────────────────────────────── */
+.resumeCard {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.actionCard {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-height: 220px;
-  border: 1px solid color-mix(in srgb, var(--accent) 10%, var(--surface-border));
+  grid-template-columns: 4px 1fr;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   background:
-    radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--accent-light) 32%, transparent), transparent 72%),
-    var(--glass);
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 97%, #ffffff), color-mix(in srgb, var(--surface) 94%, #f7f8ff));
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--surface-border));
+  box-shadow: var(--shadow-sm);
 }
 
-.actionCard :global(button) {
-  margin-top: auto;
+.resumeAccent {
+  background: var(--focus-media, var(--accent));
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 
-.cardHead {
+.resumeContent {
+  display: grid;
+  gap: 14px;
+  padding: 16px 20px;
+  background:
+    radial-gradient(460px 180px at 100% 0%, color-mix(in srgb, var(--accent-light) 42%, transparent), transparent 72%);
+}
+
+.resumeMain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.resumeBody {
+  display: grid;
+  gap: 14px;
+}
+
+.resumeTop {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
 }
 
-.cardIcon {
+.resumeIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent-light) 82%, transparent);
+  background: var(--focus-media, var(--accent));
+  color: #fff;
   flex-shrink: 0;
 }
 
-.cardTitle {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.cardBody {
-  color: var(--text-2);
-  font-size: 14px;
-  line-height: 1.62;
-  min-height: 48px;
-}
-
-.cardKicker {
+.resumeTag {
   display: inline-flex;
   align-items: center;
-  width: fit-content;
-  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--surface-border));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent-light) 68%, transparent);
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--accent-light) 72%, var(--surface));
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.stateCard {
-  margin-bottom: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.resumeHeading {
+  display: grid;
+  gap: 4px;
 }
 
-.emptyStateCard {
-  margin-top: 2px;
+.resumeEyebrow {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.stateTitle {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+.resumeTitle {
+  margin: 0;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--text);
 }
 
-.stateText {
+.resumeMeta {
+  margin: 0;
   color: var(--text-2);
-  font-size: 14px;
-  line-height: 1.58;
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 48ch;
 }
 
-.stateActions {
+.resumeProgress :global(.progressBar) {
+  background: color-mix(in srgb, var(--bg-3) 68%, #ffffff);
+}
+
+.resumePreview {
+  position: relative;
   display: flex;
-  gap: 10px;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 154px;
+  aspect-ratio: 1.14 / 1;
+  align-self: center;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(245, 247, 255, 0.92));
+  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.resumePreview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(106, 92, 242, 0.1));
+  pointer-events: none;
+}
+
+.resumePreviewImage {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;
+  display: block;
+}
+
+.resumeProgress {
+  display: grid;
+  gap: 6px;
+}
+
+.resumeProgressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 600;
+}
+
+.resumeProgressRow strong {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.resumeActions {
+  display: flex;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.skeletonCard {
-  border-radius: var(--radius-lg);
+/* ─── Summary KPI Row (tertiary weight) ──────────────────── */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summaryCard {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface) 58%, var(--bg-3));
+  border: 1px solid color-mix(in srgb, var(--surface-border) 50%, transparent);
+}
+
+.summaryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+}
+
+.summaryIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-light) 64%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+  flex-shrink: 0;
+}
+
+.summaryValue {
+  margin: 0;
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+/* ─── Error Card ─────────────────────────────────────────── */
+.errorCard {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--surface-border));
+  background: color-mix(in srgb, var(--danger-light) 22%, var(--surface));
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.errorCard h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.errorCard p {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.errorActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─── Section Headers ────────────────────────────────────── */
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.sectionHint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.linkButton {
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ─── Support Cards (secondary weight) ───────────────────── */
+.supportGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 10px;
+}
+
+.supportCard {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  height: 100%;
   border: 1px solid var(--surface-border);
-  background: var(--glass);
-  padding: 20px;
-  min-height: 220px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, #ffffff), color-mix(in srgb, var(--surface) 94%, #f8f9ff));
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 
-.skeletonLine,
-.skeletonLineLg,
-.skeletonLineSm {
-  height: 11px;
+.supportCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--surface-border));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.supportAccent {
+  background: var(--accent);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.supportCard:nth-child(2) .supportAccent {
+  background: var(--warning);
+}
+
+.supportCard:nth-child(3) .supportAccent {
+  background: var(--success);
+}
+
+.supportBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 14px 16px;
+}
+
+.supportCardLead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.supportThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: color-mix(in srgb, var(--bg-2) 72%, var(--surface));
+  box-shadow: var(--shadow-sm);
+}
+
+.supportThumbImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;
+  display: block;
+}
+
+.supportCard:nth-child(1) .supportBody {
+  background: linear-gradient(180deg, rgba(106, 92, 242, 0.03), transparent 70%);
+}
+
+.supportCard:nth-child(2) .supportBody {
+  background: linear-gradient(180deg, rgba(210, 141, 48, 0.05), transparent 70%);
+}
+
+.supportCard:nth-child(3) .supportBody {
+  background: linear-gradient(180deg, rgba(15, 154, 108, 0.04), transparent 70%);
+}
+
+.supportCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--accent);
+}
+
+.supportCardTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
   border-radius: var(--radius-full);
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.36), rgba(148, 163, 184, 0.16));
-  background-size: 240px 100%;
-  animation: shimmer 1.35s linear infinite;
+  background: color-mix(in srgb, var(--accent-light) 68%, var(--surface));
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
-.skeletonLineLg {
-  width: 68%;
-  margin-bottom: 18px;
+.supportCard:nth-child(2) .supportCardTag {
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
-.skeletonLine {
-  width: 92%;
-  margin-bottom: 11px;
+.supportCard:nth-child(2) .supportCardHead {
+  color: var(--warning);
 }
 
-.skeletonLineSm {
-  width: 52%;
+.supportCard:nth-child(3) .supportCardTag {
+  background: var(--success-light);
+  color: var(--success);
 }
 
-@keyframes shimmer {
-  from {
-    background-position: -240px 0;
-  }
-
-  to {
-    background-position: 240px 0;
-  }
+.supportCard:nth-child(3) .supportCardHead {
+  color: var(--success);
 }
 
-@media (max-width: 1120px) {
-  .metricsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.supportCardTitle {
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text);
 }
 
-@media (max-width: 900px) {
-  .metricsGrid {
+.supportCardBottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: auto;
+}
+
+.supportCardMeta,
+.supportCardHint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.supportCardHint {
+  color: var(--text-3);
+}
+
+.emptySupport {
+  display: grid;
+  gap: 6px;
+  grid-column: 1 / -1;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  border: 1px dashed color-mix(in srgb, var(--surface-border) 70%, transparent);
+  background: color-mix(in srgb, var(--bg-2) 72%, var(--surface));
+}
+
+.emptySupport strong,
+.emptySupport p {
+  margin: 0;
+}
+
+.emptySupport p {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+/* ─── Lesson Cards (compact task cards) ──────────────────── */
+.lessonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 10px;
+}
+
+.lessonCard {
+  display: grid;
+  grid-template-columns: 5px 1fr;
+  height: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, #ffffff), color-mix(in srgb, var(--surface) 95%, #f9faff));
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.lessonCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--surface-border));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.lessonCardPrimary {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--surface-border));
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--surface) 96%, #ecebff),
+      color-mix(in srgb, var(--surface) 95%, #f9faff));
+  box-shadow: var(--shadow-sm);
+}
+
+.lessonCardStrip {
+  background: var(--accent);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.lessonCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 14px 16px;
+}
+
+.lessonCard:nth-child(odd) .lessonCardBody {
+  background: linear-gradient(180deg, rgba(106, 92, 242, 0.025), transparent 72%);
+}
+
+.lessonCardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lessonCardThumb {
+  width: 92px;
+  height: 62px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 74%, transparent);
+  background: color-mix(in srgb, var(--bg-2) 74%, var(--surface));
+}
+
+.lessonCardThumbImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.lessonCardIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  margin-left: -26px;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow-sm);
+}
+
+.lessonCardMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.lessonCardSubject {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lessonCardTitle {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.lessonCardArrow {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.lessonCardDescription {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.lessonCardStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.lessonCardStats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-2) 78%, var(--surface));
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ─── Empty State ────────────────────────────────────────── */
+.emptyWatchState {
+  border: 1px dashed color-mix(in srgb, var(--surface-border) 80%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-2) 70%, var(--surface));
+  padding: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.emptyWatchState h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.emptyWatchState p {
+  margin: 0;
+  color: var(--text-2);
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1200px) {
+
+  .primaryGrid,
+  .supportGrid,
+  .lessonGrid {
     grid-template-columns: 1fr;
   }
 
-  .cardGrid {
+  .resumeMain {
+    grid-template-columns: 1fr 164px;
+  }
+}
+
+@media (max-width: 820px) {
+
+  .pageHeader,
+  .sectionHeader,
+  .cardHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summaryGrid {
     grid-template-columns: 1fr;
   }
 
-  .actionCard {
-    min-height: 204px;
+  .resumeActions {
+    width: 100%;
+  }
+
+  .resumeMain {
+    grid-template-columns: 1fr;
+  }
+
+  .resumePreview {
+    min-height: 140px;
+    aspect-ratio: auto;
+    order: -1;
+  }
+
+  .resumeActions :global(button) {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 620px) {
+
+  .resumeContent,
+  .pulseCard,
+  .supportBody,
+  .summaryCard {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .resumeTitle,
+  .lessonCardTitle {
+    font-size: 18px;
+  }
+
+  .activityChart {
+    min-height: 96px;
+    gap: 4px;
+  }
+
+  .activityCol small {
+    font-size: 8px;
   }
 }

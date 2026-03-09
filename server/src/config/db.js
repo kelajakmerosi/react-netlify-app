@@ -1,9 +1,31 @@
 const { Pool } = require('pg');
 const { logger } = require('./logger');
 
+const DEFAULT_DB_CONNECT_TIMEOUT_MS = 10000;
+const parsedDbConnectTimeoutMs = Number.parseInt(process.env.DB_CONNECT_TIMEOUT_MS || '', 10);
+const dbConnectTimeoutMs = Number.isFinite(parsedDbConnectTimeoutMs) && parsedDbConnectTimeoutMs > 0
+  ? parsedDbConnectTimeoutMs
+  : DEFAULT_DB_CONNECT_TIMEOUT_MS;
+
+const parseDbEndpoint = (connectionString) => {
+  if (!connectionString) return { host: null, port: null };
+  try {
+    const parsed = new URL(connectionString);
+    return {
+      host: parsed.hostname || null,
+      port: parsed.port ? Number(parsed.port) : 5432,
+    };
+  } catch (_err) {
+    return { host: null, port: null };
+  }
+};
+
+const dbEndpoint = parseDbEndpoint(process.env.DATABASE_URL);
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }, // required for Supabase
+  connectionTimeoutMillis: dbConnectTimeoutMs,
   max: 10,
   idleTimeoutMillis: 30000,
 });
@@ -20,7 +42,16 @@ const connectDB = async () => {
     logger.info({ now: rows[0].now }, '[db] PostgreSQL connected');
     await runMigrations();
   } catch (err) {
-    logger.error({ err }, '[db] Connection error');
+    logger.error(
+      {
+        err,
+        dbHost: dbEndpoint.host || 'unknown',
+        dbPort: dbEndpoint.port || 'unknown',
+        timeoutMs: dbConnectTimeoutMs,
+        errorCode: err?.code || err?.cause?.code || 'unknown',
+      },
+      '[db] Connection error'
+    );
     process.exit(1);
   }
 };
@@ -146,6 +177,9 @@ const runMigrations = async () => {
 
     ALTER TABLE user_lesson_progress
       ADD COLUMN IF NOT EXISTS quiz_total_questions INT;
+
+    ALTER TABLE subjects
+      ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN DEFAULT FALSE;
 
     CREATE TABLE IF NOT EXISTS user_quiz_attempts (
       id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -484,6 +518,40 @@ const runMigrations = async () => {
 
     CREATE INDEX IF NOT EXISTS idx_material_entitlements_user
       ON material_entitlements(user_id, granted_at DESC);
+
+    -- Phase 4: Question format polymorphism
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS format_type TEXT DEFAULT 'MCQ4';
+
+    ALTER TABLE exam_questions
+      DROP CONSTRAINT IF EXISTS exam_questions_format_type_check;
+
+    ALTER TABLE exam_questions
+      ADD CONSTRAINT exam_questions_format_type_check
+      CHECK (format_type IN ('MCQ4', 'MCQ8', 'WRITTEN'));
+
+    ALTER TABLE exam_questions
+      ALTER COLUMN correct_index DROP NOT NULL;
+
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS written_answer TEXT;
+
+    -- Phase 4: Difficulty enum enforcement
+    ALTER TABLE exam_questions
+      DROP CONSTRAINT IF EXISTS exam_questions_difficulty_check;
+
+    ALTER TABLE exam_questions
+      ADD CONSTRAINT exam_questions_difficulty_check
+      CHECK (difficulty IS NULL OR difficulty IN ('easy', 'medium', 'hard'));
+
+    -- Phase 4: Teacher quota tracking (passive)
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS video_quota INT DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS test_quota INT DEFAULT 0;
+
+    -- Phase 4: Subject track for taxonomy grouping
+    ALTER TABLE subjects
+      ADD COLUMN IF NOT EXISTS track TEXT DEFAULT 'foundation';
   `);
   logger.info('[db] Migrations complete');
 };

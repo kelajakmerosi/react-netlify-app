@@ -111,3 +111,8 @@ UPDATE users SET role = 'admin' WHERE email = 'user@example.com';
   Add your frontend origin to `CLIENT_URL` in `server/.env` (comma-separated values allowed).
 - `EADDRINUSE: address already in use :::8080`:
   Another process uses port 8080. Stop it or run server with a different `PORT`.
+- `AggregateError [ETIMEDOUT]` / `[db] Connection error` on startup:
+  1. Refresh `DATABASE_URL` in `server/.env` from Supabase Dashboard (Transaction pooler URI).
+  2. Validate the parsed endpoint from your env: `node -e "const fs=require('fs');const m=fs.readFileSync('server/.env','utf8').match(/^DATABASE_URL=(.*)$/m);const u=new URL(m[1]);console.log(u.hostname,u.port||5432)"`.
+  3. Test TCP reachability to that host/port: `nc -vz <db-host> <db-port>`.
+  4. If it times out on your normal network, retry using hotspot/VPN to isolate local network path issues, then start again with `cd server && npm run dev`.

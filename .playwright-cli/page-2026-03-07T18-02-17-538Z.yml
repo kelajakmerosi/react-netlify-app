@@ -1,0 +1,170 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e11]: KelajakMerosi
+      - paragraph [ref=e12]: Overview
+      - navigation "Menu" [ref=e13]:
+        - button "Dashboard" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e21]: Dashboard
+        - button "Lessons" [ref=e22] [cursor=pointer]:
+          - img [ref=e24]
+          - generic [ref=e26]: Lessons
+        - button "Exams" [ref=e27] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e32]: Exams
+        - button "Admin" [ref=e33] [cursor=pointer]:
+          - img [ref=e35]
+          - generic [ref=e37]: Admin
+      - button "Logout" [ref=e39] [cursor=pointer]:
+        - img [ref=e40]
+        - text: Logout
+    - generic [ref=e43]:
+      - banner [ref=e44]:
+        - heading "Admin" [level=1] [ref=e46]
+        - generic [ref=e47]:
+          - 'button "Language: EN" [ref=e48] [cursor=pointer]':
+            - img [ref=e49]
+          - button "Theme" [ref=e53] [cursor=pointer]:
+            - img [ref=e54]
+          - button "Settings" [ref=e56] [cursor=pointer]:
+            - img [ref=e57]
+          - button "Profile" [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]: EK
+            - generic [ref=e63]:
+              - strong [ref=e64]: Elshod Karimov
+              - generic [ref=e65]: Superadmin
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - banner [ref=e69]:
+            - generic [ref=e70]:
+              - heading "Admin Workspace" [level=2] [ref=e71]
+              - paragraph [ref=e72]: Operations console for users, content, and analytics.
+            - generic [ref=e73]:
+              - generic [ref=e74]:
+                - img [ref=e75]
+                - text: "Last updated: 03/07/2026, 11:01 PM"
+              - button "Export" [ref=e78] [cursor=pointer]:
+                - img [ref=e79]
+                - text: Export
+              - button "Refresh" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Refresh
+          - tablist "Admin sections" [ref=e88]:
+            - tab "Overview" [ref=e89] [cursor=pointer]
+            - tab "Admins & Users" [active] [selected] [ref=e90] [cursor=pointer]
+            - tab "Content" [ref=e91] [cursor=pointer]
+            - tab "Analytics" [ref=e92] [cursor=pointer]
+        - generic [ref=e914]:
+          - generic [ref=e915]:
+            - generic [ref=e917]:
+              - heading "Admin access management" [level=3] [ref=e918]
+              - paragraph [ref=e919]: Search, filter, and grant/revoke controls.
+            - generic [ref=e921]:
+              - generic [ref=e922]:
+                - generic [ref=e923]:
+                  - generic [ref=e924]: Search by name, email, or phone
+                  - textbox "Search by name, email, or phone" [ref=e925]
+                - generic [ref=e926]:
+                  - generic [ref=e927]: All
+                  - combobox "All" [ref=e928]:
+                    - option "All" [selected]
+                    - option "Admins"
+                    - option "Superadmins"
+                    - option "Students"
+                - generic [ref=e929]:
+                  - checkbox "Delete mode" [ref=e930]
+                  - generic [ref=e931]: Delete mode
+              - generic [ref=e932]:
+                - generic [ref=e933]:
+                  - generic [ref=e934]: user@example.com or +998901234567
+                  - textbox "user@example.com or +998901234567" [ref=e935]
+                - button "Grant admin" [ref=e936] [cursor=pointer]:
+                  - img [ref=e937]
+                  - text: Grant admin
+                - button "Revoke admin" [ref=e939] [cursor=pointer]:
+                  - img [ref=e940]
+                  - text: Revoke admin
+          - generic [ref=e942]:
+            - generic [ref=e944]:
+              - heading "Admins" [level=3] [ref=e945]
+              - paragraph [ref=e946]: Admin category with source tagging.
+            - table [ref=e949]:
+              - rowgroup [ref=e950]:
+                - row "Name Email Phone Admin source Actions" [ref=e951]:
+                  - columnheader "Name" [ref=e952]
+                  - columnheader "Email" [ref=e953]
+                  - columnheader "Phone" [ref=e954]
+                  - columnheader "Admin source" [ref=e955]
+                  - columnheader "Actions" [ref=e956]
+              - rowgroup [ref=e957]:
+                - row "Elshod Karimov elshod@example.com +998901234567 Allowlist + DB Demote Delete" [ref=e958]:
+                  - cell "Elshod Karimov" [ref=e959]
+                  - cell "elshod@example.com" [ref=e960]
+                  - cell "+998901234567" [ref=e961]
+                  - cell "Allowlist + DB" [ref=e962]:
+                    - generic [ref=e963]: Allowlist + DB
+                  - cell "Demote Delete" [ref=e964]:
+                    - generic [ref=e965]:
+                      - button "Demote" [ref=e966] [cursor=pointer]:
+                        - img [ref=e967]
+                        - text: Demote
+                      - button "Delete" [disabled] [ref=e971]:
+                        - img [ref=e972]
+                        - text: Delete
+                - row "Madina Ismoilova madina@example.com +998901234568 DB role Demote Delete" [ref=e975]:
+                  - cell "Madina Ismoilova" [ref=e976]
+                  - cell "madina@example.com" [ref=e977]
+                  - cell "+998901234568" [ref=e978]
+                  - cell "DB role" [ref=e979]:
+                    - generic [ref=e980]: DB role
+                  - cell "Demote Delete" [ref=e981]:
+                    - generic [ref=e982]:
+                      - button "Demote" [ref=e983] [cursor=pointer]:
+                        - img [ref=e984]
+                        - text: Demote
+                      - button "Delete" [disabled] [ref=e988]:
+                        - img [ref=e989]
+                        - text: Delete
+          - generic [ref=e992]:
+            - generic [ref=e994]:
+              - heading "Users" [level=3] [ref=e995]
+              - paragraph [ref=e996]: Registered non-admin users.
+            - table [ref=e999]:
+              - rowgroup [ref=e1000]:
+                - row "Name Email Phone Role Actions" [ref=e1001]:
+                  - columnheader "Name" [ref=e1002]
+                  - columnheader "Email" [ref=e1003]
+                  - columnheader "Phone" [ref=e1004]
+                  - columnheader "Role" [ref=e1005]
+                  - columnheader "Actions" [ref=e1006]
+              - rowgroup [ref=e1007]:
+                - row "Aziza Nur aziza@example.com +998901234569 Student Promote Delete" [ref=e1008]:
+                  - cell "Aziza Nur" [ref=e1009]
+                  - cell "aziza@example.com" [ref=e1010]
+                  - cell "+998901234569" [ref=e1011]
+                  - cell "Student" [ref=e1012]
+                  - cell "Promote Delete" [ref=e1013]:
+                    - generic [ref=e1014]:
+                      - button "Promote" [ref=e1015] [cursor=pointer]:
+                        - img [ref=e1016]
+                        - text: Promote
+                      - button "Delete" [disabled] [ref=e1019]:
+                        - img [ref=e1020]
+                        - text: Delete
+                - row "Jamshid Aliyev jamshid@example.com +998901234570 Student Promote Delete" [ref=e1023]:
+                  - cell "Jamshid Aliyev" [ref=e1024]
+                  - cell "jamshid@example.com" [ref=e1025]
+                  - cell "+998901234570" [ref=e1026]
+                  - cell "Student" [ref=e1027]
+                  - cell "Promote Delete" [ref=e1028]:
+                    - generic [ref=e1029]:
+                      - button "Promote" [ref=e1030] [cursor=pointer]:
+                        - img [ref=e1031]
+                        - text: Promote
+                      - button "Delete" [disabled] [ref=e1034]:
+                        - img [ref=e1035]
+                        - text: Delete
+  - generic [ref=e744]: 02-06

@@ -24,7 +24,7 @@ const TeacherScopeSchema = z.object({
 })
 
 const UserCapabilityUpdateResponseSchema = z.object({
-  user: z.any(),
+  user: z.unknown(),
   capabilitiesUpdated: z.boolean(),
 })
 

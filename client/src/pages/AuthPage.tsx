@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Eye, EyeOff, LayoutDashboard, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useLang } from '../hooks'
+import { useToast } from '../app/providers/ToastProvider'
 import { cn } from '../utils'
 import { ApiError } from '../services/api'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Modal } from '../components/ui'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 import styles from './AuthPage.module.css'
 
 function GoogleSVG() {
@@ -29,29 +31,20 @@ const OTP_RESEND_COOLDOWN_SEC = 60
 const PASSWORD_HAS_LETTER = /[A-Za-z]/
 const PASSWORD_HAS_NUMBER = /\d/
 
+type GoogleCredentialResponse = {
+  credential?: string
+}
+
+type GooglePromptNotification = {
+  isNotDisplayed?: () => boolean
+  isSkippedMoment?: () => boolean
+  getNotDisplayedReason?: () => string
+  getSkippedReason?: () => string
+}
+
 type AuthMode = 'login' | 'signup'
 type OtpPurpose = 'signup' | 'legacyLogin' | 'passwordReset'
 type PasswordModalKind = 'legacySetup' | 'passwordReset'
-
-function AuthNotice({
-  variant,
-  message,
-}: {
-  variant: 'error' | 'info'
-  message: string
-}) {
-  return (
-    <div
-      className={cn(styles.notice, variant === 'error' ? styles.noticeError : styles.noticeInfo)}
-      role={variant === 'error' ? 'alert' : 'status'}
-      aria-live="polite"
-    >
-      <span className={styles.noticeDot} aria-hidden="true" />
-      <span>{message}</span>
-    </div>
-  )
-}
-
 const isStrongPassword = (password: string) =>
   password.length >= 8 &&
   password.length <= 128 &&
@@ -71,6 +64,7 @@ const interpolate = (template: string, values: Record<string, string>) =>
 
 export function AuthPage() {
   const { t } = useLang()
+  const toast = useToast()
   const {
     signupRequestCode,
     signupConfirm,
@@ -82,14 +76,17 @@ export function AuthPage() {
     passwordResetComplete,
     passwordSetupComplete,
     loginWithGoogle,
+    loginWithGoogleCode,
     continueAsGuest,
   } = useAuth()
 
-  const [mode, setMode] = useState<AuthMode>('login')
+  const [mode, setMode] = useState<AuthMode>(() => {
+    if (typeof window === 'undefined') return 'login'
+    return new URLSearchParams(window.location.search).get('mode') === 'signup' ? 'signup' : 'login'
+  })
   const [loading, setLoading] = useState(false)
   const [gLoading, setGLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [info, setInfo] = useState('')
+  const [googleReady, setGoogleReady] = useState(false)
 
   const [loginPhone, setLoginPhone] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
@@ -107,8 +104,6 @@ export function AuthPage() {
   const [otpPurpose, setOtpPurpose] = useState<OtpPurpose>('signup')
   const [otpPhone, setOtpPhone] = useState('')
   const [otpCode, setOtpCode] = useState('')
-  const [otpError, setOtpError] = useState('')
-  const [otpInfo, setOtpInfo] = useState('')
   const [otpLoading, setOtpLoading] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
   const [resendAvailableAt, setResendAvailableAt] = useState(0)
@@ -121,10 +116,10 @@ export function AuthPage() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
-  const [passwordModalError, setPasswordModalError] = useState('')
   const [passwordModalLoading, setPasswordModalLoading] = useState(false)
 
   const otpRefs = useRef<Array<HTMLInputElement | null>>([])
+  const googleInitializedRef = useRef(false)
 
   const resolveErrorMessage = (err: unknown) => {
     if (err instanceof ApiError) {
@@ -154,6 +149,8 @@ export function AuthPage() {
           return t('smsProviderIssue')
         case 'SMS_TEMPLATE_NOT_APPROVED':
           return t('smsTemplateNotApproved')
+        case 'API_UNREACHABLE':
+          return t('networkError')
         default:
           if (err.status >= 500) return t('authTemporaryIssue')
       }
@@ -174,15 +171,15 @@ export function AuthPage() {
     if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
       event.preventDefault()
       setMode(currentMode === 'login' ? 'signup' : 'login')
-      setError('')
-      setInfo('')
+      /* cleared */
+      /* cleared */
       return
     }
     if ((event.key === 'Enter' || event.key === ' ') && currentMode !== mode) {
       event.preventDefault()
       setMode(currentMode)
-      setError('')
-      setInfo('')
+      /* cleared */
+      /* cleared */
     }
   }
 
@@ -209,12 +206,108 @@ export function AuthPage() {
     return () => window.clearInterval(timer)
   }, [resendAvailableAt])
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    if (!code) return
+
+    window.history.replaceState({}, '', window.location.pathname)
+    setGLoading(true)
+    loginWithGoogleCode(code, 'postmessage')
+      .catch((err) => {
+        toast.error(resolveErrorMessage(err))
+      })
+      .finally(() => setGLoading(false))
+  }, [])
+
+  const handleGoogleCredential = useCallback(async (response: GoogleCredentialResponse) => {
+    const idToken = response?.credential
+    if (!idToken) {
+      toast.error(t('googleLoginFailed'))
+      setGLoading(false)
+      return
+    }
+
+    try {
+      await loginWithGoogle(idToken)
+    } catch (err) {
+      toast.error(resolveErrorMessage(err))
+    } finally {
+      setGLoading(false)
+    }
+  }, [loginWithGoogle, t])
+
+  const initializeGoogleIdentity = useCallback(() => {
+    const googleIdentity = (window as typeof window & {
+      google?: {
+        accounts?: {
+          id?: {
+            initialize: (options: {
+              client_id: string
+              callback: (response: GoogleCredentialResponse) => void
+            }) => void
+            prompt: (listener?: (notification: GooglePromptNotification) => void) => void
+            cancel: () => void
+          }
+        }
+      }
+    }).google?.accounts?.id
+
+    if (!GOOGLE_CLIENT_ID || !googleIdentity) return false
+    if (!googleInitializedRef.current) {
+      googleIdentity.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+      })
+      googleInitializedRef.current = true
+    }
+    setGoogleReady(true)
+    return true
+  }, [handleGoogleCredential])
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return undefined
+
+    if (initializeGoogleIdentity()) return undefined
+
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-google-identity="true"]')
+    const onLoad = () => {
+      initializeGoogleIdentity()
+    }
+    const onError = () => {
+      setGoogleReady(false)
+    }
+
+    if (existingScript) {
+      existingScript.addEventListener('load', onLoad)
+      existingScript.addEventListener('error', onError)
+      return () => {
+        existingScript.removeEventListener('load', onLoad)
+        existingScript.removeEventListener('error', onError)
+      }
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.dataset.googleIdentity = 'true'
+    script.addEventListener('load', onLoad)
+    script.addEventListener('error', onError)
+    document.head.appendChild(script)
+
+    return () => {
+      script.removeEventListener('load', onLoad)
+      script.removeEventListener('error', onError)
+    }
+  }, [initializeGoogleIdentity])
+
   const openOtpModal = (purpose: OtpPurpose, phone: string, message?: string) => {
     setOtpPurpose(purpose)
     setOtpPhone(phone)
     setOtpCode('')
-    setOtpError('')
-    setOtpInfo(message || t('codeSentHint'))
+    /* cleared */
+    toast.info(message || t('codeSentHint'))
     setOtpOpen(true)
     startResendCooldown()
     requestAnimationFrame(() => otpRefs.current[0]?.focus())
@@ -223,15 +316,15 @@ export function AuthPage() {
   const closeOtpModal = () => {
     setOtpOpen(false)
     setOtpCode('')
-    setOtpError('')
-    setOtpInfo('')
+    /* cleared */
+    /* cleared */
     setOtpLoading(false)
     setResendLoading(false)
   }
 
   const openPasswordModal = (kind: PasswordModalKind) => {
     setPasswordModalKind(kind)
-    setPasswordModalError('')
+    /* cleared */
     setNewPassword('')
     setConfirmNewPassword('')
     setPasswordModalOpen(true)
@@ -240,23 +333,18 @@ export function AuthPage() {
 
   const closePasswordModal = () => {
     setPasswordModalOpen(false)
-    setPasswordModalError('')
+    /* cleared */
     setPasswordModalLoading(false)
   }
 
-  const clearNotices = () => {
-    setError('')
-    setInfo('')
-  }
 
   const handlePasswordLogin = async () => {
-    clearNotices()
     if (!PHONE_REGEX.test(loginPhone)) {
-      setError(t('phoneFormatError'))
+      toast.error(t('phoneFormatError'))
       return
     }
     if (!loginPassword.trim()) {
-      setError(t('passwordRequired'))
+      toast.error(t('passwordRequired'))
       return
     }
 
@@ -264,32 +352,31 @@ export function AuthPage() {
     try {
       await loginWithPassword({ phone: loginPhone, password: loginPassword })
     } catch (err) {
-      setError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setLoading(false)
     }
   }
 
   const handleSignupRequest = async () => {
-    clearNotices()
     if (!firstName.trim()) {
-      setError(t('firstNameRequired'))
+      toast.error(t('firstNameRequired'))
       return
     }
     if (!lastName.trim()) {
-      setError(t('lastNameRequired'))
+      toast.error(t('lastNameRequired'))
       return
     }
     if (!PHONE_REGEX.test(signupPhone)) {
-      setError(t('phoneFormatError'))
+      toast.error(t('phoneFormatError'))
       return
     }
     if (!isStrongPassword(signupPassword)) {
-      setError(t('passwordPolicyError'))
+      toast.error(t('passwordPolicyError'))
       return
     }
     if (signupPassword !== signupConfirmPassword) {
-      setError(t('passwordMismatch'))
+      toast.error(t('passwordMismatch'))
       return
     }
 
@@ -298,16 +385,15 @@ export function AuthPage() {
       await signupRequestCode(signupPhone)
       openOtpModal('signup', signupPhone)
     } catch (err) {
-      setError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setLoading(false)
     }
   }
 
   const handleLegacyOtpRequest = async () => {
-    clearNotices()
     if (!PHONE_REGEX.test(loginPhone)) {
-      setError(t('phoneFormatError'))
+      toast.error(t('phoneFormatError'))
       return
     }
 
@@ -316,16 +402,15 @@ export function AuthPage() {
       await legacyLoginOtpRequestCode(loginPhone)
       openOtpModal('legacyLogin', loginPhone)
     } catch (err) {
-      setError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setLoading(false)
     }
   }
 
   const handlePasswordResetRequest = async () => {
-    clearNotices()
     if (!PHONE_REGEX.test(loginPhone)) {
-      setError(t('phoneFormatError'))
+      toast.error(t('phoneFormatError'))
       return
     }
 
@@ -334,16 +419,16 @@ export function AuthPage() {
       await passwordResetRequestCode(loginPhone)
       openOtpModal('passwordReset', loginPhone)
     } catch (err) {
-      setError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setLoading(false)
     }
   }
 
   const handleOtpSubmit = async () => {
-    setOtpError('')
+    /* cleared */
     if (!/^\d{6}$/.test(otpCode)) {
-      setOtpError(t('otpFormatError'))
+      toast.error(t('otpFormatError'))
       return
     }
 
@@ -383,7 +468,7 @@ export function AuthPage() {
       closeOtpModal()
       openPasswordModal('passwordReset')
     } catch (err) {
-      setOtpError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setOtpLoading(false)
     }
@@ -392,7 +477,7 @@ export function AuthPage() {
   const handleOtpResend = async () => {
     if (resendCountdown > 0) return
     setResendLoading(true)
-    setOtpError('')
+    /* cleared */
     try {
       if (otpPurpose === 'signup') {
         await signupRequestCode(otpPhone)
@@ -402,22 +487,22 @@ export function AuthPage() {
         await passwordResetRequestCode(otpPhone)
       }
       startResendCooldown()
-      setOtpInfo(t('codeResentHint'))
+      toast.info(t('codeResentHint'))
     } catch (err) {
-      setOtpError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setResendLoading(false)
     }
   }
 
   const handlePasswordModalSubmit = async () => {
-    setPasswordModalError('')
+    /* cleared */
     if (!isStrongPassword(newPassword)) {
-      setPasswordModalError(t('passwordPolicyError'))
+      toast.error(t('passwordPolicyError'))
       return
     }
     if (newPassword !== confirmNewPassword) {
-      setPasswordModalError(t('passwordMismatch'))
+      toast.error(t('passwordMismatch'))
       return
     }
 
@@ -437,7 +522,7 @@ export function AuthPage() {
       await loginWithPassword({ phone: otpPhone, password: newPassword })
       closePasswordModal()
     } catch (err) {
-      setPasswordModalError(resolveErrorMessage(err))
+      toast.error(resolveErrorMessage(err))
     } finally {
       setPasswordModalLoading(false)
     }
@@ -510,70 +595,78 @@ export function AuthPage() {
     otpRefs.current[Math.min(cleaned.length, OTP_LENGTH) - 1]?.focus()
   }
 
-  const handleGoogleLogin = () => {
-    if (!GOOGLE_CLIENT_ID) {
-      setError(t('googleLoginUnavailable'))
+  const startGooglePopupCodeFlow = () => {
+    const gAccounts = (window as typeof window & {
+      google?: {
+        accounts?: {
+          oauth2?: {
+            initCodeClient: (config: {
+              client_id: string
+              scope: string
+              ux_mode: 'popup'
+              callback: (response: { code?: string; error?: string }) => void
+            }) => { requestCode: () => void }
+          }
+        }
+      }
+    }).google?.accounts?.oauth2
+
+    if (!gAccounts) {
+      toast.error(t('googleLoginUnavailable'))
+      setGLoading(false)
       return
     }
 
-    const nonce = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
-    const params = new URLSearchParams({
+    const codeClient = gAccounts.initCodeClient({
       client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: window.location.origin,
-      response_type: 'id_token',
       scope: 'openid email profile',
-      nonce,
+      ux_mode: 'popup',
+      callback: (response) => {
+        if (response.error || !response.code) {
+          setGLoading(false)
+          return
+        }
+        loginWithGoogleCode(response.code, 'postmessage')
+          .catch((err) => toast.error(resolveErrorMessage(err)))
+          .finally(() => setGLoading(false))
+      },
     })
+    codeClient.requestCode()
+  }
 
-    const popup = window.open(
-      `https://accounts.google.com/o/oauth2/v2/auth?${params}`,
-      'google-oauth',
-      'width=500,height=620,top=100,left=100,resizable=yes,scrollbars=yes'
-    )
+  const handleGoogleLogin = () => {
+    if (!GOOGLE_CLIENT_ID) {
+      toast.error(t('googleLoginUnavailable'))
+      return
+    }
 
-    if (!popup) {
-      setError(t('popupBlocked'))
+    const googleIdentity = (window as typeof window & {
+      google?: {
+        accounts?: {
+          id?: {
+            prompt: (listener?: (notification: GooglePromptNotification) => void) => void
+            cancel: () => void
+          }
+        }
+      }
+    }).google?.accounts?.id
+
+    if (!googleIdentity || !googleReady) {
+      setGLoading(true)
+      startGooglePopupCodeFlow()
       return
     }
 
     setGLoading(true)
-    const timer = setInterval(() => {
-      try {
-        if (!popup || popup.closed) {
-          clearInterval(timer)
-          setGLoading(false)
-          return
-        }
+    googleIdentity.cancel()
+    googleIdentity.prompt((notification) => {
+      const notDisplayed = notification?.isNotDisplayed?.() ?? false
+      const skipped = notification?.isSkippedMoment?.() ?? false
 
-        const hash = popup.location.hash
-        if (hash?.includes('id_token=')) {
-          const token = new URLSearchParams(hash.slice(1)).get('id_token')
-          popup.close()
-          clearInterval(timer)
-
-          if (token) {
-            loginWithGoogle(token)
-              .catch((err: unknown) => setError(resolveErrorMessage(err)))
-              .finally(() => setGLoading(false))
-          } else {
-            setError(t('googleLoginFailed'))
-            setGLoading(false)
-          }
-        }
-      } catch {
-        // Wait for popup redirect to same origin.
+      if (notDisplayed || skipped) {
+        startGooglePopupCodeFlow()
       }
-    }, 300)
-
-    setTimeout(() => {
-      clearInterval(timer)
-      try {
-        if (!popup.closed) popup.close()
-      } catch {
-        // noop
-      }
-      setGLoading(false)
-    }, 180_000)
+    })
   }
 
   const otpTitle = otpPurpose === 'signup'
@@ -581,229 +674,294 @@ export function AuthPage() {
     : otpPurpose === 'legacyLogin'
       ? t('otpModalTitleLegacyLogin')
       : t('otpModalTitlePasswordReset')
+  const authPaneTitle = mode === 'signup' ? t('authTitleSignup') : t('authTitleLogin')
 
   return (
     <div className={styles.page}>
+      <div style={{ position: 'absolute', top: '24px', right: '28px', zIndex: 50 }}>
+        <ThemeToggle />
+      </div>
+
       <div className={styles.glow1} />
       <div className={styles.glow2} />
 
-      <GlassCard className={`${styles.card} fade-in`}>
-        <div className={styles.header}>
-          <div className={styles.logoWrap} />
-          <span className="logo-text" style={{ fontSize: 30 }}>KelajakMerosi</span>
-          <p className={styles.tagline}>{t('tagline')}</p>
-        </div>
+      <GlassCard className={styles.shell}>
+        <section className={styles.showcase} aria-label="Authentication overview">
+          <div className={styles.mediaCard}>
+            <div className={styles.mediaVisual} aria-hidden="true">
+              <div className={styles.mediaWindow}>
+                <div className={styles.mediaWindowBar}>
+                  <span className={styles.mediaWindowDot} />
+                  <span className={styles.mediaWindowDot} />
+                  <span className={styles.mediaWindowDot} />
+                </div>
+                <div className={styles.mediaWindowBody}>
+                  <div className={styles.mediaPrimaryCard}>
+                    <span className={styles.mediaPrimaryIcon}>
+                      <ShieldCheck size={18} />
+                    </span>
+                    <div className={styles.mediaPrimaryCopy}>
+                      <span className={styles.mediaPrimaryLabel}>Telefon raqami</span>
+                      <strong className={styles.mediaPrimaryValue}>+998 90 123 45 67</strong>
+                    </div>
+                  </div>
 
-        <div className={styles.form}>
-          <div className={styles.modeSegment} role="tablist" aria-label={t('authModeLabel')}>
-            <span
-              aria-hidden="true"
-              className={cn(styles.modeIndicator, mode === 'signup' && styles.modeIndicatorSignup)}
-            />
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'login'}
-              tabIndex={mode === 'login' ? 0 : -1}
-              className={cn(styles.modeTab, mode === 'login' && styles.modeTabActive)}
-              onClick={() => {
-                setMode('login')
-                clearNotices()
-              }}
-              onKeyDown={(event) => onModeKeyDown(event, 'login')}
-            >
-              {t('login')}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'signup'}
-              tabIndex={mode === 'signup' ? 0 : -1}
-              className={cn(styles.modeTab, mode === 'signup' && styles.modeTabActive)}
-              onClick={() => {
-                setMode('signup')
-                clearNotices()
-              }}
-              onKeyDown={(event) => onModeKeyDown(event, 'signup')}
-            >
-              {t('register')}
-            </button>
+                  <div className={styles.mediaSecondaryRow}>
+                    <div className={styles.mediaOtpCard}>
+                      <span className={styles.mediaOtpLabel}>SMS kod</span>
+                      <div className={styles.mediaOtpDigits}>
+                        {Array.from({ length: 6 }).map((_, index) => (
+                          <span key={`otp-digit-${index}`} className={styles.mediaOtpDigit} />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={styles.mediaStatusCard}>
+                      <span className={styles.mediaStatusIcon}>
+                        <ShieldCheck size={16} />
+                      </span>
+                      <span className={styles.mediaStatusText}>Tasdiqlandi</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.mediaOverlay}>
+              <span className={styles.mediaBadge}>{t('authHeroEyebrow')}</span>
+              <span className={styles.mediaMeta}>{t('authShowcaseMeta')}</span>
+            </div>
           </div>
 
-          <p className={styles.stepHint}>
-            {mode === 'signup' ? t('authStepPhoneSignup') : t('authStepPhoneLogin')}
-          </p>
+          <div className={styles.showcaseTopRow}>
+            <div className={styles.showcaseIntro}>
+              <span className={styles.brandMark}>Kelajak Merosi</span>
+              <h1 className={styles.showcaseTitle}>{t('authHeroTitle')}</h1>
+              <p className={styles.showcaseBody}>{t('authHeroBody')}</p>
+            </div>
+          </div>
 
-          {mode === 'login' ? (
-            <>
-              <Input
-                label={t('phonePlaceholder')}
-                hideLabel
-                placeholder={t('phonePlaceholder')}
-                value={loginPhone}
-                onChange={(event) => {
-                  setLoginPhone(event.target.value.trim())
-                  if (error) setError('')
-                }}
-                error={!!error}
-              />
-              <div className={styles.passwordField}>
-                <Input
-                  label={t('password')}
-                  hideLabel
-                  type={showLoginPassword ? 'text' : 'password'}
-                  placeholder={t('password')}
-                  value={loginPassword}
-                  onChange={(event) => {
-                    setLoginPassword(event.target.value)
-                    if (error) setError('')
-                  }}
-                  error={!!error}
-                  className={styles.passwordInput}
+          <div className={styles.highlightGrid}>
+            {[
+              { title: t('authHighlightLessons'), body: t('authHighlightLessonsBody'), icon: ShieldCheck },
+              { title: t('authHighlightExams'), body: t('authHighlightExamsBody'), icon: LayoutDashboard },
+            ].map((item) => (
+              <article
+                key={item.title}
+                className={styles.highlightCard}
+              >
+                <span className={styles.highlightIcon} aria-hidden="true">
+                  <item.icon size={18} />
+                </span>
+                <div>
+                  <h3 className={styles.highlightTitle}>{item.title}</h3>
+                  <p className={styles.highlightBody}>{item.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.authPane}>
+          <div className={styles.authPaneInner}>
+            <div className={styles.header}>
+              <div className={styles.headerTop}>
+                <span className={styles.paneEyebrow}>Kelajak Merosi</span>
+                <span className={styles.authBadge}>{t('authHeroEyebrow')}</span>
+              </div>
+              <h2 className={styles.authTitle}>{authPaneTitle}</h2>
+              <p className={styles.tagline}>{mode === 'signup' ? t('authStepPhoneSignup') : t('authStepPhoneLogin')}</p>
+            </div>
+
+            <div className={styles.form}>
+              <div className={styles.modeSegment} role="tablist" aria-label={t('authModeLabel')}>
+                <span
+                  aria-hidden="true"
+                  className={cn(styles.modeIndicator, mode === 'signup' && styles.modeIndicatorSignup)}
                 />
                 <button
                   type="button"
-                  className={styles.passwordToggle}
-                  onClick={() => setShowLoginPassword((prev) => !prev)}
-                  aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                  role="tab"
+                  aria-selected={mode === 'login'}
+                  tabIndex={mode === 'login' ? 0 : -1}
+                  className={cn(styles.modeTab, mode === 'login' && styles.modeTabActive)}
+                  onClick={() => {
+                    setMode('login')
+                  }}
+                  onKeyDown={(event) => onModeKeyDown(event, 'login')}
                 >
-                  {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {t('login')}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === 'signup'}
+                  tabIndex={mode === 'signup' ? 0 : -1}
+                  className={cn(styles.modeTab, mode === 'signup' && styles.modeTabActive)}
+                  onClick={() => {
+                    setMode('signup')
+                  }}
+                  onKeyDown={(event) => onModeKeyDown(event, 'signup')}
+                >
+                  {t('register')}
                 </button>
               </div>
-              <Button fullWidth size="lg" onClick={() => void handlePasswordLogin()} disabled={loading}>
-                {loading ? t('authLoading') : t('login')}
+
+              {mode === 'login' ? (
+                <>
+                  <Input
+                    label={t('phonePlaceholder')}
+                    hideLabel
+                    placeholder={t('phonePlaceholder')}
+                    value={loginPhone}
+                    onChange={(event) => {
+                      setLoginPhone(event.target.value.trim())
+                    }}
+                  />
+                  <div className={styles.passwordField}>
+                    <Input
+                      label={t('password')}
+                      hideLabel
+                      type={showLoginPassword ? 'text' : 'password'}
+                      placeholder={t('password')}
+                      value={loginPassword}
+                      onChange={(event) => {
+                        setLoginPassword(event.target.value)
+                      }}
+                      className={styles.passwordInput}
+                    />
+                    <button
+                      type="button"
+                      className={styles.passwordToggle}
+                      onClick={() => setShowLoginPassword((prev) => !prev)}
+                      aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <Button fullWidth size="lg" onClick={() => void handlePasswordLogin()} disabled={loading}>
+                    {loading ? t('authLoading') : t('login')}
+                  </Button>
+                  <div className={styles.inlineLinks}>
+                    <button
+                      type="button"
+                      className={styles.inlineLinkButton}
+                      onClick={() => void handleLegacyOtpRequest()}
+                    >
+                      {t('loginViaCode')}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.inlineLinkButton}
+                      onClick={() => void handlePasswordResetRequest()}
+                    >
+                      {t('forgotPassword')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.nameRow}>
+                    <Input
+                      label={t('firstName')}
+                      hideLabel
+                      placeholder={t('firstName')}
+                      value={firstName}
+                      onChange={(event) => {
+                        setFirstName(event.target.value)
+                      }}
+                    />
+                    <Input
+                      label={t('lastName')}
+                      hideLabel
+                      placeholder={t('lastName')}
+                      value={lastName}
+                      onChange={(event) => {
+                        setLastName(event.target.value)
+                      }}
+                    />
+                  </div>
+                  <Input
+                    label={t('phonePlaceholder')}
+                    hideLabel
+                    placeholder={t('phonePlaceholder')}
+                    value={signupPhone}
+                    onChange={(event) => {
+                      setSignupPhone(event.target.value.trim())
+                    }}
+                  />
+                  <div className={styles.passwordField}>
+                    <Input
+                      label={t('password')}
+                      hideLabel
+                      type={showSignupPassword ? 'text' : 'password'}
+                      placeholder={t('password')}
+                      value={signupPassword}
+                      onChange={(event) => {
+                        setSignupPassword(event.target.value)
+                      }}
+                      className={styles.passwordInput}
+                    />
+                    <button
+                      type="button"
+                      className={styles.passwordToggle}
+                      onClick={() => setShowSignupPassword((prev) => !prev)}
+                      aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <div className={styles.passwordField}>
+                    <Input
+                      label={t('confirmPassword')}
+                      hideLabel
+                      type={showSignupConfirmPassword ? 'text' : 'password'}
+                      placeholder={t('confirmPassword')}
+                      value={signupConfirmPassword}
+                      onChange={(event) => {
+                        setSignupConfirmPassword(event.target.value)
+                      }}
+                      className={styles.passwordInput}
+                    />
+                    <button
+                      type="button"
+                      className={styles.passwordToggle}
+                      onClick={() => setShowSignupConfirmPassword((prev) => !prev)}
+                      aria-label={showSignupConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <Button fullWidth size="lg" onClick={() => void handleSignupRequest()} disabled={loading}>
+                    {loading ? t('authLoading') : t('continue')}
+                  </Button>
+                </>
+              )}
+
+
+              <div className={styles.orRow}>
+                <span className={styles.orLine} />
+                <span className={styles.orText}>{t('orContinueWith')}</span>
+                <span className={styles.orLine} />
+              </div>
+
+              <div className={styles.googleWrap}>
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  className={styles.googleFallbackBtn}
+                  onClick={handleGoogleLogin}
+                  disabled={gLoading}
+                >
+                  {gLoading ? t('googleLoading') : <><GoogleSVG /> {t('loginWithGoogle')}</>}
+                </Button>
+              </div>
+
+              <Button variant="ghost" fullWidth className={styles.guestBtn} onClick={continueAsGuest}>
+                {t('guestMode')}
               </Button>
-              <div className={styles.inlineLinks}>
-                <button
-                  type="button"
-                  className={styles.inlineLinkButton}
-                  onClick={() => void handleLegacyOtpRequest()}
-                >
-                  {t('loginViaCode')}
-                </button>
-                <button
-                  type="button"
-                  className={styles.inlineLinkButton}
-                  onClick={() => void handlePasswordResetRequest()}
-                >
-                  {t('forgotPassword')}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className={styles.nameRow}>
-                <Input
-                  label={t('firstName')}
-                  hideLabel
-                  placeholder={t('firstName')}
-                  value={firstName}
-                  onChange={(event) => {
-                    setFirstName(event.target.value)
-                    if (error) setError('')
-                  }}
-                  error={!!error}
-                />
-                <Input
-                  label={t('lastName')}
-                  hideLabel
-                  placeholder={t('lastName')}
-                  value={lastName}
-                  onChange={(event) => {
-                    setLastName(event.target.value)
-                    if (error) setError('')
-                  }}
-                  error={!!error}
-                />
-              </div>
-              <Input
-                label={t('phonePlaceholder')}
-                hideLabel
-                placeholder={t('phonePlaceholder')}
-                value={signupPhone}
-                onChange={(event) => {
-                  setSignupPhone(event.target.value.trim())
-                  if (error) setError('')
-                }}
-                error={!!error}
-              />
-              <div className={styles.passwordField}>
-                <Input
-                  label={t('password')}
-                  hideLabel
-                  type={showSignupPassword ? 'text' : 'password'}
-                  placeholder={t('password')}
-                  value={signupPassword}
-                  onChange={(event) => {
-                    setSignupPassword(event.target.value)
-                    if (error) setError('')
-                  }}
-                  error={!!error}
-                  className={styles.passwordInput}
-                />
-                <button
-                  type="button"
-                  className={styles.passwordToggle}
-                  onClick={() => setShowSignupPassword((prev) => !prev)}
-                  aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showSignupPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <div className={styles.passwordField}>
-                <Input
-                  label={t('confirmPassword')}
-                  hideLabel
-                  type={showSignupConfirmPassword ? 'text' : 'password'}
-                  placeholder={t('confirmPassword')}
-                  value={signupConfirmPassword}
-                  onChange={(event) => {
-                    setSignupConfirmPassword(event.target.value)
-                    if (error) setError('')
-                  }}
-                  error={!!error}
-                  className={styles.passwordInput}
-                />
-                <button
-                  type="button"
-                  className={styles.passwordToggle}
-                  onClick={() => setShowSignupConfirmPassword((prev) => !prev)}
-                  aria-label={showSignupConfirmPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showSignupConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <Button fullWidth size="lg" onClick={() => void handleSignupRequest()} disabled={loading}>
-                {loading ? t('authLoading') : t('continue')}
-              </Button>
-            </>
-          )}
-
-          {!error && info && <AuthNotice variant="info" message={info} />}
-          {error && <AuthNotice variant="error" message={error} />}
-
-          <div className={styles.orRow}>
-            <span className={styles.orLine} />
-            <span className={styles.orText}>{t('orContinueWith')}</span>
-            <span className={styles.orLine} />
+            </div>
           </div>
-
-          <div className={styles.googleWrap}>
-            <Button
-              variant="ghost"
-              fullWidth
-              className={styles.googleFallbackBtn}
-              onClick={handleGoogleLogin}
-              disabled={gLoading}
-            >
-              {gLoading ? t('googleLoading') : <><GoogleSVG /> {t('loginWithGoogle')}</>}
-            </Button>
-          </div>
-
-          <Button variant="ghost" fullWidth className={styles.guestBtn} onClick={continueAsGuest}>
-            {t('guestMode')}
-          </Button>
-        </div>
+        </section>
       </GlassCard>
 
       {otpOpen && (
@@ -856,13 +1014,11 @@ export function AuthPage() {
                 className={cn(
                   styles.otpBox,
                   digit && styles.otpBoxFilled,
-                  otpError && styles.otpBoxError,
                 )}
                 value={digit}
                 onFocus={(event) => event.currentTarget.select()}
                 onChange={(event) => {
                   handleOtpChange(index, event.target.value)
-                  if (otpError) setOtpError('')
                 }}
                 onKeyDown={(event) => handleOtpKeyDown(index, event)}
                 onPaste={handleOtpPaste}
@@ -870,8 +1026,6 @@ export function AuthPage() {
             ))}
           </div>
 
-          {!otpError && otpInfo && <AuthNotice variant="info" message={otpInfo} />}
-          {otpError && <AuthNotice variant="error" message={otpError} />}
 
           <div className={styles.modalMeta}>
             {resendCountdown > 0
@@ -917,10 +1071,7 @@ export function AuthPage() {
               value={newPassword}
               onChange={(event) => {
                 setNewPassword(event.target.value)
-                if (passwordModalError) setPasswordModalError('')
               }}
-              errorMessage={passwordModalError || undefined}
-              error={!!passwordModalError}
               className={styles.passwordInput}
             />
             <button
@@ -941,10 +1092,7 @@ export function AuthPage() {
               value={confirmNewPassword}
               onChange={(event) => {
                 setConfirmNewPassword(event.target.value)
-                if (passwordModalError) setPasswordModalError('')
               }}
-              errorMessage={passwordModalError || undefined}
-              error={!!passwordModalError}
               className={styles.passwordInput}
             />
             <button
@@ -957,7 +1105,6 @@ export function AuthPage() {
             </button>
           </div>
 
-          {passwordModalError && <AuthNotice variant="error" message={passwordModalError} />}
         </Modal>
       )}
     </div>

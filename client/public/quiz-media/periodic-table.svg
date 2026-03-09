@@ -1,0 +1,13 @@
+<svg width="720" height="420" viewBox="0 0 720 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="420" rx="28" fill="#FFF6EE"/>
+  <rect x="132" y="86" width="456" height="248" rx="22" fill="#FFFFFF" stroke="#E99942" stroke-width="10"/>
+  <rect x="176" y="128" width="92" height="92" rx="18" fill="#F9A44B"/>
+  <text x="222" y="162" text-anchor="middle" fill="white" font-family="Arial" font-size="20" font-weight="700">H</text>
+  <text x="222" y="198" text-anchor="middle" fill="white" font-family="Arial" font-size="38" font-weight="700">1</text>
+  <rect x="286" y="128" width="70" height="70" rx="14" fill="#FFE2C6"/>
+  <rect x="370" y="128" width="70" height="70" rx="14" fill="#FFE2C6"/>
+  <rect x="454" y="128" width="70" height="70" rx="14" fill="#FFE2C6"/>
+  <rect x="286" y="214" width="70" height="70" rx="14" fill="#FFEBD7"/>
+  <rect x="370" y="214" width="70" height="70" rx="14" fill="#FFEBD7"/>
+  <rect x="454" y="214" width="70" height="70" rx="14" fill="#FFEBD7"/>
+</svg>

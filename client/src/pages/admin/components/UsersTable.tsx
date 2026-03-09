@@ -1,4 +1,4 @@
-import { ShieldCheck, Trash2 } from 'lucide-react'
+import { Search, ShieldCheck, Trash2 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import type { AdminUserSummary } from '../../../services/admin.service'
 import styles from '../AdminWorkspace.module.css'
@@ -22,6 +22,7 @@ interface UsersTableProps {
   }
   onPromote: (user: AdminUserSummary) => void
   onDelete: (user: AdminUserSummary) => void
+  onInspect: (user: AdminUserSummary) => void
 }
 
 export function UsersTable({
@@ -32,6 +33,7 @@ export function UsersTable({
   labels,
   onPromote,
   onDelete,
+  onInspect,
 }: UsersTableProps): JSX.Element {
   if (loading) return <div className={styles.emptyState}>{labels.loading}</div>
   if (rows.length === 0) return <div className={styles.emptyState}>{emptyLabel}</div>
@@ -57,6 +59,10 @@ export function UsersTable({
               <td>{entry.role === 'admin' ? labels.roleAdmin : labels.roleStudent}</td>
               <td>
                 <div className={styles.actionRow}>
+                  <Button variant="ghost" size="sm" onClick={() => onInspect(entry)}>
+                    <Search size={14} aria-hidden="true" />
+                    Ko'rish
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => onPromote(entry)}>
                     <ShieldCheck size={14} aria-hidden="true" />
                     {labels.promote}

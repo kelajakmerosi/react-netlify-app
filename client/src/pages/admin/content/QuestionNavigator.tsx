@@ -1,5 +1,4 @@
 import { PlusCircle } from 'lucide-react'
-import { UI_MIGRATION_FLAGS } from '../../../app/feature-flags'
 import { Button } from '../../../components/ui/Button'
 import { useLang } from '../../../hooks'
 import type { QuestionDraftVm } from './types'
@@ -14,7 +13,6 @@ interface QuestionNavigatorProps {
 
 export default function QuestionNavigator({ questions, activeIndex, onSelect, onAdd }: QuestionNavigatorProps): JSX.Element {
   const { t } = useLang()
-  const useSharedControls = UI_MIGRATION_FLAGS.adminUseSharedFormPrimitives
 
   return (
     <aside className={styles.questionRail}>
@@ -32,27 +30,15 @@ export default function QuestionNavigator({ questions, activeIndex, onSelect, on
         ) : null}
 
         {questions.map((question, index) => (
-          useSharedControls ? (
-            <Button
-              key={`${question.id ?? 'new'}-${index}`}
-              variant="ghost"
-              className={`${styles.questionNavItem} ${activeIndex === index ? styles.questionNavItemActive : ''}`}
-              onClick={() => onSelect(index)}
-            >
-              <strong>{`${t('adminContentQuestionLabel')} ${index + 1}`}</strong>
-              <small>{question.text || t('adminContentQuestionEmpty')}</small>
-            </Button>
-          ) : (
-            <button
-              key={`${question.id ?? 'new'}-${index}`}
-              type="button"
-              className={`${styles.questionNavItem} ${activeIndex === index ? styles.questionNavItemActive : ''}`}
-              onClick={() => onSelect(index)}
-            >
-              <strong>{`${t('adminContentQuestionLabel')} ${index + 1}`}</strong>
-              <small>{question.text || t('adminContentQuestionEmpty')}</small>
-            </button>
-          )
+          <Button
+            key={`${question.id ?? 'new'}-${index}`}
+            variant="ghost"
+            className={`${styles.questionNavItem} ${activeIndex === index ? styles.questionNavItemActive : ''}`}
+            onClick={() => onSelect(index)}
+          >
+            <strong>{`${t('adminContentQuestionLabel')} ${index + 1}`}</strong>
+            <small>{question.text || t('adminContentQuestionEmpty')}</small>
+          </Button>
         ))}
       </div>
     </aside>

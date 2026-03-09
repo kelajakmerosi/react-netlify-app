@@ -1,0 +1,168 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e11]: KelajakMerosi
+    - paragraph [ref=e12]: Overview
+    - navigation "Menu" [ref=e13]:
+      - button "Dashboard" [ref=e14] [cursor=pointer]:
+        - img [ref=e16]
+        - generic [ref=e21]: Dashboard
+      - button "Lessons" [ref=e22] [cursor=pointer]:
+        - img [ref=e24]
+        - generic [ref=e26]: Lessons
+      - button "Exams" [ref=e27] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e32]: Exams
+      - button "Admin" [ref=e33] [cursor=pointer]:
+        - img [ref=e35]
+        - generic [ref=e37]: Admin
+    - button "Logout" [ref=e39] [cursor=pointer]:
+      - img [ref=e40]
+      - text: Logout
+  - generic [ref=e43]:
+    - banner [ref=e44]:
+      - heading "Admin" [level=1] [ref=e46]
+      - generic [ref=e47]:
+        - 'button "Language: EN" [ref=e48] [cursor=pointer]':
+          - img [ref=e49]
+        - button "Theme" [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+        - button "Settings" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+        - button "Profile" [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: EK
+          - generic [ref=e63]:
+            - strong [ref=e64]: Elshod Karimov
+            - generic [ref=e65]: Superadmin
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - banner [ref=e69]:
+          - generic [ref=e70]:
+            - heading "Admin Workspace" [level=2] [ref=e71]
+            - paragraph [ref=e72]: Operations console for users, content, and analytics.
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - img [ref=e75]
+              - text: "Last updated: 03/07/2026, 10:56 PM"
+            - button "Export" [ref=e78] [cursor=pointer]:
+              - img [ref=e79]
+              - text: Export
+            - button "Refresh" [ref=e82] [cursor=pointer]:
+              - img [ref=e83]
+              - text: Refresh
+        - tablist "Admin sections" [ref=e88]:
+          - tab "Overview" [ref=e89] [cursor=pointer]
+          - tab "Admins & Users" [active] [selected] [ref=e90] [cursor=pointer]
+          - tab "Content" [ref=e91] [cursor=pointer]
+          - tab "Analytics" [ref=e92] [cursor=pointer]
+      - generic [ref=e247]:
+        - generic [ref=e248]:
+          - generic [ref=e250]:
+            - heading "Admin access management" [level=3] [ref=e251]
+            - paragraph [ref=e252]: Search, filter, and grant/revoke controls.
+          - generic [ref=e254]:
+            - generic [ref=e255]:
+              - generic [ref=e256]:
+                - generic [ref=e257]: Search by name, email, or phone
+                - textbox "Search by name, email, or phone" [ref=e258]
+              - generic [ref=e259]:
+                - generic [ref=e260]: All
+                - combobox "All" [ref=e261]:
+                  - option "All" [selected]
+                  - option "Admins"
+                  - option "Superadmins"
+                  - option "Students"
+              - generic [ref=e262]:
+                - checkbox "Delete mode" [ref=e263]
+                - generic [ref=e264]: Delete mode
+            - generic [ref=e265]:
+              - generic [ref=e266]:
+                - generic [ref=e267]: user@example.com or +998901234567
+                - textbox "user@example.com or +998901234567" [ref=e268]
+              - button "Grant admin" [ref=e269] [cursor=pointer]:
+                - img [ref=e270]
+                - text: Grant admin
+              - button "Revoke admin" [ref=e272] [cursor=pointer]:
+                - img [ref=e273]
+                - text: Revoke admin
+        - generic [ref=e275]:
+          - generic [ref=e277]:
+            - heading "Admins" [level=3] [ref=e278]
+            - paragraph [ref=e279]: Admin category with source tagging.
+          - table [ref=e282]:
+            - rowgroup [ref=e283]:
+              - row "Name Email Phone Admin source Actions" [ref=e284]:
+                - columnheader "Name" [ref=e285]
+                - columnheader "Email" [ref=e286]
+                - columnheader "Phone" [ref=e287]
+                - columnheader "Admin source" [ref=e288]
+                - columnheader "Actions" [ref=e289]
+            - rowgroup [ref=e290]:
+              - row "Elshod Karimov elshod@example.com +998901234567 Allowlist + DB Demote Delete" [ref=e291]:
+                - cell "Elshod Karimov" [ref=e292]
+                - cell "elshod@example.com" [ref=e293]
+                - cell "+998901234567" [ref=e294]
+                - cell "Allowlist + DB" [ref=e295]:
+                  - generic [ref=e296]: Allowlist + DB
+                - cell "Demote Delete" [ref=e297]:
+                  - generic [ref=e298]:
+                    - button "Demote" [ref=e299] [cursor=pointer]:
+                      - img [ref=e300]
+                      - text: Demote
+                    - button "Delete" [disabled] [ref=e304]:
+                      - img [ref=e305]
+                      - text: Delete
+              - row "Madina Ismoilova madina@example.com +998901234568 DB role Demote Delete" [ref=e308]:
+                - cell "Madina Ismoilova" [ref=e309]
+                - cell "madina@example.com" [ref=e310]
+                - cell "+998901234568" [ref=e311]
+                - cell "DB role" [ref=e312]:
+                  - generic [ref=e313]: DB role
+                - cell "Demote Delete" [ref=e314]:
+                  - generic [ref=e315]:
+                    - button "Demote" [ref=e316] [cursor=pointer]:
+                      - img [ref=e317]
+                      - text: Demote
+                    - button "Delete" [disabled] [ref=e321]:
+                      - img [ref=e322]
+                      - text: Delete
+        - generic [ref=e325]:
+          - generic [ref=e327]:
+            - heading "Users" [level=3] [ref=e328]
+            - paragraph [ref=e329]: Registered non-admin users.
+          - table [ref=e332]:
+            - rowgroup [ref=e333]:
+              - row "Name Email Phone Role Actions" [ref=e334]:
+                - columnheader "Name" [ref=e335]
+                - columnheader "Email" [ref=e336]
+                - columnheader "Phone" [ref=e337]
+                - columnheader "Role" [ref=e338]
+                - columnheader "Actions" [ref=e339]
+            - rowgroup [ref=e340]:
+              - row "Aziza Nur aziza@example.com +998901234569 Student Promote Delete" [ref=e341]:
+                - cell "Aziza Nur" [ref=e342]
+                - cell "aziza@example.com" [ref=e343]
+                - cell "+998901234569" [ref=e344]
+                - cell "Student" [ref=e345]
+                - cell "Promote Delete" [ref=e346]:
+                  - generic [ref=e347]:
+                    - button "Promote" [ref=e348] [cursor=pointer]:
+                      - img [ref=e349]
+                      - text: Promote
+                    - button "Delete" [disabled] [ref=e352]:
+                      - img [ref=e353]
+                      - text: Delete
+              - row "Jamshid Aliyev jamshid@example.com +998901234570 Student Promote Delete" [ref=e356]:
+                - cell "Jamshid Aliyev" [ref=e357]
+                - cell "jamshid@example.com" [ref=e358]
+                - cell "+998901234570" [ref=e359]
+                - cell "Student" [ref=e360]
+                - cell "Promote Delete" [ref=e361]:
+                  - generic [ref=e362]:
+                    - button "Promote" [ref=e363] [cursor=pointer]:
+                      - img [ref=e364]
+                      - text: Promote
+                    - button "Delete" [disabled] [ref=e367]:
+                      - img [ref=e368]
+                      - text: Delete

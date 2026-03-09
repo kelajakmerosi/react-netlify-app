@@ -1,7 +1,7 @@
 import styles from '../../styles/components.module.css'
 import { cn, initials as getInitials } from '../../utils'
 import type { TopicStatus } from '../../types'
-import type { ReactNode } from 'react'
+import { useRef, type KeyboardEvent, type ReactNode } from 'react'
 export { Input } from './Input'
 export { Modal } from './Modal'
 export { Select } from './Select'
@@ -100,6 +100,33 @@ export function Divider({ margin }: DividerProps) {
 interface Tab { id: string; label: string }
 interface TabsProps { tabs: Tab[]; active: string; onChange: (id: string) => void }
 export function Tabs({ tabs, active, onChange }: TabsProps) {
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+
+  const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, currentId: string) => {
+    const currentIndex = tabs.findIndex((tab) => tab.id === currentId)
+    if (currentIndex < 0 || !tabs.length) return
+
+    let nextIndex = currentIndex
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % tabs.length
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length
+    } else if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = tabs.length - 1
+    } else {
+      return
+    }
+
+    event.preventDefault()
+    const nextTab = tabs[nextIndex]
+    if (!nextTab) return
+    onChange(nextTab.id)
+    tabRefs.current[nextTab.id]?.focus()
+  }
+
   return (
     <div className={styles.tabs} role="tablist" aria-label="Topic sections">
       {tabs.map(tab => (
@@ -109,8 +136,13 @@ export function Tabs({ tabs, active, onChange }: TabsProps) {
           role="tab"
           aria-selected={active === tab.id}
           aria-controls={`tab-panel-${tab.id}`}
+          tabIndex={active === tab.id ? 0 : -1}
           className={cn(styles.tab, active === tab.id && styles.tabActive)}
           onClick={() => onChange(tab.id)}
+          onKeyDown={(event) => onTabKeyDown(event, tab.id)}
+          ref={(node) => {
+            tabRefs.current[tab.id] = node
+          }}
         >
           {tab.label}
         </button>

@@ -20,7 +20,31 @@ const ExamCatalogItemSchema = z.object({
   publishedAt: z.string().nullable().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  purchased: z.boolean().optional(),
+  attemptsRemaining: z.number().optional(),
 })
+
+const TeacherExamSummarySchema = z.object({
+  id: z.string(),
+  subjectId: z.string(),
+  subjectTitle: z.string().nullable().optional(),
+  ownerUserId: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  durationSec: z.number(),
+  passPercent: z.number(),
+  requiredQuestionCount: z.number().optional(),
+  status: z.string(),
+  priceUzs: z.number(),
+  isActive: z.boolean(),
+  approvedBy: z.string().nullable().optional(),
+  publishedAt: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  questionCount: z.number().optional(),
+  verifiedQuestions: z.number().optional(),
+})
+export type TeacherExamSummary = z.infer<typeof TeacherExamSummarySchema>
 
 const ExamCheckoutSchema = z.object({
   payment: z.object({
@@ -73,15 +97,24 @@ const ExamValidationSchema = z.object({
     details: z.unknown().optional(),
   })),
 })
+export type ExamValidation = z.infer<typeof ExamValidationSchema>
 
 const TeacherExamQuestionSchema = z.object({
   id: z.string(),
   questionOrder: z.number(),
   promptText: z.string(),
+  promptRich: z.record(z.unknown()).optional(),
+  imageUrl: z.string().nullable().optional(),
   options: z.array(z.string()),
   correctIndex: z.number(),
   keyVerified: z.boolean(),
+  explanation: z.string().nullable().optional(),
+  difficulty: z.string().nullable().optional(),
+  sourceRef: z.string().nullable().optional(),
+  blockOrder: z.number().nullable().optional(),
+  blockTitle: z.string().nullable().optional(),
 })
+export type TeacherExamQuestion = z.infer<typeof TeacherExamQuestionSchema>
 
 const ImportJobSchema = z.object({
   id: z.string(),
@@ -90,8 +123,8 @@ const ImportJobSchema = z.object({
   sourceType: z.enum(['docx', 'pdf']),
   status: z.string(),
   sourceStorageKey: z.string(),
-  parseOutput: z.record(z.any()).optional(),
-  error: z.record(z.any()).optional(),
+  parseOutput: z.record(z.unknown()).optional(),
+  error: z.record(z.unknown()).optional(),
 })
 
 const ExamResultSchema = z.object({
@@ -128,7 +161,7 @@ const ExamAttemptSessionSchema = z.object({
     questionId: z.string(),
     questionOrder: z.number(),
     promptText: z.string(),
-    promptRich: z.record(z.any()).optional(),
+    promptRich: z.record(z.unknown()).optional(),
     imageUrl: z.string().nullable().optional(),
     options: z.array(z.string()),
     selectedIndex: z.number().nullable(),
@@ -156,7 +189,42 @@ export const examService = {
     return api.get(`/teacher/exams/${encodeURIComponent(examId)}/validation`, resolveToken(), ExamValidationSchema)
   },
 
-  importSource: async (payload: {
+  getTeacherExams: async () => {
+    return api.get('/teacher/exams', resolveToken(), z.array(TeacherExamSummarySchema))
+  },
+
+  createTeacherExam: async (payload: {
+    subjectId: string
+    title: string
+    description?: string
+    requiredQuestionCount?: 35 | 50
+    priceUzs?: number
+    blocks?: Array<{ blockOrder: number; title: string }>
+    questions?: Array<{
+      id?: string
+      blockOrder?: number
+      questionOrder?: number
+      promptText: string
+      promptRich?: Record<string, unknown>
+      imageUrl?: string | null
+      options: string[]
+      correctIndex: number
+      keyVerified?: boolean
+      explanation?: string
+      difficulty?: 'easy' | 'medium' | 'hard'
+      sourceRef?: string
+    }>
+  }) => {
+    return api.post('/teacher/exams', payload, resolveToken(), TeacherExamSummarySchema)
+  },
+
+  updateTeacherExam: async (examId: string, payload: any) => {
+    return api.patch<TeacherExamSummary>(`/teacher/exams/${encodeURIComponent(examId)}`, payload, resolveToken(), TeacherExamSummarySchema)
+  },
+
+  deleteTeacherExam: async (examId: string) => {
+    return api.delete<{ deleted: boolean }>(`/teacher/exams/${encodeURIComponent(examId)}`, resolveToken())
+  }, importSource: async (payload: {
     subjectId: string
     title: string
     description?: string
@@ -201,7 +269,7 @@ export const examService = {
   submitReview: async (examId: string) => {
     return api.post(`/teacher/exams/${encodeURIComponent(examId)}/submit-review`, {}, resolveToken(), z.object({
       submitted: z.boolean(),
-      exam: z.any(),
+      exam: z.unknown(),
     }))
   },
 

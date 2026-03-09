@@ -33,6 +33,22 @@
   letter-spacing: -0.015em;
 }
 
+.questionMedia {
+  margin-bottom: 16px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--surface-border) 76%, transparent);
+  background: color-mix(in srgb, var(--bg-2) 86%, var(--surface));
+  box-shadow: var(--shadow-sm);
+}
+
+.questionImage {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
 .metaLine {
   font-size: 12px;
   color: var(--text-3);
@@ -53,7 +69,7 @@
   width: 100%;
   text-align: left;
   border: 1px solid var(--surface-border);
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   background: color-mix(in srgb, var(--bg-2) 88%, transparent);
   font-size: 15px;
@@ -87,7 +103,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--bg-3);
   color: var(--text-2);
   font-size: 12px;

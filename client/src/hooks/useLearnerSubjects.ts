@@ -1,143 +1,58 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { SUBJECTS } from '../constants'
 import { useAuth } from './useAuth'
 import subjectService from '../services/subject.service'
 import { toRuntimeSubject } from '../utils/subjectRuntime'
 import type { Subject } from '../types'
+import { queryKeys } from '../lib/queryClient'
 
-const cacheByUser = new Map<string, Subject[]>()
-const CACHE_PREFIX = 'learner-subjects:v2:'
+const MIN_DEMO_SUBJECTS = 6
+const DEMO_SUBJECT_TITLE = 'demo matematika'
+const REMOVED_SUBJECT_IDS = new Set(['geography'])
+const REMOVED_SUBJECT_TITLES = new Set(['geografiya', 'geography'])
 
 const fallbackSubjects = SUBJECTS
 
-const getCacheKey = (userId: string) => `${CACHE_PREFIX}${userId}`
-
-type StorableSubject = Omit<Subject, 'icon'>
-
-const toStorableSubjects = (subjects: Subject[]): StorableSubject[] => (
-  subjects.map(({ icon: _icon, ...rest }) => rest)
-)
-
-const fromStorableSubjects = (payload: unknown): Subject[] | null => {
-  if (!Array.isArray(payload)) return null
-  const mapped = payload
-    .filter((entry) => entry && typeof entry === 'object')
-    .map((entry) => {
-      const raw = entry as Partial<StorableSubject>
-      const color = typeof raw.color === 'string' ? raw.color : '#3f68f7'
-      const gradient = typeof raw.gradient === 'string'
-        ? raw.gradient
-        : `linear-gradient(135deg, ${color}, color-mix(in srgb, ${color} 58%, #ffffff 42%))`
-
-      return {
-        ...raw,
-        color,
-        gradient,
-        icon: null,
-        topics: Array.isArray(raw.topics) ? raw.topics : [],
-        modules: Array.isArray(raw.modules) ? raw.modules : [],
-      } as Subject
-    })
-    .filter((entry) => Boolean(entry.id))
-
-  return mapped
+const isRemovedLearnerSubject = (subject: Subject) => {
+  const normalizedId = String(subject.id || '').trim().toLowerCase()
+  const normalizedTitle = String(subject.title || '').trim().toLowerCase()
+  return normalizedTitle === DEMO_SUBJECT_TITLE
+    || REMOVED_SUBJECT_IDS.has(normalizedId)
+    || REMOVED_SUBJECT_TITLES.has(normalizedTitle)
 }
 
-const readPersisted = (userId: string): Subject[] | null => {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = window.localStorage.getItem(getCacheKey(userId))
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
-    return fromStorableSubjects(parsed)
-  } catch {
-    return null
-  }
-}
+const composeDemoSubjects = (preferred: Subject[]): Subject[] => {
+  const learnerPreferred = preferred.filter((subject) => !isRemovedLearnerSubject(subject))
+  const merged = new Map<string, Subject>()
 
-const readCached = (userId: string): Subject[] | null => {
-  const fromMemory = cacheByUser.get(userId)
-  if (fromMemory && fromMemory.length) return fromMemory
-  const fromStorage = readPersisted(userId)
-  if (fromStorage && fromStorage.length) {
-    cacheByUser.set(userId, fromStorage)
-    return fromStorage
-  }
-  return null
-}
+  learnerPreferred.forEach((subject) => {
+    if (!merged.has(subject.id)) merged.set(subject.id, subject)
+  })
 
-const writeCached = (userId: string, subjects: Subject[]) => {
-  cacheByUser.set(userId, subjects)
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(getCacheKey(userId), JSON.stringify(toStorableSubjects(subjects)))
-  } catch {
-    // ignore storage errors
-  }
+  fallbackSubjects.forEach((subject) => {
+    if (merged.size >= MIN_DEMO_SUBJECTS && learnerPreferred.length > 0) return
+    if (!merged.has(subject.id)) merged.set(subject.id, subject)
+  })
+
+  return Array.from(merged.values())
 }
 
 export const useLearnerSubjects = () => {
   const { user } = useAuth()
   const userId = user?.id ?? null
-  const [subjects, setSubjects] = useState<Subject[]>(() => {
-    if (!userId) return fallbackSubjects
-    return readCached(userId) || []
-  })
-  const [loading, setLoading] = useState<boolean>(() => {
-    if (!userId) return false
-    return !(readCached(userId) || []).length
-  })
-  const [error, setError] = useState<string>('')
 
-  const loadSubjects = useCallback(async (force = false) => {
-    if (!userId) {
-      setSubjects(fallbackSubjects)
-      setLoading(false)
-      setError('')
-      return
-    }
-
-    const cached = readCached(userId)
-    if (cached && !force) {
-      setSubjects(cached)
-    }
-
-    try {
-      setLoading(force || !cached)
-      setError('')
+  const { data: subjects = fallbackSubjects, isLoading: loading, error: queryError, refetch } = useQuery({
+    queryKey: queryKeys.subjects.list(userId),
+    queryFn: async () => {
+      if (!userId) return fallbackSubjects
       const records = await subjectService.getAll()
-      const runtime = records.map(toRuntimeSubject)
-      writeCached(userId, runtime)
-      setSubjects(runtime)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load subjects')
-      if (cached && cached.length) {
-        setSubjects(cached)
-      } else {
-        setSubjects([])
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [userId])
+      return composeDemoSubjects(records.map(toRuntimeSubject))
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
-  useEffect(() => {
-    if (!userId) {
-      setSubjects(fallbackSubjects)
-      setLoading(false)
-      setError('')
-      return
-    }
-
-    const cached = readCached(userId)
-    setSubjects(cached || [])
-    setLoading(!cached)
-    setError('')
-  }, [userId])
-
-  useEffect(() => {
-    void loadSubjects()
-  }, [loadSubjects])
+  const error = queryError instanceof Error ? queryError.message : ''
 
   const byId = useMemo(
     () => new Map(subjects.map((subject) => [subject.id, subject])),
@@ -149,7 +64,7 @@ export const useLearnerSubjects = () => {
     byId,
     loading,
     error,
-    reload: () => loadSubjects(true),
+    reload: () => refetch(),
   }
 }
 
