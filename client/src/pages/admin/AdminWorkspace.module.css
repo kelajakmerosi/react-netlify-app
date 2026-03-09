@@ -160,29 +160,77 @@
 }
 
 .metricCard {
-  min-height: 122px;
-  display: grid;
-  align-content: center;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.metricHeaderWrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metricIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  color: var(--text-2);
 }
 
 .metricLabel {
   margin: 0;
-  color: var(--text-3);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.metricBodyWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .metricValue {
-  margin: 8px 0 0;
-  font-size: 30px;
+  margin: 0;
+  font-size: 28px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.metricTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.metricTrendPos .metricTrendValue {
+  color: var(--success);
+}
+.metricTrendPos .metricTrendLabel {
+  color: var(--text-3);
+}
+
+.metricTrendNeg .metricTrendValue {
+  color: var(--danger);
+}
+.metricTrendNeg .metricTrendLabel {
+  color: var(--text-3);
 }
 
 .metricHelper {
-  margin: 8px 0 0;
-  color: var(--text-2);
+  margin: 0;
+  color: var(--text-3);
   font-size: 13px;
 }
 
@@ -284,16 +332,26 @@
 
 .billingPlans {
   display: grid;
-  gap: 12px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .billingPlanCard {
   border: 1px solid var(--surface-border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  display: grid;
-  gap: 10px;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--bg-1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.billingPlanCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
 .billingPlanHeader {
@@ -301,6 +359,65 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.billingPlanTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+.billingPlanPriceWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 12px 0;
+}
+
+.billingPlanPriceInput {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-bottom: 2px dashed var(--surface-border);
+  width: 100%;
+  padding: 4px 0;
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--transition);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.billingPlanPriceInput:focus {
+  border-bottom-color: var(--accent);
+}
+
+.billingPlanCurrency {
+  font-size: 14px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.billingPlanDescInput {
+  font-size: 14px;
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid transparent;
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: all var(--transition);
+}
+
+.billingPlanDescInput:hover, .billingPlanDescInput:focus {
+  background: var(--bg-2);
+  border-color: var(--surface-border);
+  color: var(--text);
 }
 
 .billingCourses {

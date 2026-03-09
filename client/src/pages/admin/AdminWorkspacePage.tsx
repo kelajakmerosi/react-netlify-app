@@ -8,6 +8,10 @@ import {
   Save,
   ShieldCheck,
   Users,
+  Wallet,
+  ArrowDownRight,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react'
 import { Alert } from '../../components/ui'
 import { Button } from '../../components/ui/Button'
@@ -665,19 +669,23 @@ export function AdminWorkspacePage(): JSX.Element {
                 <div className={styles.billingSummaryGrid}>
                   <MetricCard
                     label={t('adminRevenueTotal')}
-                    value={`${financeSummary?.totalRevenueUzs ?? 0} UZS`}
+                    value={`${(financeSummary?.totalRevenueUzs ?? 0).toLocaleString()} UZS`}
+                    icon={<Wallet size={18} />}
                   />
                   <MetricCard
                     label={t('adminRevenueRefunded')}
-                    value={`${financeSummary?.refundedUzs ?? 0} UZS`}
+                    value={`${(financeSummary?.refundedUzs ?? 0).toLocaleString()} UZS`}
+                    icon={<ArrowDownRight size={18} />}
                   />
                   <MetricCard
                     label={t('adminPaymentsPaid')}
-                    value={financeSummary?.paidCount ?? 0}
+                    value={(financeSummary?.paidCount ?? 0).toLocaleString()}
+                    icon={<CheckCircle2 size={18} />}
                   />
                   <MetricCard
                     label={t('adminPaymentsFailed')}
-                    value={financeSummary?.failedCount ?? 0}
+                    value={(financeSummary?.failedCount ?? 0).toLocaleString()}
+                    icon={<XCircle size={18} />}
                   />
                 </div>
 
@@ -685,7 +693,7 @@ export function AdminWorkspacePage(): JSX.Element {
                   {(pricingCatalog?.plans ?? []).map((plan) => (
                     <div key={plan.key} className={styles.billingPlanCard}>
                       <div className={styles.billingPlanHeader}>
-                        <strong>{plan.title}</strong>
+                        <h4 className={styles.billingPlanTitle}>{plan.title}</h4>
                         <label className={styles.toggleWrap}>
                           <input
                             type="checkbox"
@@ -695,37 +703,39 @@ export function AdminWorkspacePage(): JSX.Element {
                           <span>{t('adminPricingActive')}</span>
                         </label>
                       </div>
-                      <div className={styles.formGrid}>
-                        <label className={styles.field}>
-                          <span>{t('adminPricingMonthlyPrice')}</span>
+                      
+                      <div className={styles.billingPlanPriceWrap}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', width: '100%' }}>
                           <input
-                            className={styles.input}
+                            className={styles.billingPlanPriceInput}
                             type="number"
                             min={0}
                             value={plan.priceMonthlyUzs}
                             onChange={(event) => handlePlanDraftChange(plan.key, { priceMonthlyUzs: Number(event.target.value) || 0 })}
                           />
-                        </label>
-                        <label className={styles.field}>
-                          <span>{t('adminPricingDescription')}</span>
-                          <input
-                            className={styles.input}
-                            value={plan.description ?? ''}
-                            onChange={(event) => handlePlanDraftChange(plan.key, { description: event.target.value })}
-                          />
-                        </label>
+                          <span className={styles.billingPlanCurrency}>UZS&nbsp;/&nbsp;mo</span>
+                        </div>
                       </div>
-                      <div className={styles.actionRow}>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          disabled={savingPlanKey === plan.key}
-                          onClick={() => void handleSavePlan(plan)}
-                        >
-                          <Save size={14} aria-hidden="true" />
-                          {savingPlanKey === plan.key ? t('adminProcessing') : t('adminSavePricing')}
-                        </Button>
+
+                      <div className={styles.formGrid}>
+                        <input
+                          className={styles.billingPlanDescInput}
+                          placeholder={t('adminPricingDescription') || 'Plan description'}
+                          value={plan.description ?? ''}
+                          onChange={(event) => handlePlanDraftChange(plan.key, { description: event.target.value })}
+                        />
                       </div>
+
+                      <Button
+                        style={{ width: '100%', marginTop: 'auto' }}
+                        variant="primary"
+                        size="md"
+                        disabled={savingPlanKey === plan.key}
+                        onClick={() => void handleSavePlan(plan)}
+                      >
+                        <Save size={16} aria-hidden="true" />
+                        {savingPlanKey === plan.key ? t('adminProcessing') : t('adminSavePricing')}
+                      </Button>
                     </div>
                   ))}
                 </div>
