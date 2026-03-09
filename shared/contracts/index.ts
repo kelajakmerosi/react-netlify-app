@@ -187,7 +187,7 @@ export const AdminIdentitySchema = z.object({
   email: z.string().email().optional(),
   phone: PhoneSchema.optional(),
 }).strict().refine(
-  (value) => Boolean(value.userId || value.email || value.phone),
+  (value: any) => Boolean(value.userId || value.email || value.phone),
   { message: 'Provide userId, email, or phone' },
 )
 
@@ -372,7 +372,7 @@ export const UserCapabilitiesUpdateSchema = z.object({
   canBuy: z.boolean().optional(),
   canLearn: z.boolean().optional(),
 }).strict().refine(
-  (value) => Object.keys(value).length > 0,
+  (value: any) => Object.keys(value).length > 0,
   { message: 'At least one capability field must be provided' },
 )
 
@@ -534,7 +534,7 @@ export const MaterialPackUpdateSchema = z.object({
   priceUzs: z.number().nonnegative().optional(),
   isActive: z.boolean().optional(),
 }).strict().refine(
-  (value) => Object.keys(value).length > 0,
+  (value: any) => Object.keys(value).length > 0,
   { message: 'At least one material pack field must be provided' },
 )
 

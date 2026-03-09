@@ -1,0 +1,558 @@
+c923005e29ae69b8ee559984d8fdac7b
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.connectDB = exports.pool = void 0;
+const pg_1 = require("pg");
+const logger_1 = require("./logger");
+const DEFAULT_DB_CONNECT_TIMEOUT_MS = 10000;
+const parsedDbConnectTimeoutMs = Number.parseInt(process.env.DB_CONNECT_TIMEOUT_MS || '', 10);
+const dbConnectTimeoutMs = Number.isFinite(parsedDbConnectTimeoutMs) && parsedDbConnectTimeoutMs > 0
+    ? parsedDbConnectTimeoutMs
+    : DEFAULT_DB_CONNECT_TIMEOUT_MS;
+const parseDbEndpoint = (connectionString) => {
+    if (!connectionString)
+        return { host: null, port: null };
+    try {
+        const parsed = new URL(connectionString);
+        return {
+            host: parsed.hostname || null,
+            port: parsed.port ? Number(parsed.port) : 5432,
+        };
+    }
+    catch {
+        return { host: null, port: null };
+    }
+};
+const dbEndpoint = parseDbEndpoint(process.env.DATABASE_URL);
+const pool = new pg_1.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }, // required for Supabase
+    connectionTimeoutMillis: dbConnectTimeoutMs,
+    max: 10,
+    idleTimeoutMillis: 30000,
+});
+exports.pool = pool;
+/**
+ * Connect and verify the database is reachable.
+ * Also runs table migrations on startup.
+ */
+const connectDB = async () => {
+    try {
+        const client = await pool.connect();
+        const { rows } = await client.query('SELECT NOW()');
+        client.release();
+        logger_1.logger.info({ now: rows[0].now }, '[db] PostgreSQL connected');
+        await runMigrations();
+    }
+    catch (err) {
+        logger_1.logger.error({
+            err,
+            dbHost: dbEndpoint.host || 'unknown',
+            dbPort: dbEndpoint.port || 'unknown',
+            timeoutMs: dbConnectTimeoutMs,
+            errorCode: err?.code || err?.cause?.code || 'unknown',
+        }, '[db] Connection error');
+        process.exit(1);
+    }
+};
+exports.connectDB = connectDB;
+/**
+ * Idempotent table setup — runs on every server start.
+ */
+const runMigrations = async () => {
+    await pool.query(`
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+    CREATE TABLE IF NOT EXISTS users (
+      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name        TEXT NOT NULL,
+      email       TEXT NOT NULL UNIQUE,
+      phone       TEXT UNIQUE,
+      phone_verified BOOLEAN DEFAULT FALSE,
+      password    TEXT,
+      avatar      TEXT DEFAULT '',
+      role        TEXT DEFAULT 'student' CHECK (role IN ('student', 'admin', 'superadmin')),
+      provider    TEXT DEFAULT 'local'   CHECK (provider IN ('local', 'google')),
+      google_id   TEXT,
+      created_at  TIMESTAMPTZ DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS phone TEXT,
+      ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS first_name TEXT,
+      ADD COLUMN IF NOT EXISTS last_name TEXT,
+      ADD COLUMN IF NOT EXISTS password_set_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS can_teach BOOLEAN,
+      ADD COLUMN IF NOT EXISTS can_buy BOOLEAN,
+      ADD COLUMN IF NOT EXISTS can_learn BOOLEAN;
+
+    UPDATE users
+    SET can_teach = CASE WHEN role IN ('admin', 'superadmin') THEN TRUE ELSE FALSE END
+    WHERE can_teach IS NULL;
+
+    UPDATE users
+    SET can_buy = TRUE
+    WHERE can_buy IS NULL;
+
+    UPDATE users
+    SET can_learn = TRUE
+    WHERE can_learn IS NULL;
+
+    ALTER TABLE users
+      ALTER COLUMN can_teach SET DEFAULT FALSE,
+      ALTER COLUMN can_buy SET DEFAULT TRUE,
+      ALTER COLUMN can_learn SET DEFAULT TRUE;
+
+    ALTER TABLE users
+      DROP CONSTRAINT IF EXISTS users_role_check;
+
+    ALTER TABLE users
+      ADD CONSTRAINT users_role_check
+      CHECK (role IN ('student', 'admin', 'superadmin'));
+
+    ALTER TABLE users
+      ALTER COLUMN email DROP NOT NULL;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone_unique
+      ON users(phone)
+      WHERE phone IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS subjects (
+      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title       TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      icon        TEXT DEFAULT '',
+      color       TEXT DEFAULT '#6366f1',
+      "order"     INT  DEFAULT 0,
+      topics      JSONB DEFAULT '[]',
+      created_at  TIMESTAMPTZ DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS admin_subject_scopes (
+      id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      admin_user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      subject_id          TEXT NOT NULL,
+      can_manage_content  BOOLEAN DEFAULT TRUE,
+      can_manage_pricing  BOOLEAN DEFAULT FALSE,
+      created_by          UUID REFERENCES users(id) ON DELETE SET NULL,
+      created_at          TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (admin_user_id, subject_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS teacher_subject_scopes (
+      id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      teacher_user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      subject_id          TEXT NOT NULL,
+      status              TEXT NOT NULL DEFAULT 'active'
+                          CHECK (status IN ('active', 'blocked', 'pending')),
+      approved_by         UUID REFERENCES users(id) ON DELETE SET NULL,
+      created_at          TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (teacher_user_id, subject_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_lesson_progress (
+      id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id               UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      subject_id            TEXT NOT NULL,
+      topic_id              TEXT NOT NULL,
+      status                TEXT DEFAULT 'locked'
+                            CHECK (status IN ('locked', 'inprogress', 'onhold', 'completed')),
+      video_watched         BOOLEAN DEFAULT FALSE,
+      quiz_score            INT,
+      quiz_answers          JSONB DEFAULT '{}'::jsonb,
+      quiz_submitted        BOOLEAN DEFAULT FALSE,
+      mastery_score         INT,
+      quiz_attempts         INT DEFAULT 0,
+      time_on_task_sec      INT DEFAULT 0,
+      resume_question_index INT DEFAULT 0,
+      last_activity_at      TIMESTAMPTZ DEFAULT NOW(),
+      completed_at          TIMESTAMPTZ,
+      created_at            TIMESTAMPTZ DEFAULT NOW(),
+      updated_at            TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (user_id, subject_id, topic_id)
+    );
+
+    ALTER TABLE user_lesson_progress
+      ADD COLUMN IF NOT EXISTS quiz_total_questions INT;
+
+    ALTER TABLE subjects
+      ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN DEFAULT FALSE;
+
+    CREATE TABLE IF NOT EXISTS user_quiz_attempts (
+      id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id          UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      subject_id       TEXT NOT NULL,
+      topic_id         TEXT NOT NULL,
+      quiz_score       INT NOT NULL,
+      mastery_score    INT NOT NULL,
+      total_questions  INT NOT NULL,
+      quiz_answers     JSONB DEFAULT '{}'::jsonb,
+      attempted_at     TIMESTAMPTZ DEFAULT NOW(),
+      created_at       TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS user_activity_days (
+      user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      activity_date DATE NOT NULL,
+      created_at    TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (user_id, activity_date)
+    );
+
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_type  TEXT NOT NULL,
+      user_id     UUID REFERENCES users(id) ON DELETE SET NULL,
+      subject_id  TEXT,
+      topic_id    TEXT,
+      source      TEXT,
+      payload     JSONB DEFAULT '{}'::jsonb,
+      created_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS pricing_plans (
+      key               TEXT PRIMARY KEY,
+      title             TEXT NOT NULL,
+      description       TEXT DEFAULT '',
+      price_monthly_uzs NUMERIC(12,2) DEFAULT 0,
+      is_active         BOOLEAN DEFAULT TRUE,
+      features          JSONB DEFAULT '[]'::jsonb,
+      updated_at        TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS course_prices (
+      id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      subject_id       TEXT NOT NULL UNIQUE,
+      subject_title    TEXT DEFAULT '',
+      price_uzs        NUMERIC(12,2) NOT NULL DEFAULT 0,
+      is_active        BOOLEAN DEFAULT TRUE,
+      updated_at       TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS payments (
+      id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id          UUID REFERENCES users(id) ON DELETE SET NULL,
+      payment_type     TEXT NOT NULL CHECK (payment_type IN ('subscription', 'course_purchase', 'exam_attempt_pack', 'material_pack')),
+      plan_key         TEXT REFERENCES pricing_plans(key) ON DELETE SET NULL,
+      subject_id       TEXT,
+      amount_uzs       NUMERIC(12,2) NOT NULL CHECK (amount_uzs >= 0),
+      provider         TEXT NOT NULL CHECK (provider IN ('payme', 'click', 'manual')),
+      status           TEXT NOT NULL DEFAULT 'paid' CHECK (status IN ('pending', 'paid', 'failed', 'refunded')),
+      external_id      TEXT,
+      payload          JSONB DEFAULT '{}'::jsonb,
+      paid_at          TIMESTAMPTZ DEFAULT NOW(),
+      created_at       TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    ALTER TABLE payments
+      DROP CONSTRAINT IF EXISTS payments_payment_type_check;
+
+    ALTER TABLE payments
+      ADD CONSTRAINT payments_payment_type_check
+      CHECK (payment_type IN ('subscription', 'course_purchase', 'exam_attempt_pack', 'material_pack'));
+
+    CREATE TABLE IF NOT EXISTS exams (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      subject_id      TEXT NOT NULL,
+      owner_user_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title           TEXT NOT NULL,
+      description     TEXT DEFAULT '',
+      duration_sec    INT NOT NULL DEFAULT 7200 CHECK (duration_sec > 0),
+      pass_percent    INT NOT NULL DEFAULT 80 CHECK (pass_percent >= 0 AND pass_percent <= 100),
+      required_question_count INT NOT NULL DEFAULT 50 CHECK (required_question_count >= 1),
+      status          TEXT NOT NULL DEFAULT 'draft'
+                      CHECK (status IN ('draft', 'pending_review', 'published', 'archived')),
+      price_uzs       NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (price_uzs >= 0),
+      is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+      approved_by     UUID REFERENCES users(id) ON DELETE SET NULL,
+      published_at    TIMESTAMPTZ,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      updated_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS exam_blocks (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      exam_id         UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+      block_order     INT NOT NULL,
+      title           TEXT NOT NULL,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (exam_id, block_order)
+    );
+
+    CREATE TABLE IF NOT EXISTS exam_questions (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      exam_id         UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+      block_id        UUID REFERENCES exam_blocks(id) ON DELETE SET NULL,
+      question_order  INT NOT NULL,
+      prompt_text     TEXT NOT NULL,
+      prompt_rich     JSONB DEFAULT '{}'::jsonb,
+      image_url       TEXT,
+      options_json    JSONB NOT NULL DEFAULT '[]'::jsonb,
+      correct_index   INT NOT NULL CHECK (correct_index >= 0),
+      key_verified    BOOLEAN NOT NULL DEFAULT TRUE,
+      explanation     TEXT,
+      difficulty      TEXT,
+      source_ref      TEXT,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      updated_at      TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (exam_id, question_order)
+    );
+
+    ALTER TABLE exams
+      ADD COLUMN IF NOT EXISTS required_question_count INT;
+
+    UPDATE exams
+    SET required_question_count = 50
+    WHERE required_question_count IS NULL;
+
+    ALTER TABLE exams
+      ALTER COLUMN required_question_count SET DEFAULT 50,
+      ALTER COLUMN required_question_count SET NOT NULL;
+
+    ALTER TABLE exams
+      DROP CONSTRAINT IF EXISTS exams_required_question_count_check;
+
+    ALTER TABLE exams
+      ADD CONSTRAINT exams_required_question_count_check
+      CHECK (required_question_count >= 1);
+
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS key_verified BOOLEAN;
+
+    UPDATE exam_questions
+    SET key_verified = TRUE
+    WHERE key_verified IS NULL;
+
+    ALTER TABLE exam_questions
+      ALTER COLUMN key_verified SET DEFAULT TRUE,
+      ALTER COLUMN key_verified SET NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS exam_entitlements (
+      id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      exam_id           UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+      attempts_total    INT NOT NULL DEFAULT 1 CHECK (attempts_total >= 1),
+      attempts_used     INT NOT NULL DEFAULT 0 CHECK (attempts_used >= 0),
+      attempts_remaining INT NOT NULL DEFAULT 1 CHECK (attempts_remaining >= 0),
+      source_payment_id UUID UNIQUE REFERENCES payments(id) ON DELETE SET NULL,
+      created_at        TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS exam_attempts (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      entitlement_id  UUID NOT NULL REFERENCES exam_entitlements(id) ON DELETE CASCADE,
+      user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      exam_id         UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+      status          TEXT NOT NULL DEFAULT 'in_progress'
+                      CHECK (status IN ('in_progress', 'submitted', 'expired', 'canceled')),
+      started_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at      TIMESTAMPTZ NOT NULL,
+      submitted_at    TIMESTAMPTZ,
+      correct_count   INT DEFAULT 0,
+      total_questions INT DEFAULT 0,
+      score_percent   INT DEFAULT 0,
+      passed          BOOLEAN DEFAULT FALSE,
+      snapshot_json   JSONB DEFAULT '{}'::jsonb,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS exam_attempt_answers (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      attempt_id      UUID NOT NULL REFERENCES exam_attempts(id) ON DELETE CASCADE,
+      question_id     UUID NOT NULL REFERENCES exam_questions(id) ON DELETE CASCADE,
+      selected_index  INT,
+      answered_at     TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (attempt_id, question_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS material_packs (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      subject_id      TEXT NOT NULL,
+      owner_user_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title           TEXT NOT NULL,
+      description     TEXT DEFAULT '',
+      price_uzs       NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (price_uzs >= 0),
+      status          TEXT NOT NULL DEFAULT 'draft'
+                      CHECK (status IN ('draft', 'pending_review', 'published', 'archived')),
+      is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+      approved_by     UUID REFERENCES users(id) ON DELETE SET NULL,
+      published_at    TIMESTAMPTZ,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      updated_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS material_pack_assets (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      pack_id         UUID NOT NULL REFERENCES material_packs(id) ON DELETE CASCADE,
+      storage_key     TEXT NOT NULL,
+      file_name       TEXT NOT NULL,
+      mime_type       TEXT,
+      size_bytes      BIGINT DEFAULT 0,
+      checksum        TEXT,
+      uploaded_by     UUID REFERENCES users(id) ON DELETE SET NULL,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS material_entitlements (
+      id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      pack_id           UUID NOT NULL REFERENCES material_packs(id) ON DELETE CASCADE,
+      source_payment_id UUID UNIQUE REFERENCES payments(id) ON DELETE SET NULL,
+      granted_at        TIMESTAMPTZ DEFAULT NOW(),
+      revoked_at        TIMESTAMPTZ
+    );
+
+    CREATE TABLE IF NOT EXISTS content_upload_jobs (
+      id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      uploader_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      subject_id        TEXT NOT NULL,
+      source_type       TEXT NOT NULL CHECK (source_type IN ('docx', 'pdf')),
+      status            TEXT NOT NULL DEFAULT 'uploaded'
+                        CHECK (status IN ('uploaded', 'parsed', 'needs_review', 'failed', 'published')),
+      source_storage_key TEXT NOT NULL,
+      parse_output_json JSONB DEFAULT '{}'::jsonb,
+      error_json        JSONB DEFAULT '{}'::jsonb,
+      created_at        TIMESTAMPTZ DEFAULT NOW(),
+      updated_at        TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    INSERT INTO pricing_plans (key, title, description, price_monthly_uzs, is_active, features)
+    VALUES
+      ('free', 'Free', 'Base plan with limited access', 0, TRUE, '[]'::jsonb),
+      ('pro', 'Pro', 'Extended access for active learners', 99000, TRUE, '[]'::jsonb),
+      ('premium', 'Premium', 'Full access to all current and future features', 199000, TRUE, '[]'::jsonb)
+    ON CONFLICT (key) DO NOTHING;
+
+    CREATE TABLE IF NOT EXISTS phone_auth_codes (
+      id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      phone         TEXT NOT NULL,
+      code_hash     TEXT NOT NULL,
+      expires_at    TIMESTAMPTZ NOT NULL,
+      attempts      INT DEFAULT 0,
+      max_attempts  INT DEFAULT 5,
+      consumed_at   TIMESTAMPTZ,
+      request_ip    TEXT,
+      created_at    TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    ALTER TABLE phone_auth_codes
+      ADD COLUMN IF NOT EXISTS purpose TEXT DEFAULT 'legacy_login',
+      ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL;
+
+    ALTER TABLE phone_auth_codes
+      DROP CONSTRAINT IF EXISTS phone_auth_codes_purpose_check;
+
+    ALTER TABLE phone_auth_codes
+      ADD CONSTRAINT phone_auth_codes_purpose_check
+      CHECK (purpose IN ('signup', 'password_reset', 'legacy_password_setup', 'legacy_login'));
+
+    CREATE INDEX IF NOT EXISTS idx_phone_auth_codes_phone_created
+      ON phone_auth_codes(phone, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_phone_auth_codes_phone_purpose_created
+      ON phone_auth_codes(phone, purpose, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_phone_auth_codes_phone_active
+      ON phone_auth_codes(phone, expires_at DESC)
+      WHERE consumed_at IS NULL;
+
+    CREATE INDEX IF NOT EXISTS idx_user_lesson_progress_user
+      ON user_lesson_progress(user_id);
+
+    CREATE INDEX IF NOT EXISTS idx_user_lesson_progress_last_activity
+      ON user_lesson_progress(user_id, last_activity_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_user
+      ON user_quiz_attempts(user_id, attempted_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_topic
+      ON user_quiz_attempts(user_id, subject_id, topic_id, attempted_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_type_created
+      ON analytics_events(event_type, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_created
+      ON analytics_events(created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_subject_topic
+      ON analytics_events(subject_id, topic_id, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_payments_status_paid_at
+      ON payments(status, paid_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_payments_type_paid_at
+      ON payments(payment_type, paid_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_payments_provider_paid_at
+      ON payments(provider, paid_at DESC);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_provider_external
+      ON payments(provider, external_id)
+      WHERE external_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS idx_admin_subject_scopes_admin
+      ON admin_subject_scopes(admin_user_id, subject_id);
+
+    CREATE INDEX IF NOT EXISTS idx_teacher_subject_scopes_teacher
+      ON teacher_subject_scopes(teacher_user_id, subject_id, status);
+
+    CREATE INDEX IF NOT EXISTS idx_exams_owner_status
+      ON exams(owner_user_id, status, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_exams_subject_status
+      ON exams(subject_id, status, is_active);
+
+    CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_order
+      ON exam_questions(exam_id, question_order);
+
+    CREATE INDEX IF NOT EXISTS idx_exam_entitlements_user_exam
+      ON exam_entitlements(user_id, exam_id, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_exam_attempts_user_exam
+      ON exam_attempts(user_id, exam_id, started_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_material_packs_subject_status
+      ON material_packs(subject_id, status, is_active);
+
+    CREATE INDEX IF NOT EXISTS idx_material_entitlements_user
+      ON material_entitlements(user_id, granted_at DESC);
+
+    -- Phase 4: Question format polymorphism
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS format_type TEXT DEFAULT 'MCQ4';
+
+    ALTER TABLE exam_questions
+      DROP CONSTRAINT IF EXISTS exam_questions_format_type_check;
+
+    ALTER TABLE exam_questions
+      ADD CONSTRAINT exam_questions_format_type_check
+      CHECK (format_type IN ('MCQ4', 'MCQ8', 'WRITTEN'));
+
+    ALTER TABLE exam_questions
+      ALTER COLUMN correct_index DROP NOT NULL;
+
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS written_answer TEXT;
+
+    -- Phase 4: Difficulty enum enforcement
+    ALTER TABLE exam_questions
+      DROP CONSTRAINT IF EXISTS exam_questions_difficulty_check;
+
+    ALTER TABLE exam_questions
+      ADD CONSTRAINT exam_questions_difficulty_check
+      CHECK (difficulty IS NULL OR difficulty IN ('easy', 'medium', 'hard'));
+
+    -- Phase 4: Teacher quota tracking (passive)
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS video_quota INT DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS test_quota INT DEFAULT 0;
+
+    -- Phase 4: Subject track for taxonomy grouping
+    ALTER TABLE subjects
+      ADD COLUMN IF NOT EXISTS track TEXT DEFAULT 'foundation';
+  `);
+    logger_1.logger.info('[db] Migrations complete');
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2N0aW1vdGhlL0Rlc2t0b3AvY29kZS9rZWxhamFrbWVyb3NpL3NlcnZlci9zcmMvY29uZmlnL2RiLnRzIiwibWFwcGluZ3MiOiI7OztBQUFBLDJCQUEwQjtBQUMxQixxQ0FBa0M7QUFFbEMsTUFBTSw2QkFBNkIsR0FBRyxLQUFLLENBQUM7QUFDNUMsTUFBTSx3QkFBd0IsR0FBRyxNQUFNLENBQUMsUUFBUSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMscUJBQXFCLElBQUksRUFBRSxFQUFFLEVBQUUsQ0FBQyxDQUFDO0FBQzlGLE1BQU0sa0JBQWtCLEdBQUcsTUFBTSxDQUFDLFFBQVEsQ0FBQyx3QkFBd0IsQ0FBQyxJQUFJLHdCQUF3QixHQUFHLENBQUM7SUFDbEcsQ0FBQyxDQUFDLHdCQUF3QjtJQUMxQixDQUFDLENBQUMsNkJBQTZCLENBQUM7QUFFbEMsTUFBTSxlQUFlLEdBQUcsQ0FBQyxnQkFBb0MsRUFBRSxFQUFFO0lBQy9ELElBQUksQ0FBQyxnQkFBZ0I7UUFBRSxPQUFPLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLENBQUM7SUFDekQsSUFBSSxDQUFDO1FBQ0gsTUFBTSxNQUFNLEdBQUcsSUFBSSxHQUFHLENBQUMsZ0JBQWdCLENBQUMsQ0FBQztRQUN6QyxPQUFPO1lBQ0wsSUFBSSxFQUFFLE1BQU0sQ0FBQyxRQUFRLElBQUksSUFBSTtZQUM3QixJQUFJLEVBQUUsTUFBTSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFDLENBQUMsSUFBSTtTQUMvQyxDQUFDO0lBQ0osQ0FBQztJQUFDLE1BQU0sQ0FBQztRQUNQLE9BQU8sRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsQ0FBQztJQUNwQyxDQUFDO0FBQ0gsQ0FBQyxDQUFDO0FBRUYsTUFBTSxVQUFVLEdBQUcsZUFBZSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsWUFBWSxDQUFDLENBQUM7QUFFN0QsTUFBTSxJQUFJLEdBQUcsSUFBSSxTQUFJLENBQUM7SUFDcEIsZ0JBQWdCLEVBQUUsT0FBTyxDQUFDLEdBQUcsQ0FBQyxZQUFZO0lBQzFDLEdBQUcsRUFBRSxFQUFFLGtCQUFrQixFQUFFLEtBQUssRUFBRSxFQUFFLHdCQUF3QjtJQUM1RCx1QkFBdUIsRUFBRSxrQkFBa0I7SUFDM0MsR0FBRyxFQUFFLEVBQUU7SUFDUCxpQkFBaUIsRUFBRSxLQUFLO0NBQ3pCLENBQUMsQ0FBQztBQWdoQk0sb0JBQUk7QUE5Z0JiOzs7R0FHRztBQUNILE1BQU0sU0FBUyxHQUFHLEtBQUssSUFBSSxFQUFFO0lBQzNCLElBQUksQ0FBQztRQUNILE1BQU0sTUFBTSxHQUFHLE1BQU0sSUFBSSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ3BDLE1BQU0sRUFBRSxJQUFJLEVBQUUsR0FBRyxNQUFNLE1BQU0sQ0FBQyxLQUFLLENBQUMsY0FBYyxDQUFDLENBQUM7UUFDcEQsTUFBTSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ2pCLGVBQU0sQ0FBQyxJQUFJLENBQUMsRUFBRSxHQUFHLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDLEdBQUcsRUFBRSxFQUFFLDJCQUEyQixDQUFDLENBQUM7UUFDL0QsTUFBTSxhQUFhLEVBQUUsQ0FBQztJQUN4QixDQUFDO0lBQUMsT0FBTyxHQUFHLEVBQUUsQ0FBQztRQUNiLGVBQU0sQ0FBQyxLQUFLLENBQ1Y7WUFDRSxHQUFHO1lBQ0gsTUFBTSxFQUFFLFVBQVUsQ0FBQyxJQUFJLElBQUksU0FBUztZQUNwQyxNQUFNLEVBQUUsVUFBVSxDQUFDLElBQUksSUFBSSxTQUFTO1lBQ3BDLFNBQVMsRUFBRSxrQkFBa0I7WUFDN0IsU0FBUyxFQUFHLEdBQVcsRUFBRSxJQUFJLElBQUssR0FBVyxFQUFFLEtBQUssRUFBRSxJQUFJLElBQUksU0FBUztTQUN4RSxFQUNELHVCQUF1QixDQUN4QixDQUFDO1FBQ0YsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQztJQUNsQixDQUFDO0FBQ0gsQ0FBQyxDQUFDO0FBc2ZhLDhCQUFTO0FBcGZ4Qjs7R0FFRztBQUNILE1BQU0sYUFBYSxHQUFHLEtBQUssSUFBSSxFQUFFO0lBQy9CLE1BQU0sSUFBSSxDQUFDLEtBQUssQ0FBQzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0dBNGVoQixDQUFDLENBQUM7SUFDSCxlQUFNLENBQUMsSUFBSSxDQUFDLDBCQUEwQixDQUFDLENBQUM7QUFDMUMsQ0FBQyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9jdGltb3RoZS9EZXNrdG9wL2NvZGUva2VsYWpha21lcm9zaS9zZXJ2ZXIvc3JjL2NvbmZpZy9kYi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBQb29sIH0gZnJvbSAncGcnO1xuaW1wb3J0IHsgbG9nZ2VyIH0gZnJvbSAnLi9sb2dnZXInO1xuXG5jb25zdCBERUZBVUxUX0RCX0NPTk5FQ1RfVElNRU9VVF9NUyA9IDEwMDAwO1xuY29uc3QgcGFyc2VkRGJDb25uZWN0VGltZW91dE1zID0gTnVtYmVyLnBhcnNlSW50KHByb2Nlc3MuZW52LkRCX0NPTk5FQ1RfVElNRU9VVF9NUyB8fCAnJywgMTApO1xuY29uc3QgZGJDb25uZWN0VGltZW91dE1zID0gTnVtYmVyLmlzRmluaXRlKHBhcnNlZERiQ29ubmVjdFRpbWVvdXRNcykgJiYgcGFyc2VkRGJDb25uZWN0VGltZW91dE1zID4gMFxuICA/IHBhcnNlZERiQ29ubmVjdFRpbWVvdXRNc1xuICA6IERFRkFVTFRfREJfQ09OTkVDVF9USU1FT1VUX01TO1xuXG5jb25zdCBwYXJzZURiRW5kcG9pbnQgPSAoY29ubmVjdGlvblN0cmluZzogc3RyaW5nIHwgdW5kZWZpbmVkKSA9PiB7XG4gIGlmICghY29ubmVjdGlvblN0cmluZykgcmV0dXJuIHsgaG9zdDogbnVsbCwgcG9ydDogbnVsbCB9O1xuICB0cnkge1xuICAgIGNvbnN0IHBhcnNlZCA9IG5ldyBVUkwoY29ubmVjdGlvblN0cmluZyk7XG4gICAgcmV0dXJuIHtcbiAgICAgIGhvc3Q6IHBhcnNlZC5ob3N0bmFtZSB8fCBudWxsLFxuICAgICAgcG9ydDogcGFyc2VkLnBvcnQgPyBOdW1iZXIocGFyc2VkLnBvcnQpIDogNTQzMixcbiAgICB9O1xuICB9IGNhdGNoIHtcbiAgICByZXR1cm4geyBob3N0OiBudWxsLCBwb3J0OiBudWxsIH07XG4gIH1cbn07XG5cbmNvbnN0IGRiRW5kcG9pbnQgPSBwYXJzZURiRW5kcG9pbnQocHJvY2Vzcy5lbnYuREFUQUJBU0VfVVJMKTtcblxuY29uc3QgcG9vbCA9IG5ldyBQb29sKHtcbiAgY29ubmVjdGlvblN0cmluZzogcHJvY2Vzcy5lbnYuREFUQUJBU0VfVVJMLFxuICBzc2w6IHsgcmVqZWN0VW5hdXRob3JpemVkOiBmYWxzZSB9LCAvLyByZXF1aXJlZCBmb3IgU3VwYWJhc2VcbiAgY29ubmVjdGlvblRpbWVvdXRNaWxsaXM6IGRiQ29ubmVjdFRpbWVvdXRNcyxcbiAgbWF4OiAxMCxcbiAgaWRsZVRpbWVvdXRNaWxsaXM6IDMwMDAwLFxufSk7XG5cbi8qKlxuICogQ29ubmVjdCBhbmQgdmVyaWZ5IHRoZSBkYXRhYmFzZSBpcyByZWFjaGFibGUuXG4gKiBBbHNvIHJ1bnMgdGFibGUgbWlncmF0aW9ucyBvbiBzdGFydHVwLlxuICovXG5jb25zdCBjb25uZWN0REIgPSBhc3luYyAoKSA9PiB7XG4gIHRyeSB7XG4gICAgY29uc3QgY2xpZW50ID0gYXdhaXQgcG9vbC5jb25uZWN0KCk7XG4gICAgY29uc3QgeyByb3dzIH0gPSBhd2FpdCBjbGllbnQucXVlcnkoJ1NFTEVDVCBOT1coKScpO1xuICAgIGNsaWVudC5yZWxlYXNlKCk7XG4gICAgbG9nZ2VyLmluZm8oeyBub3c6IHJvd3NbMF0ubm93IH0sICdbZGJdIFBvc3RncmVTUUwgY29ubmVjdGVkJyk7XG4gICAgYXdhaXQgcnVuTWlncmF0aW9ucygpO1xuICB9IGNhdGNoIChlcnIpIHtcbiAgICBsb2dnZXIuZXJyb3IoXG4gICAgICB7XG4gICAgICAgIGVycixcbiAgICAgICAgZGJIb3N0OiBkYkVuZHBvaW50Lmhvc3QgfHwgJ3Vua25vd24nLFxuICAgICAgICBkYlBvcnQ6IGRiRW5kcG9pbnQucG9ydCB8fCAndW5rbm93bicsXG4gICAgICAgIHRpbWVvdXRNczogZGJDb25uZWN0VGltZW91dE1zLFxuICAgICAgICBlcnJvckNvZGU6IChlcnIgYXMgYW55KT8uY29kZSB8fCAoZXJyIGFzIGFueSk/LmNhdXNlPy5jb2RlIHx8ICd1bmtub3duJyxcbiAgICAgIH0sXG4gICAgICAnW2RiXSBDb25uZWN0aW9uIGVycm9yJ1xuICAgICk7XG4gICAgcHJvY2Vzcy5leGl0KDEpO1xuICB9XG59O1xuXG4vKipcbiAqIElkZW1wb3RlbnQgdGFibGUgc2V0dXAg4oCUIHJ1bnMgb24gZXZlcnkgc2VydmVyIHN0YXJ0LlxuICovXG5jb25zdCBydW5NaWdyYXRpb25zID0gYXN5bmMgKCkgPT4ge1xuICBhd2FpdCBwb29sLnF1ZXJ5KGBcbiAgICBDUkVBVEUgRVhURU5TSU9OIElGIE5PVCBFWElTVFMgcGdjcnlwdG87XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyB1c2VycyAoXG4gICAgICBpZCAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICBuYW1lICAgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgZW1haWwgICAgICAgVEVYVCBOT1QgTlVMTCBVTklRVUUsXG4gICAgICBwaG9uZSAgICAgICBURVhUIFVOSVFVRSxcbiAgICAgIHBob25lX3ZlcmlmaWVkIEJPT0xFQU4gREVGQVVMVCBGQUxTRSxcbiAgICAgIHBhc3N3b3JkICAgIFRFWFQsXG4gICAgICBhdmF0YXIgICAgICBURVhUIERFRkFVTFQgJycsXG4gICAgICByb2xlICAgICAgICBURVhUIERFRkFVTFQgJ3N0dWRlbnQnIENIRUNLIChyb2xlIElOICgnc3R1ZGVudCcsICdhZG1pbicsICdzdXBlcmFkbWluJykpLFxuICAgICAgcHJvdmlkZXIgICAgVEVYVCBERUZBVUxUICdsb2NhbCcgICBDSEVDSyAocHJvdmlkZXIgSU4gKCdsb2NhbCcsICdnb29nbGUnKSksXG4gICAgICBnb29nbGVfaWQgICBURVhULFxuICAgICAgY3JlYXRlZF9hdCAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKSxcbiAgICAgIHVwZGF0ZWRfYXQgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKClcbiAgICApO1xuXG4gICAgQUxURVIgVEFCTEUgdXNlcnNcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBwaG9uZSBURVhULFxuICAgICAgQUREIENPTFVNTiBJRiBOT1QgRVhJU1RTIHBob25lX3ZlcmlmaWVkIEJPT0xFQU4gREVGQVVMVCBGQUxTRSxcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBmaXJzdF9uYW1lIFRFWFQsXG4gICAgICBBREQgQ09MVU1OIElGIE5PVCBFWElTVFMgbGFzdF9uYW1lIFRFWFQsXG4gICAgICBBREQgQ09MVU1OIElGIE5PVCBFWElTVFMgcGFzc3dvcmRfc2V0X2F0IFRJTUVTVEFNUFRaLFxuICAgICAgQUREIENPTFVNTiBJRiBOT1QgRVhJU1RTIGNhbl90ZWFjaCBCT09MRUFOLFxuICAgICAgQUREIENPTFVNTiBJRiBOT1QgRVhJU1RTIGNhbl9idXkgQk9PTEVBTixcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBjYW5fbGVhcm4gQk9PTEVBTjtcblxuICAgIFVQREFURSB1c2Vyc1xuICAgIFNFVCBjYW5fdGVhY2ggPSBDQVNFIFdIRU4gcm9sZSBJTiAoJ2FkbWluJywgJ3N1cGVyYWRtaW4nKSBUSEVOIFRSVUUgRUxTRSBGQUxTRSBFTkRcbiAgICBXSEVSRSBjYW5fdGVhY2ggSVMgTlVMTDtcblxuICAgIFVQREFURSB1c2Vyc1xuICAgIFNFVCBjYW5fYnV5ID0gVFJVRVxuICAgIFdIRVJFIGNhbl9idXkgSVMgTlVMTDtcblxuICAgIFVQREFURSB1c2Vyc1xuICAgIFNFVCBjYW5fbGVhcm4gPSBUUlVFXG4gICAgV0hFUkUgY2FuX2xlYXJuIElTIE5VTEw7XG5cbiAgICBBTFRFUiBUQUJMRSB1c2Vyc1xuICAgICAgQUxURVIgQ09MVU1OIGNhbl90ZWFjaCBTRVQgREVGQVVMVCBGQUxTRSxcbiAgICAgIEFMVEVSIENPTFVNTiBjYW5fYnV5IFNFVCBERUZBVUxUIFRSVUUsXG4gICAgICBBTFRFUiBDT0xVTU4gY2FuX2xlYXJuIFNFVCBERUZBVUxUIFRSVUU7XG5cbiAgICBBTFRFUiBUQUJMRSB1c2Vyc1xuICAgICAgRFJPUCBDT05TVFJBSU5UIElGIEVYSVNUUyB1c2Vyc19yb2xlX2NoZWNrO1xuXG4gICAgQUxURVIgVEFCTEUgdXNlcnNcbiAgICAgIEFERCBDT05TVFJBSU5UIHVzZXJzX3JvbGVfY2hlY2tcbiAgICAgIENIRUNLIChyb2xlIElOICgnc3R1ZGVudCcsICdhZG1pbicsICdzdXBlcmFkbWluJykpO1xuXG4gICAgQUxURVIgVEFCTEUgdXNlcnNcbiAgICAgIEFMVEVSIENPTFVNTiBlbWFpbCBEUk9QIE5PVCBOVUxMO1xuXG4gICAgQ1JFQVRFIFVOSVFVRSBJTkRFWCBJRiBOT1QgRVhJU1RTIGlkeF91c2Vyc19waG9uZV91bmlxdWVcbiAgICAgIE9OIHVzZXJzKHBob25lKVxuICAgICAgV0hFUkUgcGhvbmUgSVMgTk9UIE5VTEw7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBzdWJqZWN0cyAoXG4gICAgICBpZCAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICB0aXRsZSAgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgZGVzY3JpcHRpb24gVEVYVCBERUZBVUxUICcnLFxuICAgICAgaWNvbiAgICAgICAgVEVYVCBERUZBVUxUICcnLFxuICAgICAgY29sb3IgICAgICAgVEVYVCBERUZBVUxUICcjNjM2NmYxJyxcbiAgICAgIFwib3JkZXJcIiAgICAgSU5UICBERUZBVUxUIDAsXG4gICAgICB0b3BpY3MgICAgICBKU09OQiBERUZBVUxUICdbXScsXG4gICAgICBjcmVhdGVkX2F0ICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgdXBkYXRlZF9hdCAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBhZG1pbl9zdWJqZWN0X3Njb3BlcyAoXG4gICAgICBpZCAgICAgICAgICAgICAgICAgIFVVSUQgUFJJTUFSWSBLRVkgREVGQVVMVCBnZW5fcmFuZG9tX3V1aWQoKSxcbiAgICAgIGFkbWluX3VzZXJfaWQgICAgICAgVVVJRCBOT1QgTlVMTCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIHN1YmplY3RfaWQgICAgICAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIGNhbl9tYW5hZ2VfY29udGVudCAgQk9PTEVBTiBERUZBVUxUIFRSVUUsXG4gICAgICBjYW5fbWFuYWdlX3ByaWNpbmcgIEJPT0xFQU4gREVGQVVMVCBGQUxTRSxcbiAgICAgIGNyZWF0ZWRfYnkgICAgICAgICAgVVVJRCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgICAgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKCksXG4gICAgICBVTklRVUUgKGFkbWluX3VzZXJfaWQsIHN1YmplY3RfaWQpXG4gICAgKTtcblxuICAgIENSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIHRlYWNoZXJfc3ViamVjdF9zY29wZXMgKFxuICAgICAgaWQgICAgICAgICAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICB0ZWFjaGVyX3VzZXJfaWQgICAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyB1c2VycyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICBzdWJqZWN0X2lkICAgICAgICAgIFRFWFQgTk9UIE5VTEwsXG4gICAgICBzdGF0dXMgICAgICAgICAgICAgIFRFWFQgTk9UIE5VTEwgREVGQVVMVCAnYWN0aXZlJ1xuICAgICAgICAgICAgICAgICAgICAgICAgICBDSEVDSyAoc3RhdHVzIElOICgnYWN0aXZlJywgJ2Jsb2NrZWQnLCAncGVuZGluZycpKSxcbiAgICAgIGFwcHJvdmVkX2J5ICAgICAgICAgVVVJRCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgICAgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKCksXG4gICAgICBVTklRVUUgKHRlYWNoZXJfdXNlcl9pZCwgc3ViamVjdF9pZClcbiAgICApO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgdXNlcl9sZXNzb25fcHJvZ3Jlc3MgKFxuICAgICAgaWQgICAgICAgICAgICAgICAgICAgIFVVSUQgUFJJTUFSWSBLRVkgREVGQVVMVCBnZW5fcmFuZG9tX3V1aWQoKSxcbiAgICAgIHVzZXJfaWQgICAgICAgICAgICAgICBVVUlEIE5PVCBOVUxMIFJFRkVSRU5DRVMgdXNlcnMoaWQpIE9OIERFTEVURSBDQVNDQURFLFxuICAgICAgc3ViamVjdF9pZCAgICAgICAgICAgIFRFWFQgTk9UIE5VTEwsXG4gICAgICB0b3BpY19pZCAgICAgICAgICAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIHN0YXR1cyAgICAgICAgICAgICAgICBURVhUIERFRkFVTFQgJ2xvY2tlZCdcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBDSEVDSyAoc3RhdHVzIElOICgnbG9ja2VkJywgJ2lucHJvZ3Jlc3MnLCAnb25ob2xkJywgJ2NvbXBsZXRlZCcpKSxcbiAgICAgIHZpZGVvX3dhdGNoZWQgICAgICAgICBCT09MRUFOIERFRkFVTFQgRkFMU0UsXG4gICAgICBxdWl6X3Njb3JlICAgICAgICAgICAgSU5ULFxuICAgICAgcXVpel9hbnN3ZXJzICAgICAgICAgIEpTT05CIERFRkFVTFQgJ3t9Jzo6anNvbmIsXG4gICAgICBxdWl6X3N1Ym1pdHRlZCAgICAgICAgQk9PTEVBTiBERUZBVUxUIEZBTFNFLFxuICAgICAgbWFzdGVyeV9zY29yZSAgICAgICAgIElOVCxcbiAgICAgIHF1aXpfYXR0ZW1wdHMgICAgICAgICBJTlQgREVGQVVMVCAwLFxuICAgICAgdGltZV9vbl90YXNrX3NlYyAgICAgIElOVCBERUZBVUxUIDAsXG4gICAgICByZXN1bWVfcXVlc3Rpb25faW5kZXggSU5UIERFRkFVTFQgMCxcbiAgICAgIGxhc3RfYWN0aXZpdHlfYXQgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgY29tcGxldGVkX2F0ICAgICAgICAgIFRJTUVTVEFNUFRaLFxuICAgICAgY3JlYXRlZF9hdCAgICAgICAgICAgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKCksXG4gICAgICB1cGRhdGVkX2F0ICAgICAgICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKSxcbiAgICAgIFVOSVFVRSAodXNlcl9pZCwgc3ViamVjdF9pZCwgdG9waWNfaWQpXG4gICAgKTtcblxuICAgIEFMVEVSIFRBQkxFIHVzZXJfbGVzc29uX3Byb2dyZXNzXG4gICAgICBBREQgQ09MVU1OIElGIE5PVCBFWElTVFMgcXVpel90b3RhbF9xdWVzdGlvbnMgSU5UO1xuXG4gICAgQUxURVIgVEFCTEUgc3ViamVjdHNcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBpc19oaWRkZW4gQk9PTEVBTiBERUZBVUxUIEZBTFNFO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgdXNlcl9xdWl6X2F0dGVtcHRzIChcbiAgICAgIGlkICAgICAgICAgICAgICAgVVVJRCBQUklNQVJZIEtFWSBERUZBVUxUIGdlbl9yYW5kb21fdXVpZCgpLFxuICAgICAgdXNlcl9pZCAgICAgICAgICBVVUlEIE5PVCBOVUxMIFJFRkVSRU5DRVMgdXNlcnMoaWQpIE9OIERFTEVURSBDQVNDQURFLFxuICAgICAgc3ViamVjdF9pZCAgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgdG9waWNfaWQgICAgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgcXVpel9zY29yZSAgICAgICBJTlQgTk9UIE5VTEwsXG4gICAgICBtYXN0ZXJ5X3Njb3JlICAgIElOVCBOT1QgTlVMTCxcbiAgICAgIHRvdGFsX3F1ZXN0aW9ucyAgSU5UIE5PVCBOVUxMLFxuICAgICAgcXVpel9hbnN3ZXJzICAgICBKU09OQiBERUZBVUxUICd7fSc6Ompzb25iLFxuICAgICAgYXR0ZW1wdGVkX2F0ICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgY3JlYXRlZF9hdCAgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpXG4gICAgKTtcblxuICAgIENSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIHVzZXJfYWN0aXZpdHlfZGF5cyAoXG4gICAgICB1c2VyX2lkICAgICAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyB1c2VycyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICBhY3Rpdml0eV9kYXRlIERBVEUgTk9UIE5VTEwsXG4gICAgICBjcmVhdGVkX2F0ICAgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKCksXG4gICAgICBQUklNQVJZIEtFWSAodXNlcl9pZCwgYWN0aXZpdHlfZGF0ZSlcbiAgICApO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgYW5hbHl0aWNzX2V2ZW50cyAoXG4gICAgICBpZCAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICBldmVudF90eXBlICBURVhUIE5PVCBOVUxMLFxuICAgICAgdXNlcl9pZCAgICAgVVVJRCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBzdWJqZWN0X2lkICBURVhULFxuICAgICAgdG9waWNfaWQgICAgVEVYVCxcbiAgICAgIHNvdXJjZSAgICAgIFRFWFQsXG4gICAgICBwYXlsb2FkICAgICBKU09OQiBERUZBVUxUICd7fSc6Ompzb25iLFxuICAgICAgY3JlYXRlZF9hdCAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBwcmljaW5nX3BsYW5zIChcbiAgICAgIGtleSAgICAgICAgICAgICAgIFRFWFQgUFJJTUFSWSBLRVksXG4gICAgICB0aXRsZSAgICAgICAgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgZGVzY3JpcHRpb24gICAgICAgVEVYVCBERUZBVUxUICcnLFxuICAgICAgcHJpY2VfbW9udGhseV91enMgTlVNRVJJQygxMiwyKSBERUZBVUxUIDAsXG4gICAgICBpc19hY3RpdmUgICAgICAgICBCT09MRUFOIERFRkFVTFQgVFJVRSxcbiAgICAgIGZlYXR1cmVzICAgICAgICAgIEpTT05CIERFRkFVTFQgJ1tdJzo6anNvbmIsXG4gICAgICB1cGRhdGVkX2F0ICAgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpXG4gICAgKTtcblxuICAgIENSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIGNvdXJzZV9wcmljZXMgKFxuICAgICAgaWQgICAgICAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICBzdWJqZWN0X2lkICAgICAgIFRFWFQgTk9UIE5VTEwgVU5JUVVFLFxuICAgICAgc3ViamVjdF90aXRsZSAgICBURVhUIERFRkFVTFQgJycsXG4gICAgICBwcmljZV91enMgICAgICAgIE5VTUVSSUMoMTIsMikgTk9UIE5VTEwgREVGQVVMVCAwLFxuICAgICAgaXNfYWN0aXZlICAgICAgICBCT09MRUFOIERFRkFVTFQgVFJVRSxcbiAgICAgIHVwZGF0ZWRfYXQgICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBwYXltZW50cyAoXG4gICAgICBpZCAgICAgICAgICAgICAgIFVVSUQgUFJJTUFSWSBLRVkgREVGQVVMVCBnZW5fcmFuZG9tX3V1aWQoKSxcbiAgICAgIHVzZXJfaWQgICAgICAgICAgVVVJRCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBwYXltZW50X3R5cGUgICAgIFRFWFQgTk9UIE5VTEwgQ0hFQ0sgKHBheW1lbnRfdHlwZSBJTiAoJ3N1YnNjcmlwdGlvbicsICdjb3Vyc2VfcHVyY2hhc2UnLCAnZXhhbV9hdHRlbXB0X3BhY2snLCAnbWF0ZXJpYWxfcGFjaycpKSxcbiAgICAgIHBsYW5fa2V5ICAgICAgICAgVEVYVCBSRUZFUkVOQ0VTIHByaWNpbmdfcGxhbnMoa2V5KSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBzdWJqZWN0X2lkICAgICAgIFRFWFQsXG4gICAgICBhbW91bnRfdXpzICAgICAgIE5VTUVSSUMoMTIsMikgTk9UIE5VTEwgQ0hFQ0sgKGFtb3VudF91enMgPj0gMCksXG4gICAgICBwcm92aWRlciAgICAgICAgIFRFWFQgTk9UIE5VTEwgQ0hFQ0sgKHByb3ZpZGVyIElOICgncGF5bWUnLCAnY2xpY2snLCAnbWFudWFsJykpLFxuICAgICAgc3RhdHVzICAgICAgICAgICBURVhUIE5PVCBOVUxMIERFRkFVTFQgJ3BhaWQnIENIRUNLIChzdGF0dXMgSU4gKCdwZW5kaW5nJywgJ3BhaWQnLCAnZmFpbGVkJywgJ3JlZnVuZGVkJykpLFxuICAgICAgZXh0ZXJuYWxfaWQgICAgICBURVhULFxuICAgICAgcGF5bG9hZCAgICAgICAgICBKU09OQiBERUZBVUxUICd7fSc6Ompzb25iLFxuICAgICAgcGFpZF9hdCAgICAgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgY3JlYXRlZF9hdCAgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpXG4gICAgKTtcblxuICAgIEFMVEVSIFRBQkxFIHBheW1lbnRzXG4gICAgICBEUk9QIENPTlNUUkFJTlQgSUYgRVhJU1RTIHBheW1lbnRzX3BheW1lbnRfdHlwZV9jaGVjaztcblxuICAgIEFMVEVSIFRBQkxFIHBheW1lbnRzXG4gICAgICBBREQgQ09OU1RSQUlOVCBwYXltZW50c19wYXltZW50X3R5cGVfY2hlY2tcbiAgICAgIENIRUNLIChwYXltZW50X3R5cGUgSU4gKCdzdWJzY3JpcHRpb24nLCAnY291cnNlX3B1cmNoYXNlJywgJ2V4YW1fYXR0ZW1wdF9wYWNrJywgJ21hdGVyaWFsX3BhY2snKSk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBleGFtcyAoXG4gICAgICBpZCAgICAgICAgICAgICAgVVVJRCBQUklNQVJZIEtFWSBERUZBVUxUIGdlbl9yYW5kb21fdXVpZCgpLFxuICAgICAgc3ViamVjdF9pZCAgICAgIFRFWFQgTk9UIE5VTEwsXG4gICAgICBvd25lcl91c2VyX2lkICAgVVVJRCBOT1QgTlVMTCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIHRpdGxlICAgICAgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgZGVzY3JpcHRpb24gICAgIFRFWFQgREVGQVVMVCAnJyxcbiAgICAgIGR1cmF0aW9uX3NlYyAgICBJTlQgTk9UIE5VTEwgREVGQVVMVCA3MjAwIENIRUNLIChkdXJhdGlvbl9zZWMgPiAwKSxcbiAgICAgIHBhc3NfcGVyY2VudCAgICBJTlQgTk9UIE5VTEwgREVGQVVMVCA4MCBDSEVDSyAocGFzc19wZXJjZW50ID49IDAgQU5EIHBhc3NfcGVyY2VudCA8PSAxMDApLFxuICAgICAgcmVxdWlyZWRfcXVlc3Rpb25fY291bnQgSU5UIE5PVCBOVUxMIERFRkFVTFQgNTAgQ0hFQ0sgKHJlcXVpcmVkX3F1ZXN0aW9uX2NvdW50ID49IDEpLFxuICAgICAgc3RhdHVzICAgICAgICAgIFRFWFQgTk9UIE5VTEwgREVGQVVMVCAnZHJhZnQnXG4gICAgICAgICAgICAgICAgICAgICAgQ0hFQ0sgKHN0YXR1cyBJTiAoJ2RyYWZ0JywgJ3BlbmRpbmdfcmV2aWV3JywgJ3B1Ymxpc2hlZCcsICdhcmNoaXZlZCcpKSxcbiAgICAgIHByaWNlX3V6cyAgICAgICBOVU1FUklDKDEyLDIpIE5PVCBOVUxMIERFRkFVTFQgMCBDSEVDSyAocHJpY2VfdXpzID49IDApLFxuICAgICAgaXNfYWN0aXZlICAgICAgIEJPT0xFQU4gTk9UIE5VTEwgREVGQVVMVCBUUlVFLFxuICAgICAgYXBwcm92ZWRfYnkgICAgIFVVSUQgUkVGRVJFTkNFUyB1c2VycyhpZCkgT04gREVMRVRFIFNFVCBOVUxMLFxuICAgICAgcHVibGlzaGVkX2F0ICAgIFRJTUVTVEFNUFRaLFxuICAgICAgY3JlYXRlZF9hdCAgICAgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKCksXG4gICAgICB1cGRhdGVkX2F0ICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBleGFtX2Jsb2NrcyAoXG4gICAgICBpZCAgICAgICAgICAgICAgVVVJRCBQUklNQVJZIEtFWSBERUZBVUxUIGdlbl9yYW5kb21fdXVpZCgpLFxuICAgICAgZXhhbV9pZCAgICAgICAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyBleGFtcyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICBibG9ja19vcmRlciAgICAgSU5UIE5PVCBOVUxMLFxuICAgICAgdGl0bGUgICAgICAgICAgIFRFWFQgTk9UIE5VTEwsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKSxcbiAgICAgIFVOSVFVRSAoZXhhbV9pZCwgYmxvY2tfb3JkZXIpXG4gICAgKTtcblxuICAgIENSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIGV4YW1fcXVlc3Rpb25zIChcbiAgICAgIGlkICAgICAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICBleGFtX2lkICAgICAgICAgVVVJRCBOT1QgTlVMTCBSRUZFUkVOQ0VTIGV4YW1zKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIGJsb2NrX2lkICAgICAgICBVVUlEIFJFRkVSRU5DRVMgZXhhbV9ibG9ja3MoaWQpIE9OIERFTEVURSBTRVQgTlVMTCxcbiAgICAgIHF1ZXN0aW9uX29yZGVyICBJTlQgTk9UIE5VTEwsXG4gICAgICBwcm9tcHRfdGV4dCAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIHByb21wdF9yaWNoICAgICBKU09OQiBERUZBVUxUICd7fSc6Ompzb25iLFxuICAgICAgaW1hZ2VfdXJsICAgICAgIFRFWFQsXG4gICAgICBvcHRpb25zX2pzb24gICAgSlNPTkIgTk9UIE5VTEwgREVGQVVMVCAnW10nOjpqc29uYixcbiAgICAgIGNvcnJlY3RfaW5kZXggICBJTlQgTk9UIE5VTEwgQ0hFQ0sgKGNvcnJlY3RfaW5kZXggPj0gMCksXG4gICAgICBrZXlfdmVyaWZpZWQgICAgQk9PTEVBTiBOT1QgTlVMTCBERUZBVUxUIFRSVUUsXG4gICAgICBleHBsYW5hdGlvbiAgICAgVEVYVCxcbiAgICAgIGRpZmZpY3VsdHkgICAgICBURVhULFxuICAgICAgc291cmNlX3JlZiAgICAgIFRFWFQsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKSxcbiAgICAgIHVwZGF0ZWRfYXQgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgVU5JUVVFIChleGFtX2lkLCBxdWVzdGlvbl9vcmRlcilcbiAgICApO1xuXG4gICAgQUxURVIgVEFCTEUgZXhhbXNcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyByZXF1aXJlZF9xdWVzdGlvbl9jb3VudCBJTlQ7XG5cbiAgICBVUERBVEUgZXhhbXNcbiAgICBTRVQgcmVxdWlyZWRfcXVlc3Rpb25fY291bnQgPSA1MFxuICAgIFdIRVJFIHJlcXVpcmVkX3F1ZXN0aW9uX2NvdW50IElTIE5VTEw7XG5cbiAgICBBTFRFUiBUQUJMRSBleGFtc1xuICAgICAgQUxURVIgQ09MVU1OIHJlcXVpcmVkX3F1ZXN0aW9uX2NvdW50IFNFVCBERUZBVUxUIDUwLFxuICAgICAgQUxURVIgQ09MVU1OIHJlcXVpcmVkX3F1ZXN0aW9uX2NvdW50IFNFVCBOT1QgTlVMTDtcblxuICAgIEFMVEVSIFRBQkxFIGV4YW1zXG4gICAgICBEUk9QIENPTlNUUkFJTlQgSUYgRVhJU1RTIGV4YW1zX3JlcXVpcmVkX3F1ZXN0aW9uX2NvdW50X2NoZWNrO1xuXG4gICAgQUxURVIgVEFCTEUgZXhhbXNcbiAgICAgIEFERCBDT05TVFJBSU5UIGV4YW1zX3JlcXVpcmVkX3F1ZXN0aW9uX2NvdW50X2NoZWNrXG4gICAgICBDSEVDSyAocmVxdWlyZWRfcXVlc3Rpb25fY291bnQgPj0gMSk7XG5cbiAgICBBTFRFUiBUQUJMRSBleGFtX3F1ZXN0aW9uc1xuICAgICAgQUREIENPTFVNTiBJRiBOT1QgRVhJU1RTIGtleV92ZXJpZmllZCBCT09MRUFOO1xuXG4gICAgVVBEQVRFIGV4YW1fcXVlc3Rpb25zXG4gICAgU0VUIGtleV92ZXJpZmllZCA9IFRSVUVcbiAgICBXSEVSRSBrZXlfdmVyaWZpZWQgSVMgTlVMTDtcblxuICAgIEFMVEVSIFRBQkxFIGV4YW1fcXVlc3Rpb25zXG4gICAgICBBTFRFUiBDT0xVTU4ga2V5X3ZlcmlmaWVkIFNFVCBERUZBVUxUIFRSVUUsXG4gICAgICBBTFRFUiBDT0xVTU4ga2V5X3ZlcmlmaWVkIFNFVCBOT1QgTlVMTDtcblxuICAgIENSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIGV4YW1fZW50aXRsZW1lbnRzIChcbiAgICAgIGlkICAgICAgICAgICAgICAgIFVVSUQgUFJJTUFSWSBLRVkgREVGQVVMVCBnZW5fcmFuZG9tX3V1aWQoKSxcbiAgICAgIHVzZXJfaWQgICAgICAgICAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyB1c2VycyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICBleGFtX2lkICAgICAgICAgICBVVUlEIE5PVCBOVUxMIFJFRkVSRU5DRVMgZXhhbXMoaWQpIE9OIERFTEVURSBDQVNDQURFLFxuICAgICAgYXR0ZW1wdHNfdG90YWwgICAgSU5UIE5PVCBOVUxMIERFRkFVTFQgMSBDSEVDSyAoYXR0ZW1wdHNfdG90YWwgPj0gMSksXG4gICAgICBhdHRlbXB0c191c2VkICAgICBJTlQgTk9UIE5VTEwgREVGQVVMVCAwIENIRUNLIChhdHRlbXB0c191c2VkID49IDApLFxuICAgICAgYXR0ZW1wdHNfcmVtYWluaW5nIElOVCBOT1QgTlVMTCBERUZBVUxUIDEgQ0hFQ0sgKGF0dGVtcHRzX3JlbWFpbmluZyA+PSAwKSxcbiAgICAgIHNvdXJjZV9wYXltZW50X2lkIFVVSUQgVU5JUVVFIFJFRkVSRU5DRVMgcGF5bWVudHMoaWQpIE9OIERFTEVURSBTRVQgTlVMTCxcbiAgICAgIGNyZWF0ZWRfYXQgICAgICAgIFRJTUVTVEFNUFRaIERFRkFVTFQgTk9XKClcbiAgICApO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgZXhhbV9hdHRlbXB0cyAoXG4gICAgICBpZCAgICAgICAgICAgICAgVVVJRCBQUklNQVJZIEtFWSBERUZBVUxUIGdlbl9yYW5kb21fdXVpZCgpLFxuICAgICAgZW50aXRsZW1lbnRfaWQgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyBleGFtX2VudGl0bGVtZW50cyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICB1c2VyX2lkICAgICAgICAgVVVJRCBOT1QgTlVMTCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIGV4YW1faWQgICAgICAgICBVVUlEIE5PVCBOVUxMIFJFRkVSRU5DRVMgZXhhbXMoaWQpIE9OIERFTEVURSBDQVNDQURFLFxuICAgICAgc3RhdHVzICAgICAgICAgIFRFWFQgTk9UIE5VTEwgREVGQVVMVCAnaW5fcHJvZ3Jlc3MnXG4gICAgICAgICAgICAgICAgICAgICAgQ0hFQ0sgKHN0YXR1cyBJTiAoJ2luX3Byb2dyZXNzJywgJ3N1Ym1pdHRlZCcsICdleHBpcmVkJywgJ2NhbmNlbGVkJykpLFxuICAgICAgc3RhcnRlZF9hdCAgICAgIFRJTUVTVEFNUFRaIE5PVCBOVUxMIERFRkFVTFQgTk9XKCksXG4gICAgICBleHBpcmVzX2F0ICAgICAgVElNRVNUQU1QVFogTk9UIE5VTEwsXG4gICAgICBzdWJtaXR0ZWRfYXQgICAgVElNRVNUQU1QVFosXG4gICAgICBjb3JyZWN0X2NvdW50ICAgSU5UIERFRkFVTFQgMCxcbiAgICAgIHRvdGFsX3F1ZXN0aW9ucyBJTlQgREVGQVVMVCAwLFxuICAgICAgc2NvcmVfcGVyY2VudCAgIElOVCBERUZBVUxUIDAsXG4gICAgICBwYXNzZWQgICAgICAgICAgQk9PTEVBTiBERUZBVUxUIEZBTFNFLFxuICAgICAgc25hcHNob3RfanNvbiAgIEpTT05CIERFRkFVTFQgJ3t9Jzo6anNvbmIsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBleGFtX2F0dGVtcHRfYW5zd2VycyAoXG4gICAgICBpZCAgICAgICAgICAgICAgVVVJRCBQUklNQVJZIEtFWSBERUZBVUxUIGdlbl9yYW5kb21fdXVpZCgpLFxuICAgICAgYXR0ZW1wdF9pZCAgICAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyBleGFtX2F0dGVtcHRzKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIHF1ZXN0aW9uX2lkICAgICBVVUlEIE5PVCBOVUxMIFJFRkVSRU5DRVMgZXhhbV9xdWVzdGlvbnMoaWQpIE9OIERFTEVURSBDQVNDQURFLFxuICAgICAgc2VsZWN0ZWRfaW5kZXggIElOVCxcbiAgICAgIGFuc3dlcmVkX2F0ICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgVU5JUVVFIChhdHRlbXB0X2lkLCBxdWVzdGlvbl9pZClcbiAgICApO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgbWF0ZXJpYWxfcGFja3MgKFxuICAgICAgaWQgICAgICAgICAgICAgIFVVSUQgUFJJTUFSWSBLRVkgREVGQVVMVCBnZW5fcmFuZG9tX3V1aWQoKSxcbiAgICAgIHN1YmplY3RfaWQgICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgb3duZXJfdXNlcl9pZCAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyB1c2VycyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICB0aXRsZSAgICAgICAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIGRlc2NyaXB0aW9uICAgICBURVhUIERFRkFVTFQgJycsXG4gICAgICBwcmljZV91enMgICAgICAgTlVNRVJJQygxMiwyKSBOT1QgTlVMTCBERUZBVUxUIDAgQ0hFQ0sgKHByaWNlX3V6cyA+PSAwKSxcbiAgICAgIHN0YXR1cyAgICAgICAgICBURVhUIE5PVCBOVUxMIERFRkFVTFQgJ2RyYWZ0J1xuICAgICAgICAgICAgICAgICAgICAgIENIRUNLIChzdGF0dXMgSU4gKCdkcmFmdCcsICdwZW5kaW5nX3JldmlldycsICdwdWJsaXNoZWQnLCAnYXJjaGl2ZWQnKSksXG4gICAgICBpc19hY3RpdmUgICAgICAgQk9PTEVBTiBOT1QgTlVMTCBERUZBVUxUIFRSVUUsXG4gICAgICBhcHByb3ZlZF9ieSAgICAgVVVJRCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBwdWJsaXNoZWRfYXQgICAgVElNRVNUQU1QVFosXG4gICAgICBjcmVhdGVkX2F0ICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKSxcbiAgICAgIHVwZGF0ZWRfYXQgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpXG4gICAgKTtcblxuICAgIENSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIG1hdGVyaWFsX3BhY2tfYXNzZXRzIChcbiAgICAgIGlkICAgICAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICBwYWNrX2lkICAgICAgICAgVVVJRCBOT1QgTlVMTCBSRUZFUkVOQ0VTIG1hdGVyaWFsX3BhY2tzKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIHN0b3JhZ2Vfa2V5ICAgICBURVhUIE5PVCBOVUxMLFxuICAgICAgZmlsZV9uYW1lICAgICAgIFRFWFQgTk9UIE5VTEwsXG4gICAgICBtaW1lX3R5cGUgICAgICAgVEVYVCxcbiAgICAgIHNpemVfYnl0ZXMgICAgICBCSUdJTlQgREVGQVVMVCAwLFxuICAgICAgY2hlY2tzdW0gICAgICAgIFRFWFQsXG4gICAgICB1cGxvYWRlZF9ieSAgICAgVVVJRCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBtYXRlcmlhbF9lbnRpdGxlbWVudHMgKFxuICAgICAgaWQgICAgICAgICAgICAgICAgVVVJRCBQUklNQVJZIEtFWSBERUZBVUxUIGdlbl9yYW5kb21fdXVpZCgpLFxuICAgICAgdXNlcl9pZCAgICAgICAgICAgVVVJRCBOT1QgTlVMTCBSRUZFUkVOQ0VTIHVzZXJzKGlkKSBPTiBERUxFVEUgQ0FTQ0FERSxcbiAgICAgIHBhY2tfaWQgICAgICAgICAgIFVVSUQgTk9UIE5VTEwgUkVGRVJFTkNFUyBtYXRlcmlhbF9wYWNrcyhpZCkgT04gREVMRVRFIENBU0NBREUsXG4gICAgICBzb3VyY2VfcGF5bWVudF9pZCBVVUlEIFVOSVFVRSBSRUZFUkVOQ0VTIHBheW1lbnRzKGlkKSBPTiBERUxFVEUgU0VUIE5VTEwsXG4gICAgICBncmFudGVkX2F0ICAgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgcmV2b2tlZF9hdCAgICAgICAgVElNRVNUQU1QVFpcbiAgICApO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgY29udGVudF91cGxvYWRfam9icyAoXG4gICAgICBpZCAgICAgICAgICAgICAgICBVVUlEIFBSSU1BUlkgS0VZIERFRkFVTFQgZ2VuX3JhbmRvbV91dWlkKCksXG4gICAgICB1cGxvYWRlcl9pZCAgICAgICBVVUlEIE5PVCBOVUxMIFJFRkVSRU5DRVMgdXNlcnMoaWQpIE9OIERFTEVURSBDQVNDQURFLFxuICAgICAgc3ViamVjdF9pZCAgICAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIHNvdXJjZV90eXBlICAgICAgIFRFWFQgTk9UIE5VTEwgQ0hFQ0sgKHNvdXJjZV90eXBlIElOICgnZG9jeCcsICdwZGYnKSksXG4gICAgICBzdGF0dXMgICAgICAgICAgICBURVhUIE5PVCBOVUxMIERFRkFVTFQgJ3VwbG9hZGVkJ1xuICAgICAgICAgICAgICAgICAgICAgICAgQ0hFQ0sgKHN0YXR1cyBJTiAoJ3VwbG9hZGVkJywgJ3BhcnNlZCcsICduZWVkc19yZXZpZXcnLCAnZmFpbGVkJywgJ3B1Ymxpc2hlZCcpKSxcbiAgICAgIHNvdXJjZV9zdG9yYWdlX2tleSBURVhUIE5PVCBOVUxMLFxuICAgICAgcGFyc2Vfb3V0cHV0X2pzb24gSlNPTkIgREVGQVVMVCAne30nOjpqc29uYixcbiAgICAgIGVycm9yX2pzb24gICAgICAgIEpTT05CIERFRkFVTFQgJ3t9Jzo6anNvbmIsXG4gICAgICBjcmVhdGVkX2F0ICAgICAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpLFxuICAgICAgdXBkYXRlZF9hdCAgICAgICAgVElNRVNUQU1QVFogREVGQVVMVCBOT1coKVxuICAgICk7XG5cbiAgICBJTlNFUlQgSU5UTyBwcmljaW5nX3BsYW5zIChrZXksIHRpdGxlLCBkZXNjcmlwdGlvbiwgcHJpY2VfbW9udGhseV91enMsIGlzX2FjdGl2ZSwgZmVhdHVyZXMpXG4gICAgVkFMVUVTXG4gICAgICAoJ2ZyZWUnLCAnRnJlZScsICdCYXNlIHBsYW4gd2l0aCBsaW1pdGVkIGFjY2VzcycsIDAsIFRSVUUsICdbXSc6Ompzb25iKSxcbiAgICAgICgncHJvJywgJ1BybycsICdFeHRlbmRlZCBhY2Nlc3MgZm9yIGFjdGl2ZSBsZWFybmVycycsIDk5MDAwLCBUUlVFLCAnW10nOjpqc29uYiksXG4gICAgICAoJ3ByZW1pdW0nLCAnUHJlbWl1bScsICdGdWxsIGFjY2VzcyB0byBhbGwgY3VycmVudCBhbmQgZnV0dXJlIGZlYXR1cmVzJywgMTk5MDAwLCBUUlVFLCAnW10nOjpqc29uYilcbiAgICBPTiBDT05GTElDVCAoa2V5KSBETyBOT1RISU5HO1xuXG4gICAgQ1JFQVRFIFRBQkxFIElGIE5PVCBFWElTVFMgcGhvbmVfYXV0aF9jb2RlcyAoXG4gICAgICBpZCAgICAgICAgICAgIFVVSUQgUFJJTUFSWSBLRVkgREVGQVVMVCBnZW5fcmFuZG9tX3V1aWQoKSxcbiAgICAgIHBob25lICAgICAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIGNvZGVfaGFzaCAgICAgVEVYVCBOT1QgTlVMTCxcbiAgICAgIGV4cGlyZXNfYXQgICAgVElNRVNUQU1QVFogTk9UIE5VTEwsXG4gICAgICBhdHRlbXB0cyAgICAgIElOVCBERUZBVUxUIDAsXG4gICAgICBtYXhfYXR0ZW1wdHMgIElOVCBERUZBVUxUIDUsXG4gICAgICBjb25zdW1lZF9hdCAgIFRJTUVTVEFNUFRaLFxuICAgICAgcmVxdWVzdF9pcCAgICBURVhULFxuICAgICAgY3JlYXRlZF9hdCAgICBUSU1FU1RBTVBUWiBERUZBVUxUIE5PVygpXG4gICAgKTtcblxuICAgIEFMVEVSIFRBQkxFIHBob25lX2F1dGhfY29kZXNcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBwdXJwb3NlIFRFWFQgREVGQVVMVCAnbGVnYWN5X2xvZ2luJyxcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyB1c2VyX2lkIFVVSUQgUkVGRVJFTkNFUyB1c2VycyhpZCkgT04gREVMRVRFIFNFVCBOVUxMO1xuXG4gICAgQUxURVIgVEFCTEUgcGhvbmVfYXV0aF9jb2Rlc1xuICAgICAgRFJPUCBDT05TVFJBSU5UIElGIEVYSVNUUyBwaG9uZV9hdXRoX2NvZGVzX3B1cnBvc2VfY2hlY2s7XG5cbiAgICBBTFRFUiBUQUJMRSBwaG9uZV9hdXRoX2NvZGVzXG4gICAgICBBREQgQ09OU1RSQUlOVCBwaG9uZV9hdXRoX2NvZGVzX3B1cnBvc2VfY2hlY2tcbiAgICAgIENIRUNLIChwdXJwb3NlIElOICgnc2lnbnVwJywgJ3Bhc3N3b3JkX3Jlc2V0JywgJ2xlZ2FjeV9wYXNzd29yZF9zZXR1cCcsICdsZWdhY3lfbG9naW4nKSk7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfcGhvbmVfYXV0aF9jb2Rlc19waG9uZV9jcmVhdGVkXG4gICAgICBPTiBwaG9uZV9hdXRoX2NvZGVzKHBob25lLCBjcmVhdGVkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3Bob25lX2F1dGhfY29kZXNfcGhvbmVfcHVycG9zZV9jcmVhdGVkXG4gICAgICBPTiBwaG9uZV9hdXRoX2NvZGVzKHBob25lLCBwdXJwb3NlLCBjcmVhdGVkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3Bob25lX2F1dGhfY29kZXNfcGhvbmVfYWN0aXZlXG4gICAgICBPTiBwaG9uZV9hdXRoX2NvZGVzKHBob25lLCBleHBpcmVzX2F0IERFU0MpXG4gICAgICBXSEVSRSBjb25zdW1lZF9hdCBJUyBOVUxMO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3VzZXJfbGVzc29uX3Byb2dyZXNzX3VzZXJcbiAgICAgIE9OIHVzZXJfbGVzc29uX3Byb2dyZXNzKHVzZXJfaWQpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3VzZXJfbGVzc29uX3Byb2dyZXNzX2xhc3RfYWN0aXZpdHlcbiAgICAgIE9OIHVzZXJfbGVzc29uX3Byb2dyZXNzKHVzZXJfaWQsIGxhc3RfYWN0aXZpdHlfYXQgREVTQyk7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfdXNlcl9xdWl6X2F0dGVtcHRzX3VzZXJcbiAgICAgIE9OIHVzZXJfcXVpel9hdHRlbXB0cyh1c2VyX2lkLCBhdHRlbXB0ZWRfYXQgREVTQyk7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfdXNlcl9xdWl6X2F0dGVtcHRzX3RvcGljXG4gICAgICBPTiB1c2VyX3F1aXpfYXR0ZW1wdHModXNlcl9pZCwgc3ViamVjdF9pZCwgdG9waWNfaWQsIGF0dGVtcHRlZF9hdCBERVNDKTtcblxuICAgIENSRUFURSBJTkRFWCBJRiBOT1QgRVhJU1RTIGlkeF9hbmFseXRpY3NfZXZlbnRzX3R5cGVfY3JlYXRlZFxuICAgICAgT04gYW5hbHl0aWNzX2V2ZW50cyhldmVudF90eXBlLCBjcmVhdGVkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X2FuYWx5dGljc19ldmVudHNfY3JlYXRlZFxuICAgICAgT04gYW5hbHl0aWNzX2V2ZW50cyhjcmVhdGVkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X2FuYWx5dGljc19ldmVudHNfc3ViamVjdF90b3BpY1xuICAgICAgT04gYW5hbHl0aWNzX2V2ZW50cyhzdWJqZWN0X2lkLCB0b3BpY19pZCwgY3JlYXRlZF9hdCBERVNDKTtcblxuICAgIENSRUFURSBJTkRFWCBJRiBOT1QgRVhJU1RTIGlkeF9wYXltZW50c19zdGF0dXNfcGFpZF9hdFxuICAgICAgT04gcGF5bWVudHMoc3RhdHVzLCBwYWlkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3BheW1lbnRzX3R5cGVfcGFpZF9hdFxuICAgICAgT04gcGF5bWVudHMocGF5bWVudF90eXBlLCBwYWlkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3BheW1lbnRzX3Byb3ZpZGVyX3BhaWRfYXRcbiAgICAgIE9OIHBheW1lbnRzKHByb3ZpZGVyLCBwYWlkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIFVOSVFVRSBJTkRFWCBJRiBOT1QgRVhJU1RTIGlkeF9wYXltZW50c19wcm92aWRlcl9leHRlcm5hbFxuICAgICAgT04gcGF5bWVudHMocHJvdmlkZXIsIGV4dGVybmFsX2lkKVxuICAgICAgV0hFUkUgZXh0ZXJuYWxfaWQgSVMgTk9UIE5VTEw7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfYWRtaW5fc3ViamVjdF9zY29wZXNfYWRtaW5cbiAgICAgIE9OIGFkbWluX3N1YmplY3Rfc2NvcGVzKGFkbWluX3VzZXJfaWQsIHN1YmplY3RfaWQpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X3RlYWNoZXJfc3ViamVjdF9zY29wZXNfdGVhY2hlclxuICAgICAgT04gdGVhY2hlcl9zdWJqZWN0X3Njb3Blcyh0ZWFjaGVyX3VzZXJfaWQsIHN1YmplY3RfaWQsIHN0YXR1cyk7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfZXhhbXNfb3duZXJfc3RhdHVzXG4gICAgICBPTiBleGFtcyhvd25lcl91c2VyX2lkLCBzdGF0dXMsIGNyZWF0ZWRfYXQgREVTQyk7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfZXhhbXNfc3ViamVjdF9zdGF0dXNcbiAgICAgIE9OIGV4YW1zKHN1YmplY3RfaWQsIHN0YXR1cywgaXNfYWN0aXZlKTtcblxuICAgIENSRUFURSBJTkRFWCBJRiBOT1QgRVhJU1RTIGlkeF9leGFtX3F1ZXN0aW9uc19leGFtX29yZGVyXG4gICAgICBPTiBleGFtX3F1ZXN0aW9ucyhleGFtX2lkLCBxdWVzdGlvbl9vcmRlcik7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfZXhhbV9lbnRpdGxlbWVudHNfdXNlcl9leGFtXG4gICAgICBPTiBleGFtX2VudGl0bGVtZW50cyh1c2VyX2lkLCBleGFtX2lkLCBjcmVhdGVkX2F0IERFU0MpO1xuXG4gICAgQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMgaWR4X2V4YW1fYXR0ZW1wdHNfdXNlcl9leGFtXG4gICAgICBPTiBleGFtX2F0dGVtcHRzKHVzZXJfaWQsIGV4YW1faWQsIHN0YXJ0ZWRfYXQgREVTQyk7XG5cbiAgICBDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfbWF0ZXJpYWxfcGFja3Nfc3ViamVjdF9zdGF0dXNcbiAgICAgIE9OIG1hdGVyaWFsX3BhY2tzKHN1YmplY3RfaWQsIHN0YXR1cywgaXNfYWN0aXZlKTtcblxuICAgIENSRUFURSBJTkRFWCBJRiBOT1QgRVhJU1RTIGlkeF9tYXRlcmlhbF9lbnRpdGxlbWVudHNfdXNlclxuICAgICAgT04gbWF0ZXJpYWxfZW50aXRsZW1lbnRzKHVzZXJfaWQsIGdyYW50ZWRfYXQgREVTQyk7XG5cbiAgICAtLSBQaGFzZSA0OiBRdWVzdGlvbiBmb3JtYXQgcG9seW1vcnBoaXNtXG4gICAgQUxURVIgVEFCTEUgZXhhbV9xdWVzdGlvbnNcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBmb3JtYXRfdHlwZSBURVhUIERFRkFVTFQgJ01DUTQnO1xuXG4gICAgQUxURVIgVEFCTEUgZXhhbV9xdWVzdGlvbnNcbiAgICAgIERST1AgQ09OU1RSQUlOVCBJRiBFWElTVFMgZXhhbV9xdWVzdGlvbnNfZm9ybWF0X3R5cGVfY2hlY2s7XG5cbiAgICBBTFRFUiBUQUJMRSBleGFtX3F1ZXN0aW9uc1xuICAgICAgQUREIENPTlNUUkFJTlQgZXhhbV9xdWVzdGlvbnNfZm9ybWF0X3R5cGVfY2hlY2tcbiAgICAgIENIRUNLIChmb3JtYXRfdHlwZSBJTiAoJ01DUTQnLCAnTUNROCcsICdXUklUVEVOJykpO1xuXG4gICAgQUxURVIgVEFCTEUgZXhhbV9xdWVzdGlvbnNcbiAgICAgIEFMVEVSIENPTFVNTiBjb3JyZWN0X2luZGV4IERST1AgTk9UIE5VTEw7XG5cbiAgICBBTFRFUiBUQUJMRSBleGFtX3F1ZXN0aW9uc1xuICAgICAgQUREIENPTFVNTiBJRiBOT1QgRVhJU1RTIHdyaXR0ZW5fYW5zd2VyIFRFWFQ7XG5cbiAgICAtLSBQaGFzZSA0OiBEaWZmaWN1bHR5IGVudW0gZW5mb3JjZW1lbnRcbiAgICBBTFRFUiBUQUJMRSBleGFtX3F1ZXN0aW9uc1xuICAgICAgRFJPUCBDT05TVFJBSU5UIElGIEVYSVNUUyBleGFtX3F1ZXN0aW9uc19kaWZmaWN1bHR5X2NoZWNrO1xuXG4gICAgQUxURVIgVEFCTEUgZXhhbV9xdWVzdGlvbnNcbiAgICAgIEFERCBDT05TVFJBSU5UIGV4YW1fcXVlc3Rpb25zX2RpZmZpY3VsdHlfY2hlY2tcbiAgICAgIENIRUNLIChkaWZmaWN1bHR5IElTIE5VTEwgT1IgZGlmZmljdWx0eSBJTiAoJ2Vhc3knLCAnbWVkaXVtJywgJ2hhcmQnKSk7XG5cbiAgICAtLSBQaGFzZSA0OiBUZWFjaGVyIHF1b3RhIHRyYWNraW5nIChwYXNzaXZlKVxuICAgIEFMVEVSIFRBQkxFIHVzZXJzXG4gICAgICBBREQgQ09MVU1OIElGIE5PVCBFWElTVFMgdmlkZW9fcXVvdGEgSU5UIERFRkFVTFQgMCxcbiAgICAgIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyB0ZXN0X3F1b3RhIElOVCBERUZBVUxUIDA7XG5cbiAgICAtLSBQaGFzZSA0OiBTdWJqZWN0IHRyYWNrIGZvciB0YXhvbm9teSBncm91cGluZ1xuICAgIEFMVEVSIFRBQkxFIHN1YmplY3RzXG4gICAgICBBREQgQ09MVU1OIElGIE5PVCBFWElTVFMgdHJhY2sgVEVYVCBERUZBVUxUICdmb3VuZGF0aW9uJztcbiAgYCk7XG4gIGxvZ2dlci5pbmZvKCdbZGJdIE1pZ3JhdGlvbnMgY29tcGxldGUnKTtcbn07XG5cbmV4cG9ydCB7IHBvb2wsIGNvbm5lY3REQiB9O1xuIl0sInZlcnNpb24iOjN9

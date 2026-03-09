@@ -1,0 +1,251 @@
+d0f478aeff4862b68cbee278b81b9859
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret'
+process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h'
+process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'test-google-client-id'
+process.env.PHONE_OTP_TTL_SEC = process.env.PHONE_OTP_TTL_SEC || '300'
+process.env.PHONE_OTP_RESEND_COOLDOWN_SEC = process.env.PHONE_OTP_RESEND_COOLDOWN_SEC || '60'
+process.env.PASSWORD_RESET_TOKEN_TTL_SEC = process.env.PASSWORD_RESET_TOKEN_TTL_SEC || '600'
+
+jest.mock('../src/models/User.model', () => ({
+  findByEmail: jest.fn(),
+  findByPhone: jest.fn(),
+  findById: jest.fn(),
+  create: jest.fn(),
+  verifyPassword: jest.fn(),
+  setPassword: jest.fn(),
+  markPhoneVerified: jest.fn(),
+  update: jest.fn(),
+  upsertGoogle: jest.fn(),
+  findOrCreateByPhone: jest.fn(),
+  toPublic: jest.fn((row) => ({
+    id: row.id,
+    name: row.name,
+    firstName: row.first_name || row.firstName || null,
+    lastName: row.last_name || row.lastName || null,
+    email: row.email ?? null,
+    phone: row.phone ?? null,
+    role: row.role || 'student',
+    avatar: row.avatar || '',
+    createdAt: row.created_at || new Date().toISOString(),
+  })),
+}))
+
+jest.mock('../src/models/PhoneAuthCode.model', () => ({
+  countRecentRequests: jest.fn(),
+  getLastActiveCode: jest.fn(),
+  createCode: jest.fn(),
+  verifyCode: jest.fn(),
+  deleteById: jest.fn(),
+}))
+
+jest.mock('../src/services/sms/eskiz.service', () => ({
+  sendOtp: jest.fn(),
+}))
+
+jest.mock('../src/models/Analytics.model', () => ({
+  trackEvent: jest.fn().mockResolvedValue(null),
+}))
+
+jest.mock('google-auth-library', () => {
+  const verifyIdToken = jest.fn()
+  return {
+    OAuth2Client: jest.fn(() => ({ verifyIdToken })),
+    __verifyIdToken: verifyIdToken,
+  }
+})
+
+const request = require('supertest')
+const app = require('../src/app')
+const User = require('../src/models/User.model')
+const PhoneAuthCode = require('../src/models/PhoneAuthCode.model')
+const { sendOtp } = require('../src/services/sms/eskiz.service')
+const { __verifyIdToken } = require('google-auth-library')
+
+describe('Auth routes integration', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    PhoneAuthCode.countRecentRequests.mockResolvedValue(0)
+    PhoneAuthCode.getLastActiveCode.mockResolvedValue(null)
+    PhoneAuthCode.createCode.mockResolvedValue({ id: 'otp-id-1', code: '123456' })
+  })
+
+  it('returns PHONE_AUTH_ONLY for deprecated phone endpoint', async () => {
+    const res = await request(app)
+      .post('/api/auth/phone/request-code')
+      .send({ phone: '+998901234567' })
+
+    expect(res.status).toBe(410)
+    expect(res.body).toHaveProperty('error.code', 'PHONE_AUTH_ONLY')
+  })
+
+  it('requests signup OTP for a valid Uzbek phone', async () => {
+    User.findByPhone.mockResolvedValue(null)
+
+    const res = await request(app)
+      .post('/api/auth/signup/request-code')
+      .send({ phone: '+998901234567' })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('data.sent', true)
+    expect(sendOtp).toHaveBeenCalledWith('+998901234567', '123456')
+  })
+
+  it('confirms signup with OTP and returns token + user', async () => {
+    PhoneAuthCode.verifyCode.mockResolvedValue({ ok: true })
+    User.findByPhone.mockResolvedValue(null)
+    User.create.mockResolvedValue({
+      id: 'user-1',
+      name: 'Ali Valiyev',
+      first_name: 'Ali',
+      last_name: 'Valiyev',
+      phone: '+998901234567',
+      role: 'student',
+      created_at: new Date().toISOString(),
+    })
+
+    const res = await request(app)
+      .post('/api/auth/signup/confirm')
+      .send({
+        firstName: 'Ali',
+        lastName: 'Valiyev',
+        phone: '+998901234567',
+        password: 'Password1',
+        code: '123456',
+      })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('data.token')
+    expect(res.body).toHaveProperty('data.user.phone', '+998901234567')
+  })
+
+  it('logs in with phone and password', async () => {
+    User.findByPhone.mockResolvedValue({
+      id: 'user-2',
+      name: 'User',
+      phone: '+998901234568',
+      password: '$2a$12$hash',
+      role: 'student',
+    })
+    User.verifyPassword.mockResolvedValue(true)
+
+    const res = await request(app)
+      .post('/api/auth/login/password')
+      .send({ phone: '+998901234568', password: 'Password1' })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('data.token')
+    expect(res.body).toHaveProperty('data.user.phone', '+998901234568')
+  })
+
+  it('requires legacy password setup when account has no password', async () => {
+    User.findByPhone.mockResolvedValue({
+      id: 'user-3',
+      name: 'Legacy User',
+      phone: '+998901234569',
+      password: null,
+      role: 'student',
+    })
+
+    const res = await request(app)
+      .post('/api/auth/login/password')
+      .send({ phone: '+998901234569', password: 'Password1' })
+
+    expect(res.status).toBe(409)
+    expect(res.body).toHaveProperty('error.code', 'PASSWORD_SETUP_REQUIRED')
+  })
+
+  it('supports legacy OTP login and indicates password setup requirement', async () => {
+    User.findByPhone.mockResolvedValue({
+      id: 'user-legacy',
+      name: 'Legacy User',
+      phone: '+998901234570',
+      password: null,
+      role: 'student',
+    })
+    PhoneAuthCode.verifyCode.mockResolvedValue({ ok: true })
+    User.markPhoneVerified.mockResolvedValue({
+      id: 'user-legacy',
+      name: 'Legacy User',
+      phone: '+998901234570',
+      role: 'student',
+    })
+
+    const res = await request(app)
+      .post('/api/auth/login/otp/confirm')
+      .send({ phone: '+998901234570', code: '123456' })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('data.requiresPasswordSetup', true)
+    expect(res.body).toHaveProperty('data.user.phone', '+998901234570')
+  })
+
+  it('resets password through OTP confirm + complete', async () => {
+    User.findByPhone.mockResolvedValue({
+      id: 'user-reset',
+      name: 'Reset User',
+      phone: '+998901234571',
+      password: '$2a$12$hash',
+      role: 'student',
+    })
+    PhoneAuthCode.verifyCode.mockResolvedValue({ ok: true })
+
+    const confirmRes = await request(app)
+      .post('/api/auth/password/reset/confirm-code')
+      .send({ phone: '+998901234571', code: '123456' })
+
+    expect(confirmRes.status).toBe(200)
+    expect(confirmRes.body).toHaveProperty('data.resetToken')
+
+    User.findById.mockResolvedValue({
+      id: 'user-reset',
+      name: 'Reset User',
+      phone: '+998901234571',
+      role: 'student',
+    })
+    User.setPassword.mockResolvedValue({
+      id: 'user-reset',
+      name: 'Reset User',
+      phone: '+998901234571',
+      role: 'student',
+    })
+
+    const completeRes = await request(app)
+      .post('/api/auth/password/reset/complete')
+      .send({
+        phone: '+998901234571',
+        resetToken: confirmRes.body.data.resetToken,
+        newPassword: 'Password2',
+      })
+
+    expect(completeRes.status).toBe(200)
+    expect(completeRes.body).toHaveProperty('data.reset', true)
+  })
+
+  it('authenticates with google token successfully', async () => {
+    __verifyIdToken.mockResolvedValue({
+      getPayload: () => ({
+        sub: 'google-sub-1',
+        email: 'google@example.com',
+        name: 'Google User',
+        picture: 'https://example.com/avatar.png',
+      }),
+    })
+
+    User.upsertGoogle.mockResolvedValue({
+      id: 'user-google-1',
+      name: 'Google User',
+      email: 'google@example.com',
+      role: 'student',
+      avatar: 'https://example.com/avatar.png',
+      created_at: new Date().toISOString(),
+    })
+
+    const res = await request(app)
+      .post('/api/auth/google')
+      .send({ idToken: 'mock-id-token' })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('data.token')
+    expect(res.body).toHaveProperty('data.user.email', 'google@example.com')
+  })
+})

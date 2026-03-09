@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Kelajak Merosi — full-stack edu platform (React + Node.js/Express + PostgreSQL)",
   "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
   "scripts": {
     "start": "npm run dev",
     "dev:client": "cd client && npm run dev",

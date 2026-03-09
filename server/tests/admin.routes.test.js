@@ -27,7 +27,7 @@ jest.mock('../src/models/Analytics.model', () => ({
 
 const request = require('supertest')
 const jwt = require('jsonwebtoken')
-const app = require('../src/app')
+const app = require('../src/app').default || require('../src/app')
 const User = require('../src/models/User.model')
 const Analytics = require('../src/models/Analytics.model')
 

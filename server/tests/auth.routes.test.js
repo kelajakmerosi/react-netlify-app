@@ -54,7 +54,7 @@ jest.mock('google-auth-library', () => {
 })
 
 const request = require('supertest')
-const app = require('../src/app')
+const app = require('../src/app').default || require('../src/app')
 const User = require('../src/models/User.model')
 const PhoneAuthCode = require('../src/models/PhoneAuthCode.model')
 const { sendOtp } = require('../src/services/sms/eskiz.service')

@@ -1,0 +1,36 @@
+8ce2e551e06d27e91a900fc1cd1327eb
+const { spawnSync } = require('child_process')
+const path = require('path')
+
+const SCRIPT_PATH = path.join(__dirname, '../../../scripts/extract_exam_text.py')
+
+const parseDocxSource = async (sourcePath) => {
+  const result = spawnSync('python3', [SCRIPT_PATH, '--source', sourcePath, '--type', 'docx'], {
+    encoding: 'utf8',
+  })
+
+  if (result.error) {
+    throw new Error(`DOCX parser launch failed: ${result.error.message}`)
+  }
+
+  let payload = null
+  try {
+    payload = JSON.parse(String(result.stdout || '{}'))
+  } catch {
+    throw new Error(`DOCX parser returned invalid JSON: ${result.stdout || result.stderr || ''}`)
+  }
+
+  if (result.status !== 0 || payload.error) {
+    throw new Error(payload.error || result.stderr || 'DOCX parser failed')
+  }
+
+  return {
+    text: String(payload.text || ''),
+    warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
+    images: Array.isArray(payload.images) ? payload.images : [],
+  }
+}
+
+module.exports = {
+  parseDocxSource,
+}

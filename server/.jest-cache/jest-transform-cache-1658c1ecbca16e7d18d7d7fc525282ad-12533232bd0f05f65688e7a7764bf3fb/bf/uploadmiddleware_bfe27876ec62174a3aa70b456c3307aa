@@ -1,0 +1,58 @@
+d89277e7a6b7fa8ee7af6ce7d1df9223
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
+const multer = require('multer')
+
+const uploadRoot = path.join(os.tmpdir(), 'kelajakmerosi-uploads')
+
+const ensureUploadRoot = () => {
+  if (!fs.existsSync(uploadRoot)) {
+    fs.mkdirSync(uploadRoot, { recursive: true })
+  }
+}
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    try {
+      ensureUploadRoot()
+      cb(null, uploadRoot)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  filename: (_req, file, cb) => {
+    const extension = path.extname(file.originalname || '').toLowerCase() || '.bin'
+    const safeBase = path
+      .basename(file.originalname || 'upload', extension)
+      .replace(/[^a-zA-Z0-9-_]/g, '_')
+      .slice(0, 80)
+    cb(null, `${Date.now()}-${safeBase}${extension}`)
+  },
+})
+
+const allowedMimeTypes = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+])
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 25 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (_req, file, cb) => {
+    const extension = path.extname(file.originalname || '').toLowerCase()
+    const allowedByExt = extension === '.pdf' || extension === '.docx'
+    const allowedByMime = allowedMimeTypes.has(String(file.mimetype || '').toLowerCase())
+    if (allowedByExt || allowedByMime) return cb(null, true)
+    return cb(new Error('Only PDF and DOCX files are supported'))
+  },
+})
+
+const uploadExamSource = upload.single('file')
+
+module.exports = {
+  uploadExamSource,
+}
