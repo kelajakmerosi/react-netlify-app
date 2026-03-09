@@ -2,10 +2,7 @@ import { Navigate, BrowserRouter, Route, Routes, useNavigate, useParams } from '
 import { ThemeProvider } from './providers/ThemeProvider'
 import { LanguageProvider } from './providers/LanguageProvider'
 import { AuthProvider } from './providers/AuthProvider'
-import { ToastProvider } from './providers/ToastProvider'
 import { AppProvider } from './providers/AppProvider'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '../lib/queryClient'
 import { AppShell } from '../components/layout/AppShell'
 import { AuthPage } from '../pages/AuthPage'
 import { LandingPage } from '../pages/LandingPage'
@@ -165,16 +162,12 @@ function RoutedApp() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LanguageProvider>
-          <AuthProvider>
-            <ToastProvider>
-              <RoutedApp />
-            </ToastProvider>
-          </AuthProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <RoutedApp />
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   )
 }

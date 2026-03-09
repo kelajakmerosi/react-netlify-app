@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '../ui'
 import { Modal } from '../ui/Modal'
@@ -17,26 +17,25 @@ interface TopbarProps {
   onMenuToggle: () => void
 }
 
-const LOCALE_LABELS: Record<LocaleKey, string> = {
-  uz: "O'zbek",
-  ru: 'Русский',
-  en: 'English',
-}
-
 export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
   const { user, logout } = useAuth()
   const { lang, t, changeLang } = useLang()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
-  const [langOpen, setLangOpen] = useState(false)
+  const [languageOpen, setLanguageOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const langRef = useRef<HTMLDivElement>(null)
 
   const roleLabel = useMemo(() => {
     if (!user?.role) return t('guest')
     if (user.role === 'student') return t('learner')
     return t(user.role)
   }, [t, user?.role])
+
+  const localeLabels: Record<LocaleKey, string> = {
+    uz: "O'zbek",
+    ru: 'Русский',
+    en: 'English',
+  }
 
   const title = useMemo(() => {
     if (activePage === 'dashboard') return t('myLearning')
@@ -47,25 +46,6 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
     return t('myLearning')
   }, [activePage, t])
 
-  // Close lang dropdown on click-outside or Escape
-  const closeLang = useCallback(() => setLangOpen(false), [])
-
-  useEffect(() => {
-    if (!langOpen) return undefined
-    const onClickOutside = (event: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(event.target as Node)) closeLang()
-    }
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeLang()
-    }
-    document.addEventListener('mousedown', onClickOutside)
-    document.addEventListener('keydown', onEscape)
-    return () => {
-      document.removeEventListener('mousedown', onClickOutside)
-      document.removeEventListener('keydown', onEscape)
-    }
-  }, [langOpen, closeLang])
-
   return (
     <>
       <header className={styles.topbar}>
@@ -75,36 +55,11 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
         </div>
 
         <div className={styles.right}>
-          {/* Language Dropdown */}
-          <div className={styles.langWrap} ref={langRef}>
-            <IconButton
-              icon={<Languages size={16} />}
-              label={`${t('language')}: ${lang.toUpperCase()}`}
-              onClick={() => setLangOpen((prev) => !prev)}
-            />
-            {langOpen && (
-              <div className={styles.langDropdown}>
-                {SUPPORTED_LOCALES.map((locale) => {
-                  const active = locale === lang
-                  return (
-                    <button
-                      key={locale}
-                      type="button"
-                      className={`${styles.langOption} ${active ? styles.langOptionActive : ''}`}
-                      onClick={() => {
-                        changeLang(locale)
-                        setLangOpen(false)
-                      }}
-                    >
-                      <span className={styles.langOptionLabel}>{LOCALE_LABELS[locale]}</span>
-                      {active && <Check size={14} aria-hidden="true" />}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
+          <IconButton
+            icon={<Languages size={16} />}
+            label={`${t('language')}: ${lang.toUpperCase()}`}
+            onClick={() => setLanguageOpen(true)}
+          />
           <IconButton
             icon={theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             label={t('theme')}
@@ -130,12 +85,50 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
         </div>
       </header>
 
-      {/* Settings Modal — centered, clean */}
+      <Modal
+        open={languageOpen}
+        onClose={() => setLanguageOpen(false)}
+        title={t('language')}
+        description={`${t('language')}: ${localeLabels[lang]}`}
+        className={styles.drawerPanel}
+      >
+        <div className="grid gap-3">
+          {SUPPORTED_LOCALES.map((locale) => {
+            const active = locale === lang
+            return (
+              <button
+                key={locale}
+                type="button"
+                onClick={() => {
+                  changeLang(locale)
+                  setLanguageOpen(false)
+                }}
+                className={[
+                  'flex items-center justify-between rounded-2xl border px-4 py-4 text-left transition',
+                  active
+                    ? 'border-[color:var(--accent)] bg-[color:var(--accent-light)] text-[color:var(--accent)]'
+                    : 'border-[color:var(--surface-border)] bg-[color:var(--bg-2)] text-[color:var(--text)] hover:border-[color:var(--accent)]/40 hover:bg-[color:var(--accent-light)]/40',
+                ].join(' ')}
+              >
+                <div className="grid gap-1">
+                  <span className="text-sm font-extrabold tracking-tight">{localeLabels[locale]}</span>
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-[color:var(--text-3)]">
+                    {locale.toUpperCase()}
+                  </span>
+                </div>
+                {active ? <Check size={18} aria-hidden="true" /> : null}
+              </button>
+            )
+          })}
+        </div>
+      </Modal>
+
       <Modal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         title={t('settings')}
         description={roleLabel}
+        className={styles.drawerPanel}
         footer={(
           <>
             <Button variant="ghost" onClick={() => {
@@ -153,66 +146,88 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
           </>
         )}
       >
-        <div className={styles.settingsBody}>
-          {/* User Info */}
-          <section className={styles.settingsCard}>
-            <div className={styles.settingsUserRow}>
-              <Avatar name={user?.name || t('learner')} size={42} />
-              <div className={styles.settingsUserCopy}>
-                <strong>{user?.name || t('learner')}</strong>
-                <span>{roleLabel}</span>
+        <div className="grid gap-5">
+          <section className="rounded-[24px] border border-[color:var(--surface-border)] bg-[color:var(--bg-2)] p-5 shadow-sm">
+            <div className="mb-4 flex items-center gap-4">
+              <Avatar name={user?.name || t('learner')} size={54} />
+              <div className="grid gap-1">
+                <strong className="text-xl font-extrabold tracking-tight text-[color:var(--text)]">
+                  {user?.name || t('learner')}
+                </strong>
+                <span className="text-sm font-semibold text-[color:var(--text-2)]">{roleLabel}</span>
               </div>
             </div>
-            <div className={styles.settingsInfoGrid}>
-              <div className={styles.settingsInfoCell}>
-                <span className={styles.settingsInfoLabel}>{t('name')}</span>
-                <strong>{user?.name || '-'}</strong>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[color:var(--surface-border)] bg-[color:var(--glass)] px-4 py-3">
+                <span className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[color:var(--text-3)]">{t('name')}</span>
+                <strong className="mt-1 block text-sm text-[color:var(--text)]">{user?.name || '-'}</strong>
               </div>
-              <div className={styles.settingsInfoCell}>
-                <span className={styles.settingsInfoLabel}>{t('email')}</span>
-                <strong>{user?.email || '-'}</strong>
+              <div className="rounded-2xl border border-[color:var(--surface-border)] bg-[color:var(--glass)] px-4 py-3">
+                <span className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[color:var(--text-3)]">{t('email')}</span>
+                <strong className="mt-1 block text-sm text-[color:var(--text)]">{user?.email || '-'}</strong>
               </div>
-              <div className={styles.settingsInfoCell}>
-                <span className={styles.settingsInfoLabel}>Phone</span>
-                <strong>{user?.phone || '-'}</strong>
+              <div className="rounded-2xl border border-[color:var(--surface-border)] bg-[color:var(--glass)] px-4 py-3">
+                <span className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[color:var(--text-3)]">Phone</span>
+                <strong className="mt-1 block text-sm text-[color:var(--text)]">{user?.phone || '-'}</strong>
               </div>
-              <div className={styles.settingsInfoCell}>
-                <span className={styles.settingsInfoLabel}>Role</span>
-                <strong>{roleLabel}</strong>
+              <div className="rounded-2xl border border-[color:var(--surface-border)] bg-[color:var(--glass)] px-4 py-3">
+                <span className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[color:var(--text-3)]">Role</span>
+                <strong className="mt-1 block text-sm text-[color:var(--text)]">{roleLabel}</strong>
               </div>
             </div>
           </section>
 
-          {/* Language */}
-          <section className={styles.settingsSection}>
-            <div className={styles.settingsSectionHeader}>
-              <span className={styles.settingsInfoLabel}>{t('language')}</span>
-              <strong>{LOCALE_LABELS[lang]}</strong>
+          <section className="grid gap-3">
+            <div className="rounded-[24px] border border-[color:var(--surface-border)] bg-[color:var(--bg-2)] p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[color:var(--text-3)]">{t('language')}</p>
+                  <h3 className="text-lg font-extrabold tracking-tight text-[color:var(--text)]">{localeLabels[lang]}</h3>
+                </div>
+                <Button variant="ghost" onClick={() => {
+                  setSettingsOpen(false)
+                  setLanguageOpen(true)
+                }}>
+                  {t('language')}
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {SUPPORTED_LOCALES.map((locale) => (
+                  <button
+                    key={`settings-lang-${locale}`}
+                    type="button"
+                    onClick={() => changeLang(locale)}
+                    className={[
+                      'rounded-full border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] transition',
+                      locale === lang
+                        ? 'border-[color:var(--accent)] bg-[color:var(--accent-light)] text-[color:var(--accent)]'
+                        : 'border-[color:var(--surface-border)] bg-[color:var(--glass)] text-[color:var(--text-2)] hover:border-[color:var(--accent)]/35 hover:text-[color:var(--text)]',
+                    ].join(' ')}
+                  >
+                    {localeLabels[locale]}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className={styles.settingsLangRow}>
-              {SUPPORTED_LOCALES.map((locale) => (
-                <button
-                  key={`settings-lang-${locale}`}
-                  type="button"
-                  onClick={() => changeLang(locale)}
-                  className={`${styles.settingsLangBtn} ${locale === lang ? styles.settingsLangBtnActive : ''}`}
-                >
-                  {LOCALE_LABELS[locale]}
-                </button>
-              ))}
-            </div>
-          </section>
 
-          {/* Theme */}
-          <section className={styles.settingsSection}>
-            <div className={styles.settingsSectionHeader}>
-              <span className={styles.settingsInfoLabel}>{t('theme')}</span>
-              <strong>{theme === 'light' ? 'Light' : 'Dark'}</strong>
+            <div className="rounded-[24px] border border-[color:var(--surface-border)] bg-[color:var(--bg-2)] p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[color:var(--text-3)]">{t('theme')}</p>
+                  <h3 className="text-lg font-extrabold tracking-tight text-[color:var(--text)]">
+                    {theme === 'light' ? 'Light' : 'Dark'}
+                  </h3>
+                </div>
+                <Button variant="ghost" onClick={toggleTheme}>
+                  {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                  {t('theme')}
+                </Button>
+              </div>
+              <p className="text-sm leading-6 text-[color:var(--text-2)]">
+                Clean contrast, softer surfaces, and route-wide readability now follow the active theme.
+              </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={toggleTheme}>
-              {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-              {theme === 'light' ? 'Dark' : 'Light'}
-            </Button>
           </section>
         </div>
       </Modal>
