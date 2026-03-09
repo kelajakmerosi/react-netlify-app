@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: kelajakmerosi
+    env: node
+    # Build from the workspace root so npm workspaces hoist all deps (including
+    # shared/node_modules/zod) to root node_modules, and --include=dev ensures
+    # @types/* / typescript / ts-node are available during tsc compilation.
+    buildCommand: npm install --include=dev && npm run build --prefix server
+    # The tsconfig has no explicit rootDir, so TypeScript infers the repo root
+    # as the common ancestor of src/**/* and ../shared/**/*. Output mirrors that
+    # structure inside server/dist/.
+    startCommand: node server/dist/server/src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
