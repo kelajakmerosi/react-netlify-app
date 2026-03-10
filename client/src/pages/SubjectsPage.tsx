@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { BookOpen } from 'lucide-react'
 import { useApp, useLang } from '../hooks'
 import { useAuth } from '../hooks/useAuth'
 import { SubjectCard } from '../components/features/SubjectCard'
@@ -41,17 +40,6 @@ export function SubjectsPage({ onSubjectSelect }: SubjectsPageProps) {
     })
   ), [getTopicData, subjects])
 
-  const summary = useMemo(() => {
-    const totals = subjectStats.reduce((acc, item) => {
-      acc.subjects += 1
-      acc.lessons += item.total
-      acc.completed += item.completed
-      return acc
-    }, { subjects: 0, lessons: 0, completed: 0 })
-
-    const completion = totals.lessons > 0 ? Math.round((totals.completed / totals.lessons) * 100) : 0
-    return { ...totals, completion }
-  }, [subjectStats])
 
   return (
     <div className="page-content fade-in">

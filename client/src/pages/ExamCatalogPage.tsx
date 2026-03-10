@@ -80,10 +80,6 @@ export function ExamCatalogPage() {
   }
 
   const hasItems = useMemo(() => items.length > 0, [items.length])
-  const avgDuration = useMemo(() => {
-    if (!items.length) return 0
-    return Math.round(items.reduce((acc, item) => acc + Math.floor(item.durationSec / 60), 0) / items.length)
-  }, [items])
 
   const handlePurchase = useCallback((examId: string) => {
     navigate(`/exams/${examId}`)
