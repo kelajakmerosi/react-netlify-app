@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BookOpenCheck, CalendarDays, CircleCheckBig, Clock3, ShieldCheck, ShoppingCart, Wallet, CreditCard, TestTube2, Pointer } from 'lucide-react'
+import { BookOpenCheck, CalendarDays, CircleCheckBig, Clock3, ShieldCheck, ShoppingCart, Wallet, TestTube2 } from 'lucide-react'
 import { Alert, MathText, PageHeader } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'

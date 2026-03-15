@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, RotateCcw, ShieldAlert, Trophy } from 'lucide-react'
+import { CheckCircle2, RotateCcw, ShieldAlert } from 'lucide-react'
 import { Alert, MathText, PageHeader } from '../components/ui'
 import { Button } from '../components/ui/Button'
 import { GlassCard } from '../components/ui/GlassCard'
