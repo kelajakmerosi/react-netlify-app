@@ -32,6 +32,7 @@ export default function ExamImportReviewPanel({
   subjects,
 }: ExamImportReviewPanelProps): JSX.Element {
   const { t } = useLang()
+  const hasSubjects = subjects.length > 0
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? '')
   const [sourcePath, setSourcePath] = useState('')
   const [sourceFile, setSourceFile] = useState<File | null>(null)
@@ -51,7 +52,7 @@ export default function ExamImportReviewPanel({
   const [savingQuestionId, setSavingQuestionId] = useState('')
   const [notice, setNotice] = useState<Notice>(null)
 
-  const missingFields = !subjectId || !title.trim() || (!sourceFile && !sourcePath.trim())
+  const missingFields = !hasSubjects || !subjectId || !title.trim() || (!sourceFile && !sourcePath.trim())
 
   useEffect(() => {
     if (subjectId || !subjects.length) return
@@ -141,6 +142,7 @@ export default function ExamImportReviewPanel({
   return (
     <section className={styles.contentPane}>
       {notice ? <Alert variant={notice.type === 'error' ? 'warning' : 'success'}>{notice.message}</Alert> : null}
+      {!hasSubjects ? <Alert variant="info">{t('adminExamNoSubjectAccess')}</Alert> : null}
 
       <section className={styles.inventorySection}>
         <div className={styles.inventoryHeader}>
@@ -163,6 +165,7 @@ export default function ExamImportReviewPanel({
             <div className={styles.formGrid}>
               <Input label={t('adminExamImportExamTitle')} value={title} onChange={(event) => setTitle(event.target.value)} />
               <Select label={t('adminSubject')} value={subjectId} onChange={(event) => setSubjectId(event.target.value)}>
+                {!hasSubjects ? <option value="">{t('adminContentSelectSubjectPlaceholder')}</option> : null}
                 {subjects.map((subject) => (
                   <option key={subject.id} value={subject.id}>{subject.title}</option>
                 ))}

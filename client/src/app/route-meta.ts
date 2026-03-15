@@ -2,9 +2,6 @@ import type { PageId } from '../types'
 
 export const resolveActivePage = (pathname: string): PageId => {
   if (pathname.startsWith('/payments/')) return 'payment'
-  if (pathname.startsWith('/exam-attempts/')) return 'examAttempt'
-  if (pathname.startsWith('/exams/')) return 'exam'
-  if (pathname.startsWith('/exams')) return 'exams'
   if (pathname.startsWith('/attestations/')) return 'attestation'
   if (pathname.startsWith('/general/')) return 'generalSection'
   if (pathname.startsWith('/my-tests')) return 'myTests'

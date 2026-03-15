@@ -28,6 +28,25 @@ const UserCapabilityUpdateResponseSchema = z.object({
   capabilitiesUpdated: z.boolean(),
 })
 
+export interface AdminSubjectScope {
+  id: string
+  admin_user_id: string
+  subject_id: string
+  can_manage_content: boolean
+  can_manage_pricing: boolean
+  created_by?: string | null
+  created_at?: string
+}
+
+export interface TeacherSubjectScope {
+  id: string
+  teacher_user_id: string
+  subject_id: string
+  status: 'active' | 'blocked' | 'pending'
+  approved_by?: string | null
+  created_at?: string
+}
+
 export const scopeService = {
   updateUserCapabilities: async (userId: string, payload: { canTeach?: boolean; canBuy?: boolean; canLearn?: boolean }) => {
     return api.patch(`/admin/users/${encodeURIComponent(userId)}/capabilities`, payload, resolveToken(), UserCapabilityUpdateResponseSchema)

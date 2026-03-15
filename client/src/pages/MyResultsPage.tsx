@@ -125,7 +125,6 @@ export function MyResultsPage() {
         actions={
           <div className={styles.headerActions}>
             <Button variant="ghost" size="sm" onClick={() => navigate('/subjects')}>{t('subjects')}</Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/exams')}>{t('exams')}</Button>
           </div>
         }
       />
@@ -201,7 +200,6 @@ export function MyResultsPage() {
           </p>
           <div className={styles.emptyActions}>
             <Button onClick={() => navigate('/subjects')}>{t('subjects')}</Button>
-            <Button variant="ghost" onClick={() => navigate('/exams')}>{t('exams')}</Button>
           </div>
         </GlassCard>
       )}

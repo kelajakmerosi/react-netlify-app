@@ -20,40 +20,156 @@ const parseDbEndpoint = (connectionString: string | undefined) => {
   }
 };
 
-const dbEndpoint = parseDbEndpoint(process.env.DATABASE_URL);
+interface DbCandidate {
+  connectionString: string | undefined
+  label: 'primary' | 'supabase-direct-fallback'
+}
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+const buildPool = (connectionString: string | undefined) => new Pool({
+  connectionString,
   ssl: { rejectUnauthorized: false }, // required for Supabase
   connectionTimeoutMillis: dbConnectTimeoutMs,
   max: 10,
   idleTimeoutMillis: 30000,
 });
 
+const toSupabaseDirectConnectionString = (connectionString: string | undefined): string | null => {
+  if (!connectionString) return null;
+
+  try {
+    const parsed = new URL(connectionString);
+    if (!parsed.hostname.endsWith('.pooler.supabase.com')) return null;
+
+    const [, projectRef] = parsed.username.split('.');
+    if (!projectRef) return null;
+
+    parsed.hostname = `db.${projectRef}.supabase.co`;
+    parsed.port = '5432';
+    parsed.username = 'postgres';
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+};
+
+const buildDbCandidates = (connectionString: string | undefined): DbCandidate[] => {
+  const candidates: DbCandidate[] = [{
+    connectionString,
+    label: 'primary',
+  }];
+
+  const directConnectionString = toSupabaseDirectConnectionString(connectionString);
+  if (directConnectionString && directConnectionString !== connectionString) {
+    candidates.push({
+      connectionString: directConnectionString,
+      label: 'supabase-direct-fallback',
+    });
+  }
+
+  return candidates;
+};
+
+const isRetryableConnectionError = (error: unknown): boolean => {
+  const code = String((error as any)?.code || (error as any)?.cause?.code || '').trim();
+  if (['ETIMEDOUT', 'ECONNREFUSED', 'ENOTFOUND', 'EHOSTUNREACH', 'ECONNRESET'].includes(code)) return true;
+
+  const message = String((error as any)?.message || '').toLowerCase();
+  return message.includes('timeout')
+    || message.includes('connection terminated unexpectedly')
+    || message.includes('could not connect')
+    || message.includes('econnreset');
+};
+
+let activeConnectionString = process.env.DATABASE_URL;
+let activePool = buildPool(activeConnectionString);
+
+const switchPool = async (connectionString: string | undefined) => {
+  if (connectionString === activeConnectionString) return;
+
+  const previousPool = activePool;
+  activeConnectionString = connectionString;
+  activePool = buildPool(connectionString);
+  await previousPool.end().catch(() => {});
+};
+
+const pool = {
+  query: (...args: Parameters<Pool['query']>) => activePool.query(...args),
+  connect: (...args: Parameters<Pool['connect']>) => activePool.connect(...args),
+  end: () => activePool.end(),
+} as unknown as Pool;
+const normalizeCatalogAlias = (value: string) => value.trim().toLowerCase();
+
+const BUILTIN_SUBJECT_CATALOG_ALIASES: Array<{ catalogKey: string; aliases: string[] }> = [
+  { catalogKey: '5', aliases: ['matematika', 'mathematics', 'math'] },
+  { catalogKey: '6', aliases: ['informatika', 'informatics', 'computer science'] },
+  { catalogKey: '11', aliases: ['fizika', 'physics'] },
+  { catalogKey: '12', aliases: ['ona tili', 'ingliz tili', 'language', 'languages', 'english'] },
+  { catalogKey: '13', aliases: ['biologiya', 'biology'] },
+  { catalogKey: '14', aliases: ['tarix', 'history', 'kitobxonlik'] },
+];
+
 /**
  * Connect and verify the database is reachable.
  * Also runs table migrations on startup.
  */
 const connectDB = async () => {
-  try {
-    const client = await pool.connect();
-    const { rows } = await client.query('SELECT NOW()');
-    client.release();
-    logger.info({ now: rows[0].now }, '[db] PostgreSQL connected');
-    await runMigrations();
-  } catch (err) {
-    logger.error(
-      {
-        err,
-        dbHost: dbEndpoint.host || 'unknown',
-        dbPort: dbEndpoint.port || 'unknown',
-        timeoutMs: dbConnectTimeoutMs,
-        errorCode: (err as any)?.code || (err as any)?.cause?.code || 'unknown',
-      },
-      '[db] Connection error'
-    );
-    process.exit(1);
+  const candidates = buildDbCandidates(process.env.DATABASE_URL);
+  let lastError: unknown = null;
+
+  for (let index = 0; index < candidates.length; index += 1) {
+    const candidate = candidates[index]!;
+    const endpoint = parseDbEndpoint(candidate.connectionString);
+
+    try {
+      await switchPool(candidate.connectionString);
+
+      const client = await pool.connect();
+      const { rows } = await client.query('SELECT NOW()');
+      client.release();
+
+      logger.info(
+        {
+          now: rows[0].now,
+          dbHost: endpoint.host || 'unknown',
+          dbPort: endpoint.port || 'unknown',
+          connectionMode: candidate.label,
+        },
+        '[db] PostgreSQL connected',
+      );
+      await runMigrations();
+      return;
+    } catch (err) {
+      lastError = err;
+      const shouldTryFallback = candidate.label === 'primary'
+        && index < candidates.length - 1
+        && isRetryableConnectionError(err);
+
+      logger[shouldTryFallback ? 'warn' : 'error'](
+        {
+          err,
+          dbHost: endpoint.host || 'unknown',
+          dbPort: endpoint.port || 'unknown',
+          timeoutMs: dbConnectTimeoutMs,
+          errorCode: (err as any)?.code || (err as any)?.cause?.code || 'unknown',
+          connectionMode: candidate.label,
+          fallbackAvailable: index < candidates.length - 1,
+        },
+        shouldTryFallback ? '[db] Primary connection failed, trying fallback' : '[db] Connection error',
+      );
+
+      if (shouldTryFallback) continue;
+      process.exit(1);
+    }
   }
+
+  logger.error(
+    {
+      err: lastError,
+      timeoutMs: dbConnectTimeoutMs,
+    },
+    '[db] Connection error',
+  );
+  process.exit(1);
 };
 
 /**
@@ -121,10 +237,12 @@ const runMigrations = async () => {
 
     CREATE TABLE IF NOT EXISTS subjects (
       id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      catalog_key TEXT,
       title       TEXT NOT NULL,
       description TEXT DEFAULT '',
       icon        TEXT DEFAULT '',
       color       TEXT DEFAULT '#6366f1',
+      image_url   TEXT,
       "order"     INT  DEFAULT 0,
       topics      JSONB DEFAULT '[]',
       created_at  TIMESTAMPTZ DEFAULT NOW(),
@@ -179,6 +297,8 @@ const runMigrations = async () => {
       ADD COLUMN IF NOT EXISTS quiz_total_questions INT;
 
     ALTER TABLE subjects
+      ADD COLUMN IF NOT EXISTS catalog_key TEXT,
+      ADD COLUMN IF NOT EXISTS image_url TEXT,
       ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN DEFAULT FALSE;
 
     CREATE TABLE IF NOT EXISTS user_quiz_attempts (
@@ -479,6 +599,10 @@ const runMigrations = async () => {
     CREATE INDEX IF NOT EXISTS idx_analytics_events_subject_topic
       ON analytics_events(subject_id, topic_id, created_at DESC);
 
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_subjects_catalog_key_unique
+      ON subjects(catalog_key)
+      WHERE catalog_key IS NOT NULL;
+
     CREATE INDEX IF NOT EXISTS idx_payments_status_paid_at
       ON payments(status, paid_at DESC);
 
@@ -566,7 +690,68 @@ const runMigrations = async () => {
     CREATE INDEX IF NOT EXISTS idx_exams_topic_section
       ON exams(topic_id, section_type);
   `);
+
+  // Run a few critical polymorphic-question migrations separately as a safety net.
+  // Some environments were upgraded while the server was already running, which left
+  // the attempt answer schema behind the runtime code that now reads written answers.
+  await pool.query(`
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS format_type TEXT DEFAULT 'MCQ4';
+  `);
+
+  await pool.query(`
+    ALTER TABLE exam_questions
+      ADD COLUMN IF NOT EXISTS written_answer TEXT;
+  `);
+
+  await pool.query(`
+    ALTER TABLE exam_attempt_answers
+      ADD COLUMN IF NOT EXISTS written_answer TEXT;
+  `);
+
+  await backfillSubjectCatalogKeys();
   logger.info('[db] Migrations complete');
+};
+
+const backfillSubjectCatalogKeys = async () => {
+  const existingCatalogKeys = await pool.query(
+    `SELECT catalog_key
+     FROM subjects
+     WHERE catalog_key IS NOT NULL`
+  );
+  const used = new Set(
+    existingCatalogKeys.rows
+      .map((row: any) => String(row.catalog_key || '').trim())
+      .filter(Boolean),
+  );
+
+  for (const entry of BUILTIN_SUBJECT_CATALOG_ALIASES) {
+    if (used.has(entry.catalogKey)) continue;
+
+    const { rows } = await pool.query(
+      `SELECT id
+       FROM subjects
+       WHERE catalog_key IS NULL
+         AND LOWER(TRIM(title)) = ANY($1::text[])
+         AND LOWER(TRIM(title)) <> 'demo matematika'
+       ORDER BY created_at ASC
+       LIMIT 1`,
+      [entry.aliases.map(normalizeCatalogAlias)],
+    );
+
+    const match = rows[0];
+    if (!match?.id) continue;
+
+    await pool.query(
+      `UPDATE subjects
+       SET catalog_key = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [entry.catalogKey, match.id],
+    );
+
+    used.add(entry.catalogKey);
+  }
 };
 
 export { pool, connectDB };

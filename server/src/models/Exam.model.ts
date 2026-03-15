@@ -145,6 +145,8 @@ const canTransitionStatus = (currentStatus: string | null, nextStatus: string | 
 const createDraft = async ({
 
   subjectId,
+  topicId = null,
+  sectionType = null,
   ownerUserId,
   title,
   description = '',
@@ -154,10 +156,10 @@ const createDraft = async ({
   const safeDurationSec = FIXED_EXAM_DURATION_SEC
   const safePassPercent = FIXED_EXAM_PASS_PERCENT
   const { rows } = await pool.query(
-    `INSERT INTO exams (subject_id, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, 'draft', $8, TRUE)
-     RETURNING id, subject_id, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at`,
-    [subjectId, ownerUserId, title, description, safeDurationSec, safePassPercent, requiredQuestionCount, priceUzs],
+    `INSERT INTO exams (subject_id, topic_id, section_type, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft', $10, TRUE)
+     RETURNING id, subject_id, topic_id, section_type, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at`,
+    [subjectId, topicId, sectionType, ownerUserId, title, description, safeDurationSec, safePassPercent, requiredQuestionCount, priceUzs],
   )
 
   return mapExam(rows[0])
@@ -165,7 +167,7 @@ const createDraft = async ({
 
 const getById = async (id: string | number): Promise<ExamEntity | null> => {
   const { rows } = await pool.query(
-    `SELECT id, subject_id, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at
+    `SELECT id, subject_id, topic_id, section_type, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at
      FROM exams
      WHERE id = $1
      LIMIT 1`,
@@ -195,6 +197,8 @@ const listManaged = async ({ userId, subjectIds = [], isSuperadmin = false }: an
     `SELECT
        e.id,
        e.subject_id,
+       e.topic_id,
+       e.section_type,
        e.owner_user_id,
        e.title,
        e.description,
@@ -239,17 +243,21 @@ const updateDraft = async (id: string | number, patch: any = {}): Promise<ExamEn
     `UPDATE exams
      SET title = COALESCE($1, title),
          description = COALESCE($2, description),
-         duration_sec = $3,
-         pass_percent = $4,
-         required_question_count = COALESCE($5, required_question_count),
-         price_uzs = COALESCE($6, price_uzs),
-         is_active = COALESCE($7, is_active),
+         topic_id = COALESCE($3, topic_id),
+         section_type = COALESCE($4, section_type),
+         duration_sec = $5,
+         pass_percent = $6,
+         required_question_count = COALESCE($7, required_question_count),
+         price_uzs = COALESCE($8, price_uzs),
+         is_active = COALESCE($9, is_active),
          updated_at = NOW()
-     WHERE id = $8
-     RETURNING id, subject_id, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at`,
+     WHERE id = $10
+     RETURNING id, subject_id, topic_id, section_type, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at`,
     [
       patch.title ?? null,
       patch.description ?? null,
+      patch.topicId ?? null,
+      patch.sectionType ?? null,
       FIXED_EXAM_DURATION_SEC,
       FIXED_EXAM_PASS_PERCENT,
       patch.requiredQuestionCount ?? null,
@@ -283,19 +291,24 @@ const setStatus = async (id: string | number, { status, reviewerId = null }: any
          published_at = CASE WHEN $3::boolean THEN NOW() ELSE published_at END,
          updated_at = NOW()
      WHERE id = $4
-     RETURNING id, subject_id, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at`,
+     RETURNING id, subject_id, topic_id, section_type, owner_user_id, title, description, duration_sec, pass_percent, required_question_count, status, price_uzs, is_active, approved_by, published_at, created_at, updated_at`,
     [status, reviewerId, publishNow, id],
   )
 
   return mapExam(rows[0])
 }
 
-const listPublishedCatalog = async ({ subjectId, userId }: any = {}): Promise<ExamEntity[]> => {
+const listPublishedCatalog = async ({ subjectId, sectionType, userId }: any = {}): Promise<ExamEntity[]> => {
   const params = []
   let subjectClause = ''
   if (subjectId) {
     params.push(subjectId)
     subjectClause = `AND e.subject_id = $${params.length}::text`
+  }
+  let sectionClause = ''
+  if (sectionType) {
+    params.push(sectionType)
+    sectionClause = `AND e.section_type = $${params.length}`
   }
 
   let entitlementJoin = ''
@@ -314,12 +327,14 @@ const listPublishedCatalog = async ({ subjectId, userId }: any = {}): Promise<Ex
   }
 
   const { rows } = await pool.query(
-    `SELECT e.id, e.subject_id, e.owner_user_id, e.title, e.description, e.duration_sec, e.pass_percent, e.required_question_count, e.status, e.price_uzs, e.is_active, e.approved_by, e.published_at, e.created_at, e.updated_at${entitlementSelect}
+    `SELECT e.id, e.subject_id, e.topic_id, e.section_type, e.owner_user_id, e.title, e.description, e.duration_sec, e.pass_percent, e.required_question_count, e.status, e.price_uzs, e.is_active, e.approved_by, e.published_at, e.created_at, e.updated_at${entitlementSelect}
      FROM exams e
+     LEFT JOIN subjects s ON s.id::text = e.subject_id
      ${entitlementJoin}
      WHERE e.status = 'published'
        AND e.is_active = TRUE
-       ${subjectClause}
+       ${subjectClause ? `AND (e.subject_id = $1::text OR s.catalog_key = $1)` : ''}
+       ${sectionClause}
      ORDER BY e.created_at DESC`,
     params,
   )
@@ -478,8 +493,10 @@ const buildExamStructureValidation = ({ exam, questions }: { exam: any, question
   questions.forEach((question: any) => {
     const order = Number(question.questionOrder || 0)
     const prompt = String(question.promptText || '').trim()
+    const formatType = String(question.formatType || 'MCQ4').toUpperCase()
     const options = Array.isArray(question.options) ? question.options : []
     const correctIndex = Number(question.correctIndex)
+    const writtenAnswer = String(question.writtenAnswer || '').trim()
     const keyVerified = question.keyVerified === undefined ? true : Boolean(question.keyVerified)
 
     if (!prompt) {
@@ -490,29 +507,41 @@ const buildExamStructureValidation = ({ exam, questions }: { exam: any, question
       })
     }
 
-    if (options.length < 2) {
-      issues.push({
-        code: 'options_insufficient',
-        message: `Question ${order} must have at least two options`,
-        details: { questionId: question.id, questionOrder: order },
-      })
+    if (formatType === 'WRITTEN') {
+      if (writtenAnswer && !keyVerified) {
+        issues.push({
+          code: 'answer_key_unverified',
+          message: `Question ${order} answer key is not verified`,
+          details: { questionId: question.id, questionOrder: order },
+        })
+      } else if (writtenAnswer && keyVerified) {
+        verifiedQuestions += 1
+      }
+    } else {
+      if (options.length < 2) {
+        issues.push({
+          code: 'options_insufficient',
+          message: `Question ${order} must have at least two options`,
+          details: { questionId: question.id, questionOrder: order },
+        })
+      }
+
+      if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length) {
+        issues.push({
+          code: 'correct_index_invalid',
+          message: `Question ${order} has invalid correct answer index`,
+          details: { questionId: question.id, questionOrder: order, correctIndex },
+        })
+      }
     }
 
-    if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length) {
-      issues.push({
-        code: 'correct_index_invalid',
-        message: `Question ${order} has invalid correct answer index`,
-        details: { questionId: question.id, questionOrder: order, correctIndex },
-      })
-    }
-
-    if (!keyVerified) {
+    if (formatType !== 'WRITTEN' && !keyVerified) {
       issues.push({
         code: 'answer_key_unverified',
         message: `Question ${order} answer key is not verified`,
         details: { questionId: question.id, questionOrder: order },
       })
-    } else {
+    } else if (formatType !== 'WRITTEN') {
       verifiedQuestions += 1
     }
   })
@@ -525,6 +554,13 @@ const buildExamStructureValidation = ({ exam, questions }: { exam: any, question
     issues,
   }
 }
+
+const normalizeWrittenAnswerValue = (value: any): string => (
+  String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+)
 
 const validateExamStructure = async (examId: string | number): Promise<any> => {
   const exam = await getById(examId)
@@ -566,7 +602,7 @@ const startAttempt = async ({ userId, examId }: any): Promise<any> => {
     await client.query('BEGIN')
 
     const examRes = await client.query(
-      `SELECT id, subject_id, title, duration_sec, pass_percent, required_question_count, status, is_active
+      `SELECT id, subject_id, topic_id, section_type, title, duration_sec, pass_percent, required_question_count, price_uzs, status, is_active
        FROM exams
        WHERE id = $1
        LIMIT 1
@@ -614,7 +650,16 @@ const startAttempt = async ({ userId, examId }: any): Promise<any> => {
       [userId, examId],
     )
 
-    const entitlement = entitlementRes.rows[0]
+    let entitlement = entitlementRes.rows[0]
+    if (!entitlement && Number(exam.price_uzs || 0) <= 0) {
+      entitlement = await grantEntitlement({
+        userId,
+        examId,
+        attemptsTotal: 1,
+        sourcePaymentId: null,
+      })
+    }
+
     if (!entitlement) {
       await client.query('ROLLBACK')
       return { attempt: null, reason: 'no_entitlement' }
@@ -636,6 +681,8 @@ const startAttempt = async ({ userId, examId }: any): Promise<any> => {
          q.prompt_rich,
          q.image_url,
          q.options_json,
+         q.format_type,
+         q.written_answer,
          q.correct_index,
          q.key_verified,
          q.explanation,
@@ -657,6 +704,8 @@ const startAttempt = async ({ userId, examId }: any): Promise<any> => {
       promptRich: row.prompt_rich || {},
       imageUrl: row.image_url,
       options: Array.isArray(row.options_json) ? row.options_json : [],
+      formatType: row.format_type || 'MCQ4',
+      writtenAnswer: row.written_answer || null,
       correctIndex: row.correct_index,
       keyVerified: Boolean(row.key_verified),
       explanation: row.explanation,
@@ -675,6 +724,8 @@ const startAttempt = async ({ userId, examId }: any): Promise<any> => {
     const snapshot = {
       examId: exam.id,
       subjectId: exam.subject_id,
+      topicId: exam.topic_id,
+      sectionType: exam.section_type,
       examTitle: exam.title,
       durationSec: exam.duration_sec,
       passPercent: exam.pass_percent,
@@ -704,7 +755,7 @@ const startAttempt = async ({ userId, examId }: any): Promise<any> => {
   }
 }
 
-const saveAttemptAnswer = async ({ attemptId, userId, questionId, selectedIndex }: any): Promise<any> => {
+const saveAttemptAnswer = async ({ attemptId, userId, questionId, selectedIndex, writtenAnswer }: any): Promise<any> => {
   const attemptRes = await pool.query(
     `SELECT id, user_id, status, expires_at, snapshot_json
      FROM exam_attempts
@@ -723,16 +774,38 @@ const saveAttemptAnswer = async ({ attemptId, userId, questionId, selectedIndex 
     : []
   const targetQuestion = snapshotQuestions.find((question: any) => question.id === questionId)
   if (!targetQuestion) return { updated: false, reason: 'attempt_not_found' }
+  const formatType = String(targetQuestion.formatType || 'MCQ4').toUpperCase()
+
+  if (formatType === 'WRITTEN') {
+    const safeWrittenAnswer = String(writtenAnswer || '').trim()
+    if (!safeWrittenAnswer) {
+      return { updated: false, reason: 'invalid_answer' }
+    }
+
+    await pool.query(
+      `INSERT INTO exam_attempt_answers (attempt_id, question_id, selected_index, written_answer, answered_at)
+       VALUES ($1, $2, NULL, $3, NOW())
+       ON CONFLICT (attempt_id, question_id) DO UPDATE
+         SET selected_index = NULL,
+             written_answer = EXCLUDED.written_answer,
+             answered_at = NOW()`,
+      [attemptId, questionId, safeWrittenAnswer],
+    )
+
+    return { updated: true, reason: null }
+  }
+
   const optionCount = Array.isArray(targetQuestion.options) ? targetQuestion.options.length : 0
   if (optionCount < 2 || selectedIndex < 0 || selectedIndex >= optionCount) {
     return { updated: false, reason: 'invalid_answer' }
   }
 
   await pool.query(
-    `INSERT INTO exam_attempt_answers (attempt_id, question_id, selected_index, answered_at)
-     VALUES ($1, $2, $3, NOW())
+    `INSERT INTO exam_attempt_answers (attempt_id, question_id, selected_index, written_answer, answered_at)
+     VALUES ($1, $2, $3, NULL, NOW())
      ON CONFLICT (attempt_id, question_id) DO UPDATE
        SET selected_index = EXCLUDED.selected_index,
+           written_answer = NULL,
            answered_at = NOW()`,
     [attemptId, questionId, selectedIndex],
   )
@@ -782,25 +855,45 @@ const submitAttempt = async ({ attemptId, userId }: any): Promise<any> => {
     const questions = Array.isArray(snapshot.questions) ? snapshot.questions : []
 
     const answersRes = await client.query(
-      `SELECT question_id, selected_index
+      `SELECT question_id, selected_index, written_answer
        FROM exam_attempt_answers
        WHERE attempt_id = $1`,
       [attemptId],
     )
 
-    const answerMap = new Map(answersRes.rows.map((row) => [row.question_id, Number(row.selected_index)]))
+    const answerMap = new Map(answersRes.rows.map((row) => [row.question_id, {
+      selectedIndex: row.selected_index === null || row.selected_index === undefined ? null : Number(row.selected_index),
+      writtenAnswer: row.written_answer == null ? null : String(row.written_answer),
+    }]))
 
     let correctCount = 0
+    let scoredQuestions = 0
     for (const question of questions) {
-      const selectedIndex = answerMap.get(question.id)
-      if (selectedIndex !== undefined && selectedIndex === Number(question.correctIndex)) {
+      const formatType = String(question.formatType || 'MCQ4').toUpperCase()
+      const answer = answerMap.get(question.id)
+
+      if (formatType === 'WRITTEN') {
+        const expected = normalizeWrittenAnswerValue(question.writtenAnswer)
+        const actual = normalizeWrittenAnswerValue(answer?.writtenAnswer)
+        if (expected) {
+          scoredQuestions += 1
+          if (actual && actual === expected) {
+            correctCount += 1
+          }
+        }
+        continue
+      }
+
+      scoredQuestions += 1
+      const selectedIndex = answer?.selectedIndex
+      if (selectedIndex !== null && selectedIndex !== undefined && selectedIndex === Number(question.correctIndex)) {
         correctCount += 1
       }
     }
 
-    const totalQuestions = questions.length
-    const scorePercent = totalQuestions > 0
-      ? Math.round((correctCount / totalQuestions) * 100)
+    const totalQuestions = scoredQuestions
+    const scorePercent = scoredQuestions > 0
+      ? Math.round((correctCount / scoredQuestions) * 100)
       : 0
 
     const passed = scorePercent >= Number(snapshot.passPercent || 80)
@@ -842,12 +935,15 @@ const getAttemptSession = async ({ attemptId, userId }: any): Promise<any> => {
   if (!attempt || attempt.user_id !== userId) return null
 
   const answersRes = await pool.query(
-    `SELECT question_id, selected_index
+    `SELECT question_id, selected_index, written_answer
      FROM exam_attempt_answers
      WHERE attempt_id = $1`,
     [attemptId],
   )
-  const answerMap = new Map(answersRes.rows.map((row) => [row.question_id, Number(row.selected_index)]))
+  const answerMap = new Map(answersRes.rows.map((row) => [row.question_id, {
+    selectedIndex: row.selected_index === null || row.selected_index === undefined ? null : Number(row.selected_index),
+    writtenResponse: row.written_answer == null ? '' : String(row.written_answer),
+  }]))
 
   const snapshot = attempt.snapshot_json || {}
   const questions = (snapshot.questions || []).map((question: any) => ({
@@ -857,7 +953,9 @@ const getAttemptSession = async ({ attemptId, userId }: any): Promise<any> => {
     promptRich: question.promptRich || {},
     imageUrl: question.imageUrl || null,
     options: question.options || [],
-    selectedIndex: answerMap.has(question.id) ? answerMap.get(question.id) : null,
+    formatType: question.formatType || 'MCQ4',
+    selectedIndex: answerMap.get(question.id)?.selectedIndex ?? null,
+    writtenResponse: answerMap.get(question.id)?.writtenResponse ?? '',
     difficulty: question.difficulty || null,
     blockOrder: question.blockOrder ?? null,
     blockTitle: question.blockTitle ?? null,
@@ -887,25 +985,42 @@ const getAttemptResult = async ({ attemptId, userId }: any): Promise<any> => {
   if (!attempt || attempt.user_id !== userId) return null
 
   const answersRes = await pool.query(
-    `SELECT question_id, selected_index, answered_at
+    `SELECT question_id, selected_index, written_answer, answered_at
      FROM exam_attempt_answers
      WHERE attempt_id = $1`,
     [attemptId],
   )
 
-  const answerMap = new Map(answersRes.rows.map((row) => [row.question_id, Number(row.selected_index)]))
+  const answerMap = new Map(answersRes.rows.map((row) => [row.question_id, {
+    selectedIndex: row.selected_index === null || row.selected_index === undefined ? null : Number(row.selected_index),
+    writtenResponse: row.written_answer == null ? '' : String(row.written_answer),
+  }]))
 
   const snapshot = attempt.snapshot_json || {}
   const questions = (snapshot.questions || []).map((question: any) => {
-    const selectedIndex = answerMap.get(question.id)
+    const formatType = String(question.formatType || 'MCQ4').toUpperCase()
+    const answer = answerMap.get(question.id)
+    const selectedIndex = answer?.selectedIndex
+    const writtenResponse = answer?.writtenResponse ?? ''
+    const expectedWrittenAnswer = String(question.writtenAnswer || '')
+    const requiresManualReview = formatType === 'WRITTEN' && !expectedWrittenAnswer.trim()
+
     return {
       questionId: question.id,
       questionOrder: question.questionOrder,
       promptText: question.promptText,
+      formatType,
       options: question.options || [],
       selectedIndex: selectedIndex === undefined ? null : selectedIndex,
+      writtenResponse,
+      expectedWrittenAnswer: expectedWrittenAnswer || null,
+      requiresManualReview,
       correctIndex: question.correctIndex,
-      isCorrect: selectedIndex === undefined ? false : selectedIndex === Number(question.correctIndex),
+      isCorrect: formatType === 'WRITTEN'
+        ? (requiresManualReview
+          ? null
+          : normalizeWrittenAnswerValue(writtenResponse) === normalizeWrittenAnswerValue(expectedWrittenAnswer))
+        : (selectedIndex === undefined || selectedIndex === null ? false : selectedIndex === Number(question.correctIndex)),
       explanation: question.explanation || null,
     }
   })

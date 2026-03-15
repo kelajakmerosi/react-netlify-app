@@ -192,10 +192,6 @@ export function LandingPage() {
                 </a>
               </div>
               <div className={s.catRow2}>
-                <a className={s.catCard} href="/exams" onClick={(e) => { e.preventDefault(); navigate('/exams') }}>
-                  <img src={`${IMG}/cat-2.jpg`} alt="Imtihonlar" loading="lazy" />
-                  <span className={s.catBadge}><strong>Imtihonlar</strong><small>Attestatsiya oqimi</small></span>
-                </a>
                 <a className={s.catCard} href="/dashboard" onClick={(e) => { e.preventDefault(); navigate('/dashboard') }}>
                   <img src={`${IMG}/cat-3.jpg`} alt="Dashboard" loading="lazy" />
                   <span className={s.catBadge}><strong>Dashboard</strong><small>Davom etish va tavsiyalar</small></span>
@@ -336,7 +332,6 @@ export function LandingPage() {
               <a href="#courses">Yo'nalishlar</a>
               <span className={s.footerLink} onClick={() => navigate('/auth?mode=signup')} role="link" tabIndex={0}>Ro'yxatdan o'tish</span>
               <span className={s.footerLink} onClick={() => navigate('/dashboard')} role="link" tabIndex={0}>Dashboard</span>
-              <span className={s.footerLink} onClick={() => navigate('/exams')} role="link" tabIndex={0}>Imtihonlar</span>
             </div>
             <div>
               <h4>Aloqa</h4>

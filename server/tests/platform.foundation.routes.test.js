@@ -34,6 +34,7 @@ jest.mock('../src/models/Exam.model', () => ({
   FIXED_EXAM_DURATION_SEC: 7200,
   FIXED_EXAM_PASS_PERCENT: 80,
   DEFAULT_REQUIRED_EXAM_QUESTION_COUNT: 50,
+  listManaged: jest.fn(),
   createDraft: jest.fn(),
   getById: jest.fn(),
   updateDraft: jest.fn(),
@@ -82,6 +83,7 @@ describe('Platform foundation routes', () => {
   const superToken = jwt.sign({ id: 'super-1' }, process.env.JWT_SECRET)
   const teacherToken = jwt.sign({ id: 'teacher-1' }, process.env.JWT_SECRET)
   const learnerToken = jwt.sign({ id: 'learner-1' }, process.env.JWT_SECRET)
+  const adminToken = jwt.sign({ id: 'admin-2' }, process.env.JWT_SECRET)
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -123,6 +125,18 @@ describe('Platform foundation routes', () => {
         }
       }
 
+      if (id === 'admin-2') {
+        return {
+          id: 'admin-2',
+          name: 'Scoped Admin',
+          email: 'admin2@example.com',
+          role: 'admin',
+          can_teach: false,
+          can_buy: true,
+          can_learn: true,
+        }
+      }
+
       if (id === '11111111-1111-4111-8111-111111111111') {
         return {
           id,
@@ -147,6 +161,9 @@ describe('Platform foundation routes', () => {
     })
 
     SubjectScope.hasTeacherScope.mockResolvedValue(true)
+    SubjectScope.hasAdminScope.mockResolvedValue(true)
+    SubjectScope.listTeacherScopes.mockResolvedValue([])
+    SubjectScope.listAdminScopes.mockResolvedValue([])
 
     Exam.createDraft.mockResolvedValue({
       id: '22222222-2222-4222-8222-222222222222',
@@ -177,6 +194,30 @@ describe('Platform foundation routes', () => {
       verifiedQuestions: 50,
       issues: [],
     })
+    Exam.listManaged.mockResolvedValue([
+      {
+        id: '22222222-2222-4222-8222-222222222222',
+        subjectId: 'math',
+        ownerUserId: 'teacher-1',
+        title: 'Test exam',
+        status: 'draft',
+        isActive: true,
+        priceUzs: 10000,
+        durationSec: 7200,
+        passPercent: 80,
+        requiredQuestionCount: 50,
+      },
+    ])
+    Exam.listQuestions.mockResolvedValue([
+      {
+        id: 'q-1',
+        questionOrder: 1,
+        promptText: 'Q1',
+        options: ['A', 'B'],
+        correctIndex: 0,
+        keyVerified: true,
+      },
+    ])
 
     Payment.createCheckoutIntent.mockResolvedValue({
       id: '33333333-3333-4333-8333-333333333333',
@@ -263,6 +304,37 @@ describe('Platform foundation routes', () => {
 
     expect(res.status).toBe(201)
     expect(res.body).toHaveProperty('data.id', '22222222-2222-4222-8222-222222222222')
+  })
+
+  it('allows scoped admin to open managed exam questions without teach capability', async () => {
+    SubjectScope.listAdminScopes.mockResolvedValueOnce([
+      {
+        id: 'scope-1',
+        admin_user_id: 'admin-2',
+        subject_id: 'math',
+        can_manage_content: true,
+        can_manage_pricing: false,
+      },
+    ])
+
+    const listRes = await request(app)
+      .get('/api/teacher/exams')
+      .set('Authorization', `Bearer ${adminToken}`)
+
+    expect(listRes.status).toBe(200)
+    expect(listRes.body.data).toHaveLength(1)
+
+    const questionsRes = await request(app)
+      .get('/api/teacher/exams/22222222-2222-4222-8222-222222222222/questions')
+      .set('Authorization', `Bearer ${adminToken}`)
+
+    expect(questionsRes.status).toBe(200)
+    expect(questionsRes.body.data).toHaveLength(1)
+    expect(SubjectScope.hasAdminScope).toHaveBeenCalledWith({
+      userId: 'admin-2',
+      subjectId: 'math',
+      requireContent: true,
+    })
   })
 
   it('rejects non-fixed exam duration policy at request validation', async () => {

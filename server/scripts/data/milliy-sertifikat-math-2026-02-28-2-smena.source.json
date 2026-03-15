@@ -1,0 +1,478 @@
+{
+  "test_metadata": {
+    "title": "Matematika Milliy Sertifikat",
+    "date": "28.02.2026",
+    "session": "2-smena",
+    "author": "Repititor D.Mukam"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "text": "Quyidagi sonni 7 ga bo‘lgandagi qoldiqni toping: $$\\underbrace{777 \\dots 79}_{2025 \\text{ ta}} + \\underbrace{777 \\dots 78}_{2025 \\text{ ta}} + \\dots + \\underbrace{777 \\dots 71}_{2025 \\text{ ta}}$$",
+      "options": [
+        { "label": "A", "value": "1" },
+        { "label": "B", "value": "6" },
+        { "label": "C", "value": "0" },
+        { "label": "D", "value": "3" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "text": "Hisoblang: $$4\\frac{2}{2025} \\cdot 6\\frac{5}{2026} - 2\\frac{2023}{2025} \\cdot 7\\frac{2021}{2026} - \\frac{35}{2026}$$",
+      "options": [
+        { "label": "A", "value": "$\\frac{7}{1013}$" },
+        { "label": "B", "value": "$\\frac{7}{2026}$" },
+        { "label": "C", "value": "$\\frac{14}{1013}$" },
+        { "label": "D", "value": "$\\frac{28}{2025}$" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "text": "Ikki shahardan bir biriga qarab ikki jism yo‘lga chiqdi, birinchisi 1 soat o‘tganda 2-dan 2 km ko‘p yo‘l bosib o‘tdi. Agar birinchi jism ikkinchisidan 1 soat oldin manzilga yetib kelgan bo‘lsa, ikkinchi jism qancha vaqtda yetib kelgan? Ikki shahar orası 24 km.",
+      "options": [
+        { "label": "A", "value": "4" },
+        { "label": "B", "value": "6" },
+        { "label": "C", "value": "3" },
+        { "label": "D", "value": "8" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "text": "2 ta bir xil narxdagi kurtka. Sotuvchi ulardan birini 5 foiz chegirma bilan sotdi, ikkinchisini chegirmasiz. Agar 1-sidan olingan foyda sotgan narxining 18% ini tashkil qilsa, 2-chi kurtkadan olingan foyda uning o‘zining narxining necha foizini tashkil qiladi?",
+      "options": [
+        { "label": "A", "value": "21" },
+        { "label": "B", "value": "22,1" },
+        { "label": "C", "value": "23" },
+        { "label": "D", "value": "22" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "text": "Hisoblang: $$\\frac{(3^4 \\cdot 2)^{-\\frac{1}{2}}}{9^{-3} \\cdot 2^{-2}}$$",
+      "options": [
+        { "label": "A", "value": "$162\\sqrt{2}$" },
+        { "label": "B", "value": "$\\frac{81}{2\\sqrt{2}}$" },
+        { "label": "C", "value": "108" },
+        { "label": "D", "value": "162" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "text": "Hisoblang: $$\\sqrt[6]{7 - \\sqrt{40}} \\cdot \\sqrt[3]{\\sqrt{2} + \\sqrt{5}} \\cdot \\sqrt[3]{9}$$",
+      "options": [
+        { "label": "A", "value": "3" },
+        { "label": "B", "value": "-3" },
+        { "label": "C", "value": "$6\\sqrt{3}$" },
+        { "label": "D", "value": "$3\\sqrt{3}$" }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "multiple_choice",
+      "text": "Hisoblang: $$\\frac{5}{\\sqrt[3]{32} + 2} + \\frac{5}{\\sqrt[3]{128} - \\sqrt[3]{32} + 2} - \\sqrt[3]{2}$$",
+      "options": [
+        { "label": "A", "value": "-1" },
+        { "label": "B", "value": "1" },
+        { "label": "C", "value": "0" },
+        { "label": "D", "value": "$\\sqrt[6]{6}$" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "multiple_choice",
+      "text": "$a_n = 3,8 - 0,7n$ qonuniyat bilan aniqlangan ketma-ketlik berilgan. Shunga ko‘ra $S_{11}$ ni toping.",
+      "options": [
+        { "label": "A", "value": "-0,55" },
+        { "label": "B", "value": "-4,4" },
+        { "label": "C", "value": "-3,7" },
+        { "label": "D", "value": "-3,3" }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "multiple_choice",
+      "text": "Agar kamayuvchi geometrik progressiyada $b_1 + b_2 + b_3 = 19$ va $b_1^2 + b_2^2 + b_3^2 = 133$ bo‘lsa, uning dastlabki 5 ta hadi yig‘indisini toping.",
+      "options": [
+        { "label": "A", "value": "$22\\frac{4}{9}$" },
+        { "label": "B", "value": "$22\\frac{5}{9}$" },
+        { "label": "C", "value": "$23\\frac{1}{9}$" },
+        { "label": "D", "value": "$23\\frac{4}{9}$" }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "multiple_choice",
+      "text": "$a = \\sqrt{2}, b = \\sqrt{18}$ bo‘lsa, quyidagini soddalashtiring: $$(\\frac{1}{\\sqrt{a}-\\sqrt{b}} - \\frac{1}{\\sqrt{a}+\\sqrt{b}} - \\frac{2\\sqrt{ab}}{a-b}) \\cdot (\\frac{1}{\\sqrt{a}-\\sqrt{b}} - \\frac{1}{a-\\sqrt{ab}} - \\frac{2\\sqrt{ab}}{a-b})$$",
+      "options": [
+        { "label": "A", "value": "9" },
+        { "label": "B", "value": "3" },
+        { "label": "C", "value": "$\\sqrt{3}$" },
+        { "label": "D", "value": "$\\sqrt{6}$" }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "multiple_choice",
+      "text": "Soddalashtiring: $$(2x - 1)^4 - 8x(2x - 1)^3 + 24x^2(2x - 1)^2 - 32x^3(2x - 1) + 16x^4$$",
+      "options": [
+        { "label": "A", "value": "1" },
+        { "label": "B", "value": "$(4x - 1)^2$" },
+        { "label": "C", "value": "$\\frac{1}{2}$" },
+        { "label": "D", "value": "-1" }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "multiple_choice",
+      "text": "Tenglamaning $[-\\frac{\\pi}{2}; \\frac{5\\pi}{2}]$ oralig‘ida nechta ildizi bor: $$\\cos(\\frac{3\\pi}{2} + 2x) = 0$$",
+      "options": [
+        { "label": "A", "value": "3" },
+        { "label": "B", "value": "2" },
+        { "label": "C", "value": "7" },
+        { "label": "D", "value": "4" }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "multiple_choice",
+      "text": "Tenglamaning haqiqiy ildizlari sonini toping: $$\\frac{\\sqrt{4-x} - \\sqrt{5x^3 - 4x^2 - 4x}}{\\sqrt{4-x} + \\log^2_{5x+1}(5x^3 - 4x^2 + 1)} = 1$$",
+      "options": [
+        { "label": "A", "value": "0" },
+        { "label": "B", "value": "1" },
+        { "label": "C", "value": "haqiqiy ildizga ega emas" },
+        { "label": "D", "value": "2" }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "multiple_choice",
+      "text": "Tenglamalar sistemasini yechimlari uchun $x \\cdot y$ ni toping: $$\\begin{cases} x^{3y-4} = 9 \\\\ x^{y+1} = 27 \\end{cases}$$",
+      "options": [
+        { "label": "A", "value": "8" },
+        { "label": "B", "value": "10" },
+        { "label": "C", "value": "9" },
+        { "label": "D", "value": "6" }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "multiple_choice",
+      "text": "Tenglamani yeching: $$x + \\frac{x}{1+2} + \\frac{x}{1+2+3} + \\dots + \\frac{x}{1+2+\\dots+4041} = 4041$$",
+      "options": [
+        { "label": "A", "value": "2021" },
+        { "label": "B", "value": "2022" },
+        { "label": "C", "value": "2023" },
+        { "label": "D", "value": "2024" }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "multiple_choice",
+      "text": "Tengsizlikni qanoatlantiruvchi butun sonlar nechta? $$\\sqrt{x^2 - 4x + 4} - 5\\sqrt{2-x} + 6 < 0$$",
+      "options": [
+        { "label": "A", "value": "34" },
+        { "label": "B", "value": "36" },
+        { "label": "C", "value": "35" },
+        { "label": "D", "value": "37" }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "multiple_choice",
+      "text": "Tengsizlikni yeching: $$\\frac{|x^2 - 8x + 12|}{18 + 7x - x^2} > 0$$",
+      "options": [
+        { "label": "A", "value": "35" },
+        { "label": "B", "value": "27" },
+        { "label": "C", "value": "30" },
+        { "label": "D", "value": "24" }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "multiple_choice",
+      "text": "Tenglama $[-\\frac{3\\pi}{2}; \\frac{5\\pi}{2}]$ kesmada nechta ildizga ega? $$\\sin^4 x + \\cos^4 x = 1$$",
+      "options": [
+        { "label": "A", "value": "8" },
+        { "label": "B", "value": "4" },
+        { "label": "C", "value": "9" },
+        { "label": "D", "value": "7" }
+      ]
+    },
+    {
+      "id": 19,
+      "type": "multiple_choice",
+      "text": "Funksiyaning aniqlanish sohasini toping: $$y = \\log_{x+2} \\left( \\frac{(x-2)\\sqrt{24 + 2x - x^2}}{x-2} \\right)$$",
+      "options": [
+        { "label": "A", "value": "5 ta" },
+        { "label": "B", "value": "6 ta" },
+        { "label": "C", "value": "4 ta" },
+        { "label": "D", "value": "7 ta" }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "multiple_choice",
+      "text": "$f(x)$ funksiya uchun $f(x) = \\frac{x^4+1}{x^2+1}$ o‘rinli bo‘lsa, funksiyaning qiymatlar sohasini toping.",
+      "options": [
+        { "label": "A", "value": "(-2\\sqrt{2}-2; \\infty)" },
+        { "label": "B", "value": "(-2\\sqrt{2}-2; 2\\sqrt{2}-2)" },
+        { "label": "C", "value": "(2\\sqrt{2}-2; \\infty)" },
+        { "label": "D", "value": "(2\\sqrt{2}; \\infty)" }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "multiple_choice",
+      "text": "$f(x) = (x - 8)e^{x-7}$ funksiyaning $[5; 9]$ oralig‘idagi eng katta qiymatini toping.",
+      "options": [
+        { "label": "A", "value": "-1" },
+        { "label": "B", "value": "-7" },
+        { "label": "C", "value": "7" },
+        { "label": "D", "value": "8" }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "multiple_choice",
+      "text": "Aniq integralni hisoblang: $$\\int_{-\\frac{\\pi}{4}}^{\\frac{\\pi}{4}} \\frac{\\sin^3 x}{\\cos^7 x} dx$$",
+      "options": [
+        { "label": "A", "value": "$-\\frac{1}{5}$" },
+        { "label": "B", "value": "0" },
+        { "label": "C", "value": "$\\frac{1}{5}$" },
+        { "label": "D", "value": "$-\\frac{5}{12}$" }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "multiple_choice",
+      "text": "Aylananing 8 ga teng vatari 90° li yoyni tortib turadi. Aylana radiusini toping.",
+      "options": [
+        { "label": "A", "value": "$3\\sqrt{2}$" },
+        { "label": "B", "value": "4" },
+        { "label": "C", "value": "$4\\sqrt{2}$" },
+        { "label": "D", "value": "8" }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "multiple_choice",
+      "text": "Quyidagi rasmga asosan bo‘yalgan soha yuzini toping.",
+      "image_reference": "page_5_triangle_diagram.png",
+      "options": [
+        { "label": "A", "value": "$15\\sqrt{3}$" },
+        { "label": "B", "value": "$14\\sqrt{3}$" },
+        { "label": "C", "value": "28" },
+        { "label": "D", "value": "30" }
+      ]
+    },
+    {
+      "id": 25,
+      "type": "multiple_choice",
+      "text": "ABC va FED muntazam uchburchaklar rasmdagidek joylashtirilgan. AB = 18 va CF:FA = AD:DB = BE:EC = 1:2 bo‘lsa, $S_{DEF}$ ni toping.",
+      "image_reference": "page_6_triangle_overlap.png",
+      "options": [
+        { "label": "A", "value": "$27\\sqrt{3}$" },
+        { "label": "B", "value": "$18\\sqrt{3}$" },
+        { "label": "C", "value": "9" },
+        { "label": "D", "value": "$9\\sqrt{3}$" }
+      ]
+    },
+    {
+      "id": 26,
+      "type": "multiple_choice",
+      "text": "Tenglama nechta butun yechimga ega? $$x^4 - \\frac{2027!}{2026! + 2025!}x^2 + 2025 = 0$$",
+      "options": [
+        { "label": "A", "value": "1 ta" },
+        { "label": "B", "value": "2 ta" },
+        { "label": "C", "value": "3 ta" },
+        { "label": "D", "value": "4 ta" }
+      ]
+    },
+    {
+      "id": 27,
+      "type": "multiple_choice",
+      "text": "To‘g‘ri burchakli trapetsiya asoslari 9 va 3 ga, kichik yon tomoni 6 ga teng. Trapetsiya diagonallari kesishgan nuqtadan katta asosgacha bo‘lgan eng qisqa masofani toping.",
+      "options": [
+        { "label": "A", "value": "4,5" },
+        { "label": "B", "value": "3" },
+        { "label": "C", "value": "3,5" },
+        { "label": "D", "value": "1" }
+      ]
+    },
+    {
+      "id": 28,
+      "type": "multiple_choice",
+      "text": "Muntazam ko‘pburchakning diagonallari soni 35 ta bo‘lsa, bir uchidan chiqqan eng katta va eng kichik diagonallari sonini toping.",
+      "options": [
+        { "label": "A", "value": "54°" },
+        { "label": "B", "value": "72°" },
+        { "label": "C", "value": "45°" },
+        { "label": "D", "value": "60°" }
+      ]
+    },
+    {
+      "id": 29,
+      "type": "multiple_choice",
+      "text": "A(3; 1; 2), B(-1; 1; 4) va C(0; 2; 2) uchburchakning uchlari bo‘lsa, C uchidan AB tomonga tushirilgan mediananing uzunligini toping.",
+      "options": [
+        { "label": "A", "value": "$\\sqrt{10}$" },
+        { "label": "B", "value": "$\\sqrt{20}$" },
+        { "label": "C", "value": "$\\sqrt{6}$" },
+        { "label": "D", "value": "$\\sqrt{3}$" }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "multiple_choice",
+      "text": "Muntazam oltiburchakli piramidaning yon qirrasi asos tekisligi bilan 60° hosil qiladi. Agar qirrasining uzunligi $\\sqrt{39}$ bo‘lsa, uning hajmini toping.",
+      "options": [
+        { "label": "A", "value": "13" },
+        { "label": "B", "value": "$\\frac{117\\sqrt{39}}{32}$" },
+        { "label": "C", "value": "$\\frac{39\\sqrt{39}}{32}$" },
+        { "label": "D", "value": "$\\frac{117\\sqrt{39}}{16}$" }
+      ]
+    },
+    {
+      "id": 31,
+      "type": "multiple_choice",
+      "text": "$(A \\cup C) \\cap (B \\cup D)$ ning elementlari sonini toping.",
+      "image_reference": "page_7_venn_diagram.png",
+      "options": [
+        { "label": "A", "value": "12" },
+        { "label": "B", "value": "11" },
+        { "label": "C", "value": "13" },
+        { "label": "D", "value": "16" }
+      ]
+    },
+    {
+      "id": 32,
+      "type": "multiple_choice",
+      "text": "“MATEMATIKA” so‘zidagi harflar qog‘ozga alohida yozib chiqilgan. Harflar ichidan tasodifiy tanlangan M harfi chiqish ehtimolini toping.",
+      "options": [
+        { "label": "A", "value": "$\\frac{1}{10}$" },
+        { "label": "B", "value": "$\\frac{3}{10}$" },
+        { "label": "C", "value": "$\\frac{1}{5}$" },
+        { "label": "D", "value": "$\\frac{2}{5}$" }
+      ]
+    },
+    {
+      "id": "33-35",
+      "type": "matching",
+      "text": "Muntazam uchburchakli piramidaning yon yoqlari asos tekislik bilan 60° burchak hosil qiladi. Piramidaga ichki chizilgan konusning asosi radiusi 4 ga teng. ($\\pi \\approx 3$)",
+      "tasks": [
+        { "id": 33, "text": "Konusning yon sirti yuzini toping." },
+        { "id": 34, "text": "Piramidaning yon sirti yuzini toping." },
+        { "id": 35, "text": "Piramida hajmini toping." }
+      ],
+      "answers": [
+        { "label": "A", "value": "48" },
+        { "label": "B", "value": "96" },
+        { "label": "C", "value": "192" },
+        { "label": "D", "value": "$64\\sqrt{3}$" },
+        { "label": "E", "value": "$96\\sqrt{3}$" },
+        { "label": "F", "value": "100" }
+      ]
+    },
+    {
+      "id": 36,
+      "type": "open_ended",
+      "text": "Quyidagi tenglamalar sistemasi berilgan: $$\\begin{cases} x - \\frac{1}{4}xy - y = 0 \\\\ x^2 - \\frac{2}{5}xy + y^2 = 0 \\end{cases}$$",
+      "sub_questions": [
+        { "id": "36a", "text": "Tenglamalar sistemasining yechimlari uchun $x \\cdot y$ ning eng katta qiymatini toping." },
+        { "id": "36b", "text": "Tenglamalar sistemasining yechimlari juftligi nechta?" }
+      ]
+    },
+    {
+      "id": 37,
+      "type": "open_ended",
+      "text": "Quyidagi tenglama berilgan: $$\\sin^2 x + \\sin 2x = 3\\cos^2 x$$",
+      "sub_questions": [
+        { "id": "37a", "text": "Tenglamaning eng katta manfiy yechimini toping." },
+        { "id": "37b", "text": "Tenglamaning $[-\\pi; \\pi]$ oralig‘idagi yechimlari sonini toping." }
+      ]
+    },
+    {
+      "id": 38,
+      "type": "open_ended",
+      "text": "$f(x)$ va $g(x)$ funksiyalar uchun $f(3x - 2) + 7g(x - 5) = x + 1$ va $f(x + 1) - g(\\frac{x}{3} - 4) = 3x$ bo‘lsa:",
+      "sub_questions": [
+        { "id": "38a", "text": "$(f(1))^{-1}$ ni toping." },
+        { "id": "38b", "text": "$f(x) + g(x) = \\frac{1}{2}$ tenglamaning ildizlari sonini toping." }
+      ]
+    },
+    {
+      "id": 39,
+      "type": "open_ended",
+      "text": "Quyida $f(x)$ funksiyaning grafigi tasvirlangan.",
+      "image_reference": "page_10_function_graph.png",
+      "sub_questions": [
+        { "id": "39a", "text": "[-9; 5] kesmadagi $f(x)$ funksiyaning ekstremum nuqtalari nechta?" },
+        { "id": "39b", "text": "$f'(x) < 0$ eng katta manfiy butun qiymatini toping." }
+      ]
+    },
+    {
+      "id": 40,
+      "type": "open_ended",
+      "text": "$f(x) = ax^3 + bx^2 + cx, g(x) = px^2 + qx$ funksiyalar berilgan. Bu funksiyalar (-2; 8) va (2; 0) nuqtalarda kesishadi. $f(x)$ funksiya $(-1\\frac{1}{3}; 0)$ nuqtadan o‘tadi.",
+      "image_reference": "page_11_shaded_area.png",
+      "sub_questions": [
+        { "id": "40a", "text": "$\\frac{a+b+c}{p+q}$ ni toping." },
+        { "id": "40b", "text": "Bo‘yalgan soha yuzini toping." }
+      ]
+    },
+    {
+      "id": 41,
+      "type": "open_ended",
+      "text": "ABC to'g'ri burchakli uchburchakka O markazli aylana ichki chizilgan. CO to'g'ri chiziq AB gipotenuzani D nuqtada kesib o'tadi. Agar ichki chizilgan aylana radiusi $\\sqrt{6}$ ga va CO:OD = $\\sqrt{3}:\\sqrt{2}$ bo'lsa:",
+      "image_reference": "page_12_triangle_circle.png",
+      "sub_questions": [
+        { "id": "41a", "text": "OD ni toping." },
+        { "id": "41b", "text": "$\\angle ABC$ ni toping." }
+      ]
+    },
+    {
+      "id": 42,
+      "type": "open_ended",
+      "text": "Rasmda ABCD va KCML kvadratlar berilgan.",
+      "image_reference": "page_13_squares.png",
+      "sub_questions": [
+        { "id": "42a", "text": "$S'$ yuzani toping." },
+        { "id": "42b", "text": "$S_{LMCDB}$ beshburchak yuzini toping." }
+      ]
+    },
+    {
+      "id": 43,
+      "type": "open_ended",
+      "text": "Tomoni uzunligi 9 ga teng bo'lgan ABCDEF muntazam oltiburchak BC tomonidan G nuqta, AF tomonidan H nuqta olindi. Agar BG = 1 va HF = 2 bo'lsa, rasmdagi ma'lumotlar asosida:",
+      "image_reference": "page_14_hexagon.png",
+      "sub_questions": [
+        { "id": "43a", "text": "GH ni toping." },
+        { "id": "43b", "text": "$\\frac{S_1}{S_2}$ ni toping." }
+      ]
+    },
+    {
+      "id": 44,
+      "type": "open_ended",
+      "text": "ABCD uchburchakli piramidaga radiusi $\\frac{2}{3}$ bo'lgan shar ichki chizilgan. Shar piramidaning ABD yog'iga va DC qirrasiga hamda ABC uchburchakning medianalar kesisish nuqtasiga urinadi. DC = 3 va AD $\\perp$ AC bo'lsa:",
+      "sub_questions": [
+        { "id": "44a", "text": "ADB yoqning AB asosiga tushgan medianasi uzunligini toping." },
+        { "id": "44b", "text": "Piramida hajmini toping." }
+      ]
+    },
+    {
+      "id": 45,
+      "type": "open_ended",
+      "text": "Korxona rahbari korxonaga ketadigan xarajatlarni hisoblab chiqdi. Bunda korxonaning daromad funksiyasi $A(x) = \\frac{2x}{3}$ ga, xarajat funksiyasi $B(x) = 2\\sqrt{x}$. Bunda $x$ ishchilar soni.",
+      "sub_questions": [
+        { "id": "45a", "text": "Korxona zarar qilmasligi uchun eng kamida nechta ishchi olishi kerak?" },
+        { "id": "45b", "text": "Korxona foyda olishi uchun eng kamida nechta ishchi olishi kerak?" }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { BookOpen, Calculator, Dna, FlaskConical, Globe2, Languages, Monitor, Sigma, Zap } from 'lucide-react'
 import type { Subject, SubjectModule, Topic } from '../types'
 import type { SubjectRecord } from '../services/subject.service'
+import { resolveSubjectVisualKey } from './subjectVisuals'
 
 const FALLBACK_COLORS = ['#3f68f7', '#0c95d8', '#10936a', '#e67d13', '#7c3aed', '#0ea5a4']
 
@@ -60,6 +61,12 @@ const getIconNode = (iconName: string | undefined) => {
 export const toRuntimeSubject = (record: SubjectRecord): Subject => {
   const color = pickColor(record.id, record.color ?? undefined)
   const gradient = `linear-gradient(135deg, ${color}, color-mix(in srgb, ${color} 58%, #ffffff 42%))`
+  const visualKey = resolveSubjectVisualKey({
+    subjectId: record.catalogKey ?? record.catalog_key ?? record.id,
+    title: record.title,
+    iconName: record.icon,
+    color: record.color,
+  })
 
   const topics: Topic[] = (record.topics || []).map((topic) => {
     const optionsSafe = (questionOptions: unknown) => {
@@ -103,6 +110,8 @@ export const toRuntimeSubject = (record: SubjectRecord): Subject => {
     description: record.description || '',
     iconName: record.icon ?? undefined,
     icon: getIconNode(record.icon ?? undefined),
+    visualKey,
+    imageUrl: record.imageUrl ?? record.image_url ?? undefined,
     color,
     gradient,
     topics,

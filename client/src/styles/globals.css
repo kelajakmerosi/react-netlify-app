@@ -223,6 +223,13 @@ a {
   overflow: clip;
 }
 
+.main-content-immersive {
+  margin-left: 0;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 12%, transparent), transparent 38%),
+    var(--bg-2);
+}
+
 .page-content {
   width: 100%;
   max-width: 1380px;

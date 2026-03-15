@@ -1,4 +1,4 @@
-const DEFAULT_SUPERADMIN_EMAILS = ['kelajakmerosi@gmail.com']
+const DEFAULT_SUPERADMIN_EMAILS = ['kelajakmerosi@gmail.com', 'webpenetration11@gmail.com']
 
 export const normalizeEmail = (value?: string | null): string => String(value || '').trim().toLowerCase()
 

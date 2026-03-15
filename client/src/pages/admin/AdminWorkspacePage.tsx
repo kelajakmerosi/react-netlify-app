@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   BadgeDollarSign,
   BarChart3,
@@ -71,6 +72,20 @@ const formatAdminDateTime = (value: Date | null, locale: string): string => {
   }).format(value)
 }
 
+const adminPathForTab = (tab: AdminTab): string => {
+  if (tab === 'users') return '/admin/users'
+  if (tab === 'content') return '/admin/content'
+  if (tab === 'analytics') return '/admin/analytics'
+  return '/admin'
+}
+
+const resolveAdminTab = (pathname: string, isSuperAdmin: boolean): AdminTab => {
+  if (pathname.startsWith('/admin/content')) return 'content'
+  if (pathname.startsWith('/admin/analytics')) return 'analytics'
+  if (pathname.startsWith('/admin/users') && isSuperAdmin) return 'users'
+  return 'overview'
+}
+
 const normalizeDailyPoints = (
   points: Array<{ bucket: string; value: number }>,
   fromDate: string,
@@ -97,10 +112,16 @@ const normalizeDailyPoints = (
 export function AdminWorkspacePage(): JSX.Element {
   const { user: currentUser, logout } = useAuth()
   const { t, lang } = useLang()
+  const location = useLocation()
+  const navigate = useNavigate()
   const isSuperAdmin = currentUser?.role === 'superadmin'
   const localizeError = (err: unknown, fallbackKey = 'adminActionFailed') => resolveUiErrorMessage(err, t, fallbackKey)
-
-  const [tab, setTab] = useState<AdminTab>('overview')
+  const activeTab = useMemo(() => resolveAdminTab(location.pathname, isSuperAdmin), [isSuperAdmin, location.pathname])
+  const isContentEditorRoute = location.pathname.startsWith('/admin/content/subjects/')
+  const shouldLoadInsights = activeTab === 'overview' || activeTab === 'analytics'
+  const shouldLoadBilling = isSuperAdmin && shouldLoadInsights
+  const shouldLoadUsers = isSuperAdmin && activeTab === 'users'
+  const shouldLoadSystemInfo = activeTab === 'overview'
 
   const [info, setInfo] = useState<SystemInfo | null>(null)
   const [users, setUsers] = useState<AdminUserSummary[]>([])
@@ -206,12 +227,12 @@ export function AdminWorkspacePage(): JSX.Element {
     setLoadingCore(true)
     try {
       const [nextInfo, nextUsers, nextSubjects] = await Promise.all([
-        adminService.getSystemInfo(),
-        isSuperAdmin ? adminService.getUsers() : Promise.resolve([]),
+        shouldLoadSystemInfo ? adminService.getSystemInfo() : Promise.resolve(null),
+        shouldLoadUsers ? adminService.getUsers() : Promise.resolve([]),
         adminService.getSubjects(),
       ])
 
-      setInfo(nextInfo)
+      if (nextInfo) setInfo(nextInfo)
       setUsers(nextUsers)
       setSubjects(nextSubjects.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
     } finally {
@@ -284,7 +305,11 @@ export function AdminWorkspacePage(): JSX.Element {
     setFatalError(null)
     setPanelError(null)
     try {
-      await Promise.all([loadCore(), loadAnalytics(), loadBilling()])
+      await Promise.all([
+        loadCore(),
+        shouldLoadInsights ? loadAnalytics() : Promise.resolve(),
+        shouldLoadBilling ? loadBilling() : Promise.resolve(),
+      ])
       setLastUpdatedAt(new Date())
     } catch (err) {
       setFatalError(localizeError(err, 'adminLoadFailed'))
@@ -294,18 +319,18 @@ export function AdminWorkspacePage(): JSX.Element {
   useEffect(() => {
     void loadAll()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuperAdmin])
+  }, [activeTab, isSuperAdmin])
 
   useEffect(() => {
-    if (!isSuperAdmin && tab === 'users') {
-      setTab('overview')
+    if (!isSuperAdmin && location.pathname.startsWith('/admin/users')) {
+      navigate('/admin', { replace: true })
     }
-  }, [isSuperAdmin, tab])
+  }, [isSuperAdmin, location.pathname, navigate])
 
   useEffect(() => {
     setPanelError(null)
     setSuccess(null)
-  }, [tab])
+  }, [activeTab])
 
   const handleRefreshAll = async () => {
     setSuccess(null)
@@ -574,6 +599,32 @@ export function AdminWorkspacePage(): JSX.Element {
     { id: 'analytics', label: t('adminTabAnalytics'), icon: <BarChart3 size={16} aria-hidden="true" /> },
   ]
 
+  if (activeTab === 'content' && isContentEditorRoute) {
+    return (
+      <div className="page-content fade-in">
+        <div className={`${styles.page} ${styles.focusPage}`}>
+          <div className={styles.alertRail}>
+            {fatalError ? <Alert variant="error">{fatalError}</Alert> : null}
+          </div>
+
+          <ContentBuilderShell
+            subjects={subjects}
+            subjectsLoading={loadingCore}
+            currentUserId={currentUser?.id}
+            canManagePricing={isSuperAdmin}
+            pricingRows={coursePricingRows}
+            savingCourseId={savingCourseId}
+            bootstrappingDemo={bootstrappingDemo}
+            onBootstrapDemo={handleBootstrapDemo}
+            onCoursePricingChange={handleCourseDraftChange}
+            onSaveCoursePrice={handleSaveCoursePrice}
+            onSubjectsChange={(nextSubjects) => setSubjects(nextSubjects)}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page-content fade-in">
       <div className={styles.page}>
@@ -590,12 +641,17 @@ export function AdminWorkspacePage(): JSX.Element {
             onExport={handleExport}
           />
 
-          <AdminTabRail tabs={tabs} active={tab} ariaLabel={t('adminTabRailAria')} onChange={setTab} />
+          <AdminTabRail
+            tabs={tabs}
+            active={activeTab}
+            ariaLabel={t('adminTabRailAria')}
+            onChange={(nextTab) => navigate(adminPathForTab(nextTab))}
+          />
         </div>
 
         <div className={styles.alertRail}>
           {fatalError ? <Alert variant="error">{fatalError}</Alert> : null}
-          {tab !== 'content' && (
+          {activeTab !== 'content' && (
             <>
               {panelError ? <Alert variant="warning">{panelError}</Alert> : null}
               {success ? <Alert variant="success">{success}</Alert> : null}
@@ -603,7 +659,7 @@ export function AdminWorkspacePage(): JSX.Element {
           )}
         </div>
 
-        {tab === 'overview' ? (
+        {activeTab === 'overview' ? (
           <>
             <div className={styles.metricGrid}>
               {overviewMetrics.map((item) => (
@@ -614,16 +670,16 @@ export function AdminWorkspacePage(): JSX.Element {
             <SectionCard title={t('adminQuickOpsTitle')} subtitle={t('adminQuickOpsSubtitle')}>
               <div className={`${styles.quickOps} ${!isSuperAdmin ? styles.quickOpsCompact : ''}`}>
                 {isSuperAdmin ? (
-                  <Button className={styles.quickOpBtn} variant="ghost" onClick={() => setTab('users')}>
+                  <Button className={styles.quickOpBtn} variant="ghost" onClick={() => navigate(adminPathForTab('users'))}>
                     <Users size={16} aria-hidden="true" />
                     {t('adminQuickUsers')}
                   </Button>
                 ) : null}
-                <Button className={styles.quickOpBtn} variant="ghost" onClick={() => setTab('content')}>
+                <Button className={styles.quickOpBtn} variant="ghost" onClick={() => navigate(adminPathForTab('content'))}>
                   <BookOpen size={16} aria-hidden="true" />
                   {t('adminQuickContent')}
                 </Button>
-                <Button className={styles.quickOpBtn} variant="ghost" onClick={() => setTab('analytics')}>
+                <Button className={styles.quickOpBtn} variant="ghost" onClick={() => navigate(adminPathForTab('analytics'))}>
                   <ChartPie size={16} aria-hidden="true" />
                   {t('adminQuickAnalytics')}
                 </Button>
@@ -813,7 +869,7 @@ export function AdminWorkspacePage(): JSX.Element {
           </>
         ) : null}
 
-        {tab === 'users' && isSuperAdmin ? (
+        {activeTab === 'users' && isSuperAdmin ? (
           <div className={styles.sectionGrid}>
             <SectionCard title={t('adminUsersTitle')} subtitle={t('adminUsersSubtitle')}>
               <AdminAccessToolbar
@@ -905,10 +961,11 @@ export function AdminWorkspacePage(): JSX.Element {
           />
         )}
 
-        {tab === 'content' ? (
+        {activeTab === 'content' ? (
           <div className={styles.sectionGrid}>
             <ContentBuilderShell
               subjects={subjects}
+              subjectsLoading={loadingCore}
               currentUserId={currentUser?.id}
               canManagePricing={isSuperAdmin}
               pricingRows={coursePricingRows}
@@ -922,7 +979,7 @@ export function AdminWorkspacePage(): JSX.Element {
           </div>
         ) : null}
 
-        {tab === 'analytics' ? (
+        {activeTab === 'analytics' ? (
           <div className={styles.sectionGrid}>
             <SectionCard title={t('adminAnalyticsTitle')} subtitle={t('adminAnalyticsSubtitle')}>
               <AnalyticsFilters

@@ -16,6 +16,25 @@ export interface SubjectVisual {
   imageAlt: string
 }
 
+const VISUAL_KEY_BY_ICON: Record<string, string> = {
+  calculator: 'math',
+  zap: 'physics',
+  dna: 'biology',
+  flaskconical: 'chemistry',
+  flask: 'chemistry',
+  bookopen: 'history',
+  sigma: 'geometry',
+}
+
+const VISUAL_KEY_BY_COLOR: Record<string, string> = {
+  '#3f68f7': 'math',
+  '#0c95d8': 'physics',
+  '#10936a': 'biology',
+  '#e58411': 'chemistry',
+  '#9a6a3a': 'history',
+  '#6e59f5': 'geometry',
+}
+
 const TOPIC_VISUALS: Record<string, Partial<SubjectVisual>> = {
   'algebra-basics': {
     imageUrl: '/subject-visuals/user/algebra-1600.jpg',
@@ -83,10 +102,10 @@ const SUBJECT_VISUALS: Record<string, SubjectVisual> = {
   },
 }
 
-const normalize = (value?: string) => (value || '').toLowerCase().trim()
+const normalize = (value?: string | null) => (value || '').toLowerCase().trim()
 
-const resolveSubjectKey = (subjectId?: string) => {
-  const normalized = normalize(subjectId)
+const resolveSubjectKey = (value?: string) => {
+  const normalized = normalize(value)
   if (!normalized) return 'default'
   if (SUBJECT_VISUALS[normalized]) return normalized
 
@@ -96,6 +115,32 @@ const resolveSubjectKey = (subjectId?: string) => {
   if (normalized.includes('bio')) return 'biology'
   if (normalized.includes('hist') || normalized.includes('tarix')) return 'history'
   if (normalized.includes('geometry') || normalized.includes('geometri')) return 'geometry'
+
+  return 'default'
+}
+
+export const resolveSubjectVisualKey = ({
+  subjectId,
+  title,
+  iconName,
+  color,
+}: {
+  subjectId?: string
+  title?: string
+  iconName?: string | null
+  color?: string | null
+}): string => {
+  const normalizedIcon = normalize(iconName).replace(/\s+/g, '')
+  if (normalizedIcon && VISUAL_KEY_BY_ICON[normalizedIcon]) return VISUAL_KEY_BY_ICON[normalizedIcon]
+
+  const normalizedColor = normalize(color)
+  if (normalizedColor && VISUAL_KEY_BY_COLOR[normalizedColor]) return VISUAL_KEY_BY_COLOR[normalizedColor]
+
+  const fromSubject = resolveSubjectKey(subjectId ?? undefined)
+  if (fromSubject !== 'default') return fromSubject
+
+  const fromTitle = resolveSubjectKey(title ?? undefined)
+  if (fromTitle !== 'default') return fromTitle
 
   return 'default'
 }
@@ -116,4 +161,3 @@ export const getLearningVisual = (subjectId?: string, topicId?: string): Subject
     ...topicVisual,
   }
 }
-

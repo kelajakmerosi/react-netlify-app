@@ -27,7 +27,7 @@ const SUBJECT_SEEDS: Array<Omit<Subject, 'modules'> & { sections: SubjectSection
     sections: [
       { id: 'att-5', type: 'attestation', title: 'Attestatsiya', topicIds: ['1', '4'] },
       { id: '7', type: 'general', title: 'Umumiy Matematika', topicIds: ['1', '4'] },
-      { id: 'mil-5', type: 'milliy', title: 'Milliy sertifikat', topicIds: [], comingSoon: true },
+      { id: 'mil-5', type: 'milliy', title: 'Milliy sertifikat', topicIds: [] },
     ],
     topics: [
       {

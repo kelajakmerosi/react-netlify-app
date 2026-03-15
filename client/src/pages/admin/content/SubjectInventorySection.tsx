@@ -9,6 +9,7 @@ import styles from './ContentBuilder.module.css'
 interface SubjectInventorySectionProps {
   subjects: SubjectRecord[]
   selectedSubjectId: string | null
+  canCreateSubject: boolean
   onCreateSubject: () => void
   onOpenSubject: (subjectId: string, step: BuilderStep) => void
   onToggleVisibility?: (subjectId: string, isHidden: boolean) => void
@@ -22,6 +23,7 @@ const countQuestions = (subject: SubjectRecord) => (
 export default function SubjectInventorySection({
   subjects,
   selectedSubjectId,
+  canCreateSubject,
   onCreateSubject,
   onOpenSubject,
   onToggleVisibility,
@@ -57,13 +59,21 @@ export default function SubjectInventorySection({
       </div>
 
       <div className={styles.inventoryGrid}>
-        <button type="button" className={`${styles.inventoryCard} ${styles.inventoryCardCreate}`} onClick={onCreateSubject}>
-          <div className={styles.inventoryCreateIcon}>
-            <PlusCircle size={20} aria-hidden="true" />
+        {canCreateSubject ? (
+          <button type="button" className={`${styles.inventoryCard} ${styles.inventoryCardCreate}`} onClick={onCreateSubject}>
+            <div className={styles.inventoryCreateIcon}>
+              <PlusCircle size={20} aria-hidden="true" />
+            </div>
+            <strong>{t('adminContentCreateSubjectCardTitle')}</strong>
+            <p>{t('adminContentCreateSubjectCardSubtitle')}</p>
+          </button>
+        ) : null}
+
+        {subjects.length === 0 ? (
+          <div className={styles.emptyState}>
+            {canCreateSubject ? t('adminContentNoSubjectsYet') : t('adminContentNoScopedSubjects')}
           </div>
-          <strong>{t('adminContentCreateSubjectCardTitle')}</strong>
-          <p>{t('adminContentCreateSubjectCardSubtitle')}</p>
-        </button>
+        ) : null}
 
         {subjects.map((subject) => {
           const visual = getSubjectVisual(subject.id)

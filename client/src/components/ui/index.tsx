@@ -9,6 +9,7 @@ export { Textarea } from './Textarea'
 export { SegmentedControl } from './SegmentedControl'
 export { IconButton } from './IconButton'
 export { PageHeader } from './PageHeader'
+export { MathText } from './MathText'
 import { 
   CheckCircle2, Circle, PauseCircle, Lock, 
   AlertTriangle, AlertCircle, Info 

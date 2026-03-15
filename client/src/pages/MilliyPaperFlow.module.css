@@ -1,0 +1,517 @@
+.shell {
+  display: grid;
+  gap: 24px;
+}
+
+.hero {
+  display: grid;
+  gap: 16px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-family: var(--font-display, inherit);
+}
+
+.heroMeta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid var(--surface-border);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.heroMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--surface-border));
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.cardText,
+.muted {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.badgeRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--shell-bg-2);
+  border: 1px solid var(--surface-border);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgePrimary {
+  background: var(--accent-light);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.badgeSuccess {
+  background: var(--success-light);
+  border-color: transparent;
+  color: var(--success);
+}
+
+.badgeWarning {
+  background: var(--warning-light);
+  border-color: transparent;
+  color: var(--warning);
+}
+
+.metaRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+  border-top: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--surface-border);
+  margin: 8px 0;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.metaItem svg {
+  color: var(--text-3);
+}
+
+.actionsRow {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.detailCard {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--radius-xl);
+}
+
+.detailSectionTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.summaryStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.statBox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--shell-bg-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.statVal {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.providerGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.providerBtn {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  padding: 16px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.providerBtn:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: var(--shell-bg-2);
+}
+
+.providerBtnActive {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.providerBtnActive::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+}
+
+.providerIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  color: var(--text-2);
+}
+
+.providerBtnActive .providerIcon {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+}
+
+.providerInfo {
+  display: grid;
+  gap: 4px;
+}
+
+.providerName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.providerDesc {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.questionShell {
+  display: grid;
+  gap: 16px;
+}
+
+.questionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.questionPrompt {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.45;
+}
+
+.optionCopy {
+  flex: 1 1 auto;
+}
+
+.questionImage {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--surface-border) 70%, transparent);
+  background: #fff;
+}
+
+.optionList {
+  display: grid;
+  gap: 10px;
+}
+
+.optionBtn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.optionBtnActive {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 36%, transparent);
+}
+
+.optionLabel {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--accent-light) 18%, var(--surface));
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.reviewList {
+  display: grid;
+  gap: 24px;
+}
+
+.reviewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.reviewCardIndicator {
+  display: none;
+}
+
+.reviewCorrect {
+  border-color: color-mix(in srgb, var(--success) 30%, var(--surface-border));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--success) 5%, transparent);
+}
+
+.reviewCorrect .reviewCardIndicator {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--success);
+}
+
+.reviewWrong {
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--surface-border));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--danger) 5%, transparent);
+}
+
+.reviewWrong .reviewCardIndicator {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--danger);
+}
+
+.reviewOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+}
+
+.reviewOptionCorrect {
+  background: var(--success-light);
+  border-color: color-mix(in srgb, var(--success) 50%, transparent);
+}
+
+.reviewOptionCorrect .optionLabel {
+  background: var(--success);
+  color: #fff;
+}
+
+.reviewOptionWrong {
+  background: var(--danger-light);
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+
+.reviewOptionWrong .optionLabel {
+  background: var(--danger);
+  color: #fff;
+}
+
+.reviewOptionNeutral {
+  opacity: 0.6;
+}
+
+.reviewMeta {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reviewOptionCorrect .reviewMeta {
+  color: var(--success);
+}
+
+.reviewOptionWrong .reviewMeta {
+  color: var(--danger);
+}
+
+.resultSummaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 40px 24px;
+  align-items: center;
+  text-align: center;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.resultScoreLarge {
+  font-size: 56px;
+  font-family: var(--font-display, inherit);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+  margin: 12px 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.resultScoreLabel {
+  font-size: 16px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.resultActions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.spin {
+  animation: milliy-spin 0.9s linear infinite;
+}
+
+@keyframes milliy-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .questionPrompt {
+    font-size: 18px;
+  }
+}

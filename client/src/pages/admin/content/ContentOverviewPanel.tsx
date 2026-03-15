@@ -5,7 +5,7 @@ import { Input } from '../../../components/ui/Input'
 import { useLang } from '../../../hooks'
 import type { SubjectRecord } from '../../../services/admin.service'
 import { formatUzs } from '../../../utils'
-import type { ContentSubtab } from './types'
+import type { BuilderStep } from './types'
 import styles from './ContentBuilder.module.css'
 
 interface PricingRow {
@@ -18,6 +18,7 @@ interface PricingRow {
 interface ContentOverviewPanelProps {
   subjects: SubjectRecord[]
   canManagePricing: boolean
+  canCreateSubjects: boolean
   pricingRows: PricingRow[]
   savingCourseId: string | null
   bootstrappingDemo: boolean
@@ -25,7 +26,8 @@ interface ContentOverviewPanelProps {
   onPricingChange: (subjectId: string, patch: Partial<Pick<PricingRow, 'priceUzs' | 'isActive'>>) => void
   onSavePricing: (subjectId: string) => Promise<string | void>
   onOpenSubjectCreator: () => void
-  onOpenSubtab: (subtab: ContentSubtab) => void
+  onOpenSubject: (subjectId: string, step: BuilderStep) => void
+  onOpenSection: (section: 'subjects' | 'exams' | 'imports') => void
 }
 
 type Notice = { type: 'error' | 'success'; message: string } | null
@@ -33,6 +35,7 @@ type Notice = { type: 'error' | 'success'; message: string } | null
 export default function ContentOverviewPanel({
   subjects,
   canManagePricing,
+  canCreateSubjects,
   pricingRows,
   savingCourseId,
   bootstrappingDemo,
@@ -40,10 +43,19 @@ export default function ContentOverviewPanel({
   onPricingChange,
   onSavePricing,
   onOpenSubjectCreator,
-  onOpenSubtab,
+  onOpenSubject,
+  onOpenSection,
 }: ContentOverviewPanelProps): JSX.Element {
   const { t, lang } = useLang()
   const [notice, setNotice] = useState<Notice>(null)
+  const firstSubjectWithoutTopics = useMemo(
+    () => subjects.find((subject) => (subject.topics?.length ?? 0) === 0) ?? null,
+    [subjects],
+  )
+  const firstSubjectMissingQuiz = useMemo(
+    () => subjects.find((subject) => (subject.topics ?? []).some((topic) => (topic.questions?.length ?? 0) === 0)) ?? null,
+    [subjects],
+  )
 
   const totals = useMemo(() => {
     const topics = subjects.reduce((sum, subject) => sum + (subject.topics?.length ?? 0), 0)
@@ -118,10 +130,16 @@ export default function ContentOverviewPanel({
               <Button onClick={() => void runDemoBootstrap()} disabled={bootstrappingDemo}>
                 {bootstrappingDemo ? t('adminContentDemoBusy') : t('adminContentDemoAction')}
               </Button>
-              <Button variant="ghost" onClick={onOpenSubjectCreator}>
-                {t('adminContentOverviewCreateSubject')}
-              </Button>
-              <Button variant="ghost" onClick={() => onOpenSubtab('exams')}>
+              {canCreateSubjects ? (
+                <Button variant="ghost" onClick={onOpenSubjectCreator}>
+                  {t('adminContentOverviewCreateSubject')}
+                </Button>
+              ) : (
+                <Button variant="ghost" onClick={() => onOpenSection('subjects')}>
+                  {t('adminContentOverviewOpenSubjects')}
+                </Button>
+              )}
+              <Button variant="ghost" onClick={() => onOpenSection('exams')}>
                 {t('adminContentOverviewOpenExams')}
               </Button>
             </div>
@@ -139,10 +157,20 @@ export default function ContentOverviewPanel({
               <div className={styles.healthItem}>
                 <strong>{totals.subjectsWithoutTopics}</strong>
                 <span>{t('adminContentOverviewEmptySubjects')}</span>
+                {firstSubjectWithoutTopics ? (
+                  <Button variant="ghost" size="sm" onClick={() => onOpenSubject(firstSubjectWithoutTopics.id, 2)}>
+                    {t('adminContentOverviewFixEmptySubject')}
+                  </Button>
+                ) : null}
               </div>
               <div className={styles.healthItem}>
                 <strong>{totals.topicsWithoutQuestions}</strong>
                 <span>{t('adminContentOverviewTopicsMissingQuiz')}</span>
+                {firstSubjectMissingQuiz ? (
+                  <Button variant="ghost" size="sm" onClick={() => onOpenSubject(firstSubjectMissingQuiz.id, 3)}>
+                    {t('adminContentOverviewFixMissingQuiz')}
+                  </Button>
+                ) : null}
               </div>
               <div className={styles.healthItem}>
                 <strong>{totals.activeProducts}</strong>
@@ -212,7 +240,7 @@ export default function ContentOverviewPanel({
                         ) : null}
 
                         <div className={styles.commandCardActions}>
-                          <Button variant="ghost" size="sm" onClick={() => onOpenSubtab('subjects')}>
+                          <Button variant="ghost" size="sm" onClick={() => onOpenSubject(row.subjectId, 1)}>
                             {t('adminContentOverviewOpenSubjects')}
                           </Button>
                           {canManagePricing ? (

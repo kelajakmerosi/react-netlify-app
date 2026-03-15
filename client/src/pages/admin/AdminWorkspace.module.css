@@ -3,6 +3,10 @@
   gap: 14px;
 }
 
+.focusPage {
+  padding-top: 6px;
+}
+
 .headerBlock {
   position: static !important;
   top: auto !important;

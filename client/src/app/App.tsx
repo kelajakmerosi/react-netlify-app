@@ -17,15 +17,15 @@ import { SubjectPage } from '../pages/SubjectPage'
 import { TopicPage } from '../pages/TopicPage'
 import { ProfilePage } from '../pages/ProfilePage'
 import { AdminPage } from '../pages/AdminPage'
-import { ExamCatalogPage } from '../pages/ExamCatalogPage'
-import { ExamCheckoutPage } from '../pages/ExamCheckoutPage'
-import { ExamSessionPage } from '../pages/ExamSessionPage'
-import { ExamResultPage } from '../pages/ExamResultPage'
 import { PaymentGatewayPage } from '../pages/PaymentGatewayPage'
 import { AttestationPage } from '../pages/AttestationPage'
 import { GeneralSectionPage } from '../pages/GeneralSectionPage'
 import { MyTestsPage } from '../pages/MyTestsPage'
 import { MyResultsPage } from '../pages/MyResultsPage'
+import { MilliySectionPage } from '../pages/MilliySectionPage'
+import { MilliyPaperPage } from '../pages/MilliyPaperPage'
+import { MilliyAttemptPage } from '../pages/MilliyAttemptPage'
+import { MilliyResultPage } from '../pages/MilliyResultPage'
 import { useAuth } from '../hooks/useAuth'
 import type { CurrentTopic, PageId } from '../types'
 
@@ -37,9 +37,6 @@ const routeForPage = (
   if (page === 'subjects') return '/subjects'
   if (page === 'profile') return '/profile'
   if (page === 'admin') return '/admin'
-  if (page === 'exams') return '/exams'
-  if (page === 'exam') return opts?.examId ? `/exams/${opts.examId}` : '/exams'
-  if (page === 'examAttempt') return opts?.attemptId ? `/exam-attempts/${opts.attemptId}` : '/exams'
   if (page === 'payment') return '/dashboard'
   if (page === 'subject') return opts?.subjectId ? `/subjects/${opts.subjectId}` : '/subjects'
   if (page === 'topic' && opts?.topic) {
@@ -82,6 +79,7 @@ function SubjectRoute() {
       onSectionSelect={(sectionType, sectionId, subjId) => {
         if (sectionType === 'attestation') navigate(`/attestations/${subjId}`)
         else if (sectionType === 'general') navigate(`/general/${sectionId}/${subjId}`)
+        else if (sectionType === 'milliy') navigate(`/subjects/${subjId}/milliy/${sectionId}`)
       }}
     />
   )
@@ -131,29 +129,65 @@ function GeneralSectionRoute() {
   )
 }
 
-function ExamCatalogRoute() {
-  return <ExamCatalogPage />
+function MilliySectionRoute() {
+  const navigate = useNavigate()
+  const { subjectId, sectionId } = useParams<{ subjectId: string; sectionId: string }>()
+  if (!subjectId || !sectionId) return <Navigate to="/subjects" replace />
+
+  return (
+    <MilliySectionPage
+      subjectId={subjectId}
+      sectionId={sectionId}
+      onBack={() => navigate(`/subjects/${subjectId}`)}
+      onOpenPaper={(paperKey) => navigate(`/subjects/${subjectId}/milliy/${sectionId}/papers/${paperKey}`)}
+    />
+  )
 }
 
-function ExamCheckoutRoute() {
-  const { examId } = useParams<{ examId: string }>()
-  if (!examId) return <Navigate to="/exams" replace />
+function MilliyPaperRoute() {
+  const navigate = useNavigate()
+  const { subjectId, sectionId, paperKey } = useParams<{ subjectId: string; sectionId: string; paperKey: string }>()
+  if (!subjectId || !sectionId || !paperKey) return <Navigate to="/subjects" replace />
 
-  return <ExamCheckoutPage examId={examId} />
+  return (
+    <MilliyPaperPage
+      subjectId={subjectId}
+      sectionId={sectionId}
+      paperKey={paperKey}
+      onBack={() => navigate(`/subjects/${subjectId}/milliy/${sectionId}`)}
+      onStartAttempt={(attemptId) => navigate(`/subjects/${subjectId}/milliy/${sectionId}/papers/${paperKey}/attempts/${attemptId}`)}
+      onGoToPayment={(paymentId, examId) => navigate(`/payments/${paymentId}?kind=exam&resourceId=${encodeURIComponent(examId)}&subjectId=${encodeURIComponent(subjectId)}&sectionId=${encodeURIComponent(sectionId)}&paperKey=${encodeURIComponent(paperKey)}`)}
+    />
+  )
 }
 
-function ExamSessionRoute() {
-  const { attemptId } = useParams<{ attemptId: string }>()
-  if (!attemptId) return <Navigate to="/exams" replace />
+function MilliyAttemptRoute() {
+  const navigate = useNavigate()
+  const { subjectId, sectionId, paperKey, attemptId } = useParams<{ subjectId: string; sectionId: string; paperKey: string; attemptId: string }>()
+  if (!subjectId || !sectionId || !paperKey || !attemptId) return <Navigate to="/subjects" replace />
 
-  return <ExamSessionPage attemptId={attemptId} />
+  return (
+    <MilliyAttemptPage
+      paperKey={paperKey}
+      attemptId={attemptId}
+      onBack={() => navigate(`/subjects/${subjectId}/milliy/${sectionId}/papers/${paperKey}`)}
+      onOpenResult={() => navigate(`/subjects/${subjectId}/milliy/${sectionId}/papers/${paperKey}/attempts/${attemptId}/result`)}
+    />
+  )
 }
 
-function ExamResultRoute() {
-  const { attemptId } = useParams<{ attemptId: string }>()
-  if (!attemptId) return <Navigate to="/exams" replace />
+function MilliyResultRoute() {
+  const navigate = useNavigate()
+  const { subjectId, sectionId, paperKey, attemptId } = useParams<{ subjectId: string; sectionId: string; paperKey: string; attemptId: string }>()
+  if (!subjectId || !sectionId || !paperKey || !attemptId) return <Navigate to="/subjects" replace />
 
-  return <ExamResultPage attemptId={attemptId} />
+  return (
+    <MilliyResultPage
+      paperKey={paperKey}
+      attemptId={attemptId}
+      onBack={() => navigate(`/subjects/${subjectId}/milliy/${sectionId}/papers/${paperKey}`)}
+    />
+  )
 }
 
 function AdminGuardRoute() {
@@ -201,17 +235,17 @@ function RoutedApp() {
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/subjects" element={<SubjectsRoute />} />
           <Route path="/subjects/:subjectId" element={<SubjectRoute />} />
+          <Route path="/subjects/:subjectId/milliy/:sectionId" element={<MilliySectionRoute />} />
+          <Route path="/subjects/:subjectId/milliy/:sectionId/papers/:paperKey" element={<MilliyPaperRoute />} />
+          <Route path="/subjects/:subjectId/milliy/:sectionId/papers/:paperKey/attempts/:attemptId" element={<MilliyAttemptRoute />} />
+          <Route path="/subjects/:subjectId/milliy/:sectionId/papers/:paperKey/attempts/:attemptId/result" element={<MilliyResultRoute />} />
           <Route path="/subjects/:subjectId/topics/:topicId" element={<TopicRoute />} />
           <Route path="/attestations/:subjectId" element={<AttestationRoute />} />
           <Route path="/general/:sectionId/:subjectId" element={<GeneralSectionRoute />} />
           <Route path="/my-tests" element={<MyTestsPage />} />
           <Route path="/my-results" element={<MyResultsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminGuardRoute />} />
-          <Route path="/exams" element={<ExamCatalogRoute />} />
-          <Route path="/exams/:examId" element={<ExamCheckoutRoute />} />
-          <Route path="/exam-attempts/:attemptId" element={<ExamSessionRoute />} />
-          <Route path="/exam-attempts/:attemptId/result" element={<ExamResultRoute />} />
+          <Route path="/admin/*" element={<AdminGuardRoute />} />
           <Route path="/payments/:paymentId" element={<PaymentGatewayPage />} />
         </Route>
 

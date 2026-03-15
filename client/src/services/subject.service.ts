@@ -8,13 +8,19 @@ import { SubjectTopicSchema, SubjectSectionSchema } from '@shared/contracts'
 
 const SubjectRecordSchema = z.object({
   id: z.string().min(1),
+  catalogKey: z.string().min(1).nullable().optional(),
+  catalog_key: z.string().min(1).nullable().optional(),
   title: z.string().min(1),
   description: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   color: z.string().nullable().optional(),
+  imageUrl: z.string().nullable().optional(),
+  image_url: z.string().nullable().optional(),
   order: z.number().int().optional(),
   topics: z.array(SubjectTopicSchema).default([]),
   sections: z.array(SubjectSectionSchema).default([]),
+  isHidden: z.boolean().optional(),
+  is_hidden: z.boolean().optional(),
 })
 
 export type SubjectRecord = z.infer<typeof SubjectRecordSchema>

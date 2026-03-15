@@ -1,0 +1,11 @@
+<svg width="900" height="520" viewBox="0 0 900 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="520" fill="#FBFCFF"/>
+  <path d="M120 400L450 60L770 400" stroke="#2D3256" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M290 230L560 200L460 385Z" fill="#7CDCE6" fill-opacity="0.9" stroke="#3B6F9C" stroke-width="6" stroke-linejoin="round"/>
+  <text x="438" y="48" fill="#315A8D" font-size="30" font-family="Arial, sans-serif">A</text>
+  <text x="96" y="425" fill="#315A8D" font-size="30" font-family="Arial, sans-serif">C</text>
+  <text x="778" y="425" fill="#315A8D" font-size="30" font-family="Arial, sans-serif">B</text>
+  <text x="268" y="220" fill="#315A8D" font-size="30" font-family="Arial, sans-serif">F</text>
+  <text x="567" y="210" fill="#315A8D" font-size="30" font-family="Arial, sans-serif">E</text>
+  <text x="445" y="408" fill="#315A8D" font-size="30" font-family="Arial, sans-serif">D</text>
+</svg>

@@ -1,9 +1,9 @@
-import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, PlusCircle, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, Paintbrush2, PlusCircle, Trash2 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { IconButton, Input } from '../../../components/ui'
 import { useLang } from '../../../hooks'
-import { normalizeTopicOrders, resolveTopicStatus } from './contentUtils'
-import type { ContentDraft, TopicDraftVm, TopicStatus } from './types'
+import { extractYoutubeVideoId, normalizeTopicOrders, resolveTopicStatus } from './contentUtils'
+import { deriveTopicId, type ContentDraft, type TopicDraftVm, type TopicStatus } from './types'
 import type { SubjectRecord } from '../../../services/admin.service'
 import styles from './ContentBuilder.module.css'
 
@@ -31,6 +31,8 @@ export default function TopicSetupStep({
   const { t } = useLang()
 
   const selectedTopic = editingTopicIndex != null ? draft.topics[editingTopicIndex] : null
+  const derivedTopicId = selectedTopic ? deriveTopicId(selectedTopic, editingTopicIndex ?? 0) : ''
+  const detectedVideoId = selectedTopic ? extractYoutubeVideoId(selectedTopic.videoUrl) : ''
 
   const setTopicPatch = (patch: Partial<TopicDraftVm>) => {
     if (editingTopicIndex == null) return
@@ -92,6 +94,7 @@ export default function TopicSetupStep({
           {draft.topics.map((topic, index) => {
             const status = resolveTopicStatus(topic, liveSubject)
             const active = index === editingTopicIndex
+            const topicLabelId = deriveTopicId(topic, index)
             const statusLabel = status === 'published'
               ? t('adminContentStatusPublished')
               : status === 'ready'
@@ -103,7 +106,7 @@ export default function TopicSetupStep({
                 <button type="button" className={styles.topicSelectBtn} onClick={() => onEditTopicIndex(index)}>
                   <div>
                     <strong>{topic.title || t('adminContentUntitledTopic')}</strong>
-                    <small>{topic.id || t('adminContentNoTopicId')}</small>
+                    <small>{topicLabelId}</small>
                   </div>
                 </button>
 
@@ -135,32 +138,54 @@ export default function TopicSetupStep({
         ) : (
           <div className={styles.formGrid}>
             <label className={styles.field}>
-              <span>{t('adminContentTopicId')}</span>
-              <Input value={selectedTopic.id} onChange={(event) => setTopicPatch({ id: event.target.value })} />
-            </label>
-
-            <label className={styles.field}>
               <span>{t('adminContentTitle')}</span>
-              <Input value={selectedTopic.title} onChange={(event) => setTopicPatch({ title: event.target.value })} />
-            </label>
-
-            <label className={styles.field}>
-              <span>{t('adminContentVideoId')}</span>
-              <Input value={selectedTopic.videoId} onChange={(event) => setTopicPatch({ videoId: event.target.value })} />
-            </label>
-
-            <label className={styles.field}>
-              <span>{t('adminContentOrder')}</span>
               <Input
-                type="number"
-                value={String(selectedTopic.order)}
-                onChange={(event) => setTopicPatch({ order: Number(event.target.value) || 0 })}
+                value={selectedTopic.title}
+                onChange={(event) => setTopicPatch({ title: event.target.value })}
+                helperText={t('adminContentGeneratedTopicId').replace('{id}', derivedTopicId)}
               />
             </label>
 
             <label className={styles.fieldWide}>
               <span>{t('adminContentVideoUrl')}</span>
-              <Input value={selectedTopic.videoUrl} onChange={(event) => setTopicPatch({ videoUrl: event.target.value })} />
+              <Input
+                value={selectedTopic.videoUrl}
+                onChange={(event) => setTopicPatch({ videoUrl: event.target.value })}
+                helperText={detectedVideoId
+                  ? t('adminContentVideoAutoDetected').replace('{id}', detectedVideoId)
+                  : t('adminContentVideoUrlHint')}
+              />
+            </label>
+
+            <details className={`${styles.advancedDetails} ${styles.fieldWide}`}>
+              <summary>
+                <Paintbrush2 size={14} aria-hidden="true" />
+                {t('adminContentAdvancedFields')}
+              </summary>
+              <div className={styles.formGrid}>
+                <label className={styles.field}>
+                  <span>{t('adminContentTopicId')}</span>
+                  <Input
+                    value={selectedTopic.id}
+                    onChange={(event) => setTopicPatch({ id: event.target.value })}
+                    helperText={t('adminContentTopicIdHelper')}
+                  />
+                </label>
+
+                <label className={styles.field}>
+                  <span>{t('adminContentVideoId')}</span>
+                  <Input
+                    value={selectedTopic.videoId}
+                    onChange={(event) => setTopicPatch({ videoId: event.target.value })}
+                    helperText={t('adminContentVideoIdHelper')}
+                  />
+                </label>
+              </div>
+            </details>
+
+            <label className={styles.fieldWide}>
+              <span>{t('adminContentStep2Hint')}</span>
+              <p className={styles.inventorySubtitle}>{t('adminContentTopicEditingHint')}</p>
             </label>
           </div>
         )}

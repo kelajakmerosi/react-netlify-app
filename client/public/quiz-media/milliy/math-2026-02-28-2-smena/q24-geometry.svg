@@ -1,0 +1,16 @@
+<svg width="900" height="520" viewBox="0 0 900 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="520" fill="#FAFBFF"/>
+  <path d="M110 420L430 70L730 420" stroke="#353B5C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M430 70L465 420" stroke="#58608E" stroke-width="6" stroke-linecap="round"/>
+  <path d="M325 235L730 420" stroke="#58608E" stroke-width="6" stroke-linecap="round"/>
+  <path d="M430 70L325 235L730 420Z" fill="#F4C42E" fill-opacity="0.9" stroke="#D49B00" stroke-width="5" stroke-linejoin="round"/>
+  <circle cx="430" cy="70" r="8" fill="#353B5C"/>
+  <circle cx="325" cy="235" r="8" fill="#353B5C"/>
+  <circle cx="730" cy="420" r="8" fill="#353B5C"/>
+  <circle cx="465" cy="420" r="8" fill="#353B5C"/>
+  <text x="234" y="442" fill="#25304F" font-size="30" font-family="Arial, sans-serif">6,5</text>
+  <text x="570" y="442" fill="#25304F" font-size="30" font-family="Arial, sans-serif">7,5</text>
+  <text x="618" y="188" fill="#25304F" font-size="30" font-family="Arial, sans-serif">15</text>
+  <text x="414" y="132" fill="#25304F" font-size="34" font-family="Arial, sans-serif">α</text>
+  <text x="667" y="366" fill="#25304F" font-size="34" font-family="Arial, sans-serif">β</text>
+</svg>

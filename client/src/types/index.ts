@@ -40,6 +40,8 @@ export interface Subject {
   description?: string
   iconName?: string
   icon: ReactNode
+  visualKey?: string
+  imageUrl?: string
   color: string
   gradient: string
   topics: Topic[]
@@ -195,9 +197,6 @@ export type PageId =
   | 'topic'
   | 'profile'
   | 'admin'
-  | 'exams'
-  | 'exam'
-  | 'examAttempt'
   | 'payment'
   | 'attestation'
   | 'generalSection'

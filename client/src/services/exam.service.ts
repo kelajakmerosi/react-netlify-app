@@ -7,6 +7,8 @@ const resolveToken = () => tokenStore.get() ?? undefined
 const ExamCatalogItemSchema = z.object({
   id: z.string(),
   subjectId: z.string(),
+  topicId: z.string().nullable().optional(),
+  sectionType: z.enum(['attestation', 'general', 'milliy']).nullable().optional(),
   ownerUserId: z.string(),
   title: z.string(),
   description: z.string().optional(),
@@ -23,10 +25,13 @@ const ExamCatalogItemSchema = z.object({
   purchased: z.boolean().optional(),
   attemptsRemaining: z.number().optional(),
 })
+export type ExamCatalogItem = z.infer<typeof ExamCatalogItemSchema>
 
 const TeacherExamSummarySchema = z.object({
   id: z.string(),
   subjectId: z.string(),
+  topicId: z.string().nullable().optional(),
+  sectionType: z.enum(['attestation', 'general', 'milliy']).nullable().optional(),
   subjectTitle: z.string().nullable().optional(),
   ownerUserId: z.string(),
   title: z.string(),
@@ -85,6 +90,7 @@ const ExamAttemptStartSchema = z.object({
     blockTitle: z.string().nullable().optional(),
   })),
 })
+export type ExamAttemptStart = z.infer<typeof ExamAttemptStartSchema>
 
 const ExamValidationSchema = z.object({
   valid: z.boolean(),
@@ -106,13 +112,15 @@ const TeacherExamQuestionSchema = z.object({
   promptRich: z.record(z.unknown()).optional(),
   imageUrl: z.string().nullable().optional(),
   options: z.array(z.string()),
-  correctIndex: z.number(),
+  correctIndex: z.number().nullable().optional(),
   keyVerified: z.boolean(),
   explanation: z.string().nullable().optional(),
   difficulty: z.string().nullable().optional(),
   sourceRef: z.string().nullable().optional(),
   blockOrder: z.number().nullable().optional(),
   blockTitle: z.string().nullable().optional(),
+  formatType: z.enum(['MCQ4', 'MCQ8', 'WRITTEN']).default('MCQ4'),
+  writtenAnswer: z.string().nullable().optional(),
 })
 export type TeacherExamQuestion = z.infer<typeof TeacherExamQuestionSchema>
 
@@ -137,13 +145,18 @@ const ExamResultSchema = z.object({
     questionId: z.string(),
     questionOrder: z.number().optional(),
     promptText: z.string(),
+    formatType: z.enum(['MCQ4', 'MCQ8', 'WRITTEN']).optional(),
     options: z.array(z.string()),
     selectedIndex: z.number().nullable(),
-    correctIndex: z.number(),
-    isCorrect: z.boolean(),
+    writtenResponse: z.string().optional(),
+    expectedWrittenAnswer: z.string().nullable().optional(),
+    requiresManualReview: z.boolean().optional(),
+    correctIndex: z.number().nullable().optional(),
+    isCorrect: z.boolean().nullable(),
     explanation: z.string().nullable().optional(),
   })),
 })
+export type ExamResult = z.infer<typeof ExamResultSchema>
 
 const ExamAttemptSessionSchema = z.object({
   id: z.string(),
@@ -165,16 +178,22 @@ const ExamAttemptSessionSchema = z.object({
     imageUrl: z.string().nullable().optional(),
     options: z.array(z.string()),
     selectedIndex: z.number().nullable(),
+    formatType: z.enum(['MCQ4', 'MCQ8', 'WRITTEN']).default('MCQ4'),
+    writtenResponse: z.string().optional(),
     difficulty: z.string().nullable().optional(),
     blockOrder: z.number().nullable().optional(),
     blockTitle: z.string().nullable().optional(),
   })),
 })
+export type ExamAttemptSession = z.infer<typeof ExamAttemptSessionSchema>
 
 export const examService = {
-  getCatalog: async (subjectId?: string) => {
-    const query = subjectId ? `?subjectId=${encodeURIComponent(subjectId)}` : ''
-    return api.get(`/exams${query}`, resolveToken(), z.array(ExamCatalogItemSchema))
+  getCatalog: async (query?: { subjectId?: string; sectionType?: 'attestation' | 'general' | 'milliy' }) => {
+    const params = new URLSearchParams()
+    if (query?.subjectId) params.set('subjectId', query.subjectId)
+    if (query?.sectionType) params.set('sectionType', query.sectionType)
+    const suffix = params.size > 0 ? `?${params.toString()}` : ''
+    return api.get(`/exams${suffix}`, resolveToken(), z.array(ExamCatalogItemSchema))
   },
 
   checkout: async (examId: string, payload: { provider: 'payme' | 'click' | 'manual'; attempts?: number }) => {
@@ -195,9 +214,11 @@ export const examService = {
 
   createTeacherExam: async (payload: {
     subjectId: string
+    topicId?: string
+    sectionType?: 'attestation' | 'general' | 'milliy'
     title: string
     description?: string
-    requiredQuestionCount?: 35 | 50
+    requiredQuestionCount?: 35 | 45 | 50
     priceUzs?: number
     blocks?: Array<{ blockOrder: number; title: string }>
     questions?: Array<{
@@ -208,11 +229,13 @@ export const examService = {
       promptRich?: Record<string, unknown>
       imageUrl?: string | null
       options: string[]
-      correctIndex: number
+      correctIndex?: number
       keyVerified?: boolean
       explanation?: string
       difficulty?: 'easy' | 'medium' | 'hard'
       sourceRef?: string
+      formatType?: 'MCQ4' | 'MCQ8' | 'WRITTEN'
+      writtenAnswer?: string
     }>
   }) => {
     return api.post('/teacher/exams', payload, resolveToken(), TeacherExamSummarySchema)
@@ -228,7 +251,7 @@ export const examService = {
     subjectId: string
     title: string
     description?: string
-    requiredQuestionCount?: 35 | 50
+    requiredQuestionCount?: 35 | 45 | 50
     sourceType?: 'docx' | 'pdf'
     sourcePath?: string
     file?: File
@@ -273,7 +296,7 @@ export const examService = {
     }))
   },
 
-  saveAnswer: async (attemptId: string, payload: { questionId: string; selectedIndex: number }) => {
+  saveAnswer: async (attemptId: string, payload: { questionId: string; selectedIndex?: number; writtenAnswer?: string }) => {
     return api.patch(`/exams/attempts/${encodeURIComponent(attemptId)}/answers`, payload, resolveToken(), z.object({ updated: z.boolean() }))
   },
 

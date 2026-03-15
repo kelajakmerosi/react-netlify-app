@@ -4,19 +4,20 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node ./node_modules/vite/bin/vite.js",
+    "dev": "vite",
     "start": "npm run dev",
     "build": "tsc && vite build",
-    "preview": "node ./node_modules/vite/bin/vite.js preview",
+    "preview": "vite preview",
     "lint": "eslint src --report-unused-disable-directives",
-    "typecheck": "node ./node_modules/typescript/bin/tsc --noEmit",
-    "test": "node ./node_modules/vitest/vitest.mjs run",
-    "test:ui": "node ./node_modules/vitest/vitest.mjs run src/components/ui"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest run src/components/ui"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
     "i18next": "^25.8.14",
+    "katex": "^0.16.38",
     "lucide-react": "^0.575.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -31,6 +32,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/katex": "^0.16.8",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^5.1.0",

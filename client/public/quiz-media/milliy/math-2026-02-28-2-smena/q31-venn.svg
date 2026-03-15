@@ -1,0 +1,39 @@
+<svg width="900" height="620" viewBox="0 0 900 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="620" fill="#FBFCFF"/>
+  <circle cx="290" cy="315" r="145" fill="#DDF5FB" stroke="#7BC4D8" stroke-width="6"/>
+  <circle cx="450" cy="215" r="145" fill="#E7F8D8" stroke="#67B83A" stroke-width="6"/>
+  <circle cx="610" cy="315" r="145" fill="#F9DADB" stroke="#D35A5C" stroke-width="6"/>
+  <circle cx="450" cy="420" r="145" fill="#E7E6FF" stroke="#6767D5" stroke-width="6"/>
+  <text x="208" y="318" fill="#2B2F55" font-size="30" font-family="Arial, sans-serif">A</text>
+  <text x="446" y="72" fill="#2B2F55" font-size="30" font-family="Arial, sans-serif">B</text>
+  <text x="678" y="318" fill="#2B2F55" font-size="30" font-family="Arial, sans-serif">C</text>
+  <text x="446" y="575" fill="#2B2F55" font-size="30" font-family="Arial, sans-serif">D</text>
+  <g fill="#2B2F55" font-size="24" font-family="Arial, sans-serif">
+    <text x="220" y="260">12</text>
+    <text x="235" y="360">2</text>
+    <text x="230" y="430">23</text>
+    <text x="205" y="470">20</text>
+    <text x="420" y="165">4</text>
+    <text x="495" y="185">15</text>
+    <text x="445" y="220">16</text>
+    <text x="615" y="250">6</text>
+    <text x="690" y="310">12</text>
+    <text x="685" y="365">7</text>
+    <text x="425" y="500">21</text>
+    <text x="500" y="515">17</text>
+    <text x="458" y="560">11</text>
+    <text x="420" y="545">3</text>
+    <text x="350" y="470">5</text>
+    <text x="330" y="505">10</text>
+    <text x="395" y="455">25</text>
+    <text x="394" y="290">19</text>
+    <text x="392" y="335">14</text>
+    <text x="472" y="305">1</text>
+    <text x="492" y="325">9</text>
+    <text x="450" y="375">24</text>
+    <text x="435" y="430">18</text>
+    <text x="595" y="410">8</text>
+    <text x="545" y="455">13</text>
+    <text x="600" y="390">22</text>
+  </g>
+</svg>

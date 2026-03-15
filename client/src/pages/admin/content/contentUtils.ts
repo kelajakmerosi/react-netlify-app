@@ -8,6 +8,7 @@ import type {
   TopicStatus,
   ValidationIssue,
 } from './types'
+import { deriveTopicId } from './types'
 
 const hasText = (value: string) => value.trim().length > 0
 
@@ -25,7 +26,7 @@ const isValidOptionalUrl = (value: string): boolean => {
   }
 }
 
-const extractYoutubeVideoId = (value: string): string => {
+export const extractYoutubeVideoId = (value: string): string => {
   const input = value.trim()
   if (!input) return ''
 
@@ -59,7 +60,7 @@ export const isQuestionComplete = (question: QuestionDraftVm): boolean => {
 
 export const isTopicCoreComplete = (topic: TopicDraftVm): boolean => {
   const hasVideo = hasText(topic.videoId) || Boolean(extractYoutubeVideoId(topic.videoUrl))
-  return hasText(topic.id) && hasText(topic.title) && hasVideo
+  return hasText(topic.title) && hasVideo
 }
 
 export const isTopicQuizComplete = (topic: TopicDraftVm): boolean => {
@@ -85,16 +86,9 @@ export const validateDraftForPublish = (draft: ContentDraft): ValidationIssue[] 
     })
   }
 
-  const topicIds = draft.topics.map((topic) => topic.id.trim()).filter(Boolean)
-  if (new Set(topicIds).size !== topicIds.length) {
-    issues.push({
-      step: 2,
-      path: 'topics.id',
-      message: 'adminContentIssueTopicIdDuplicate',
-    })
-  }
-
   draft.topics.forEach((topic, topicIndex) => {
+    deriveTopicId(topic, topicIndex)
+
     if (!isTopicCoreComplete(topic)) {
       issues.push({
         step: 2,

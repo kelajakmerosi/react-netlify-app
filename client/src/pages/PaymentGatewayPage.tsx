@@ -23,6 +23,9 @@ export function PaymentGatewayPage() {
   const toast = useToast()
 
   const resourceId = query.get('resourceId') || ''
+  const subjectId = query.get('subjectId') || ''
+  const sectionId = query.get('sectionId') || ''
+  const paperKey = query.get('paperKey') || ''
 
   const [session, setSession] = useState<{
     payment: {
@@ -104,14 +107,18 @@ export function PaymentGatewayPage() {
     if (!session || session.payment.status !== 'paid') return
 
     if (!resourceId) {
-      navigate('/exams')
+      navigate('/dashboard')
       return
     }
 
     try {
       setProcessing(true)
       const started = await examService.startAttempt(resourceId)
-      navigate(`/exam-attempts/${started.attempt.id}`)
+      if (subjectId && sectionId && paperKey) {
+        navigate(`/subjects/${subjectId}/milliy/${sectionId}/papers/${paperKey}/attempts/${started.attempt.id}`)
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err) {
       toast.error(resolveUiErrorMessage(err, t, 'errorExamStartFailed'))
     } finally {

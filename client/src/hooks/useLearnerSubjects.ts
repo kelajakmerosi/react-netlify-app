@@ -1,53 +1,37 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { SUBJECTS } from '../constants'
 import { useAuth } from './useAuth'
 import subjectService from '../services/subject.service'
-import { toRuntimeSubject } from '../utils/subjectRuntime'
-import type { Subject } from '../types'
+import type { LocaleKey } from '../types'
 import { queryKeys } from '../lib/queryClient'
-
-const MIN_DEMO_SUBJECTS = 6
-const DEMO_SUBJECT_TITLE = 'demo matematika'
-
-const fallbackSubjects = SUBJECTS
-
-const isRemovedLearnerSubject = (subject: Subject) => {
-  const normalizedTitle = String(subject.title || '').trim().toLowerCase()
-  return normalizedTitle === DEMO_SUBJECT_TITLE
-}
-
-const composeDemoSubjects = (preferred: Subject[]): Subject[] => {
-  const learnerPreferred = preferred.filter((subject) => !isRemovedLearnerSubject(subject))
-  const merged = new Map<string, Subject>()
-
-  learnerPreferred.forEach((subject) => {
-    if (!merged.has(subject.id)) merged.set(subject.id, subject)
-  })
-
-  fallbackSubjects.forEach((subject) => {
-    if (merged.size >= MIN_DEMO_SUBJECTS && learnerPreferred.length > 0) return
-    if (!merged.has(subject.id)) merged.set(subject.id, subject)
-  })
-
-  return Array.from(merged.values())
-}
+import { buildCanonicalSubjectCatalog } from '../utils/subjectCatalog'
+import { useLang } from './index'
 
 export const useLearnerSubjects = () => {
   const { user } = useAuth()
+  const { lang } = useLang()
   const userId = user?.id ?? null
 
-  const { data: subjects = fallbackSubjects, isLoading: loading, error: queryError, refetch } = useQuery({
+  const { data: liveSubjects = [], isLoading: loading, error: queryError, refetch } = useQuery({
     queryKey: queryKeys.subjects.list(userId),
     queryFn: async () => {
-      if (!userId) return fallbackSubjects
-      const records = await subjectService.getAll()
-      return composeDemoSubjects(records.map(toRuntimeSubject))
+      if (!userId) return []
+      return subjectService.getAll()
     },
     staleTime: 5 * 60 * 1000,
   })
 
   const error = queryError instanceof Error ? queryError.message : ''
+
+  const catalog = useMemo(
+    () => buildCanonicalSubjectCatalog(liveSubjects, lang as LocaleKey),
+    [lang, liveSubjects],
+  )
+
+  const subjects = useMemo(
+    () => catalog.map((entry) => entry.subject),
+    [catalog],
+  )
 
   const byId = useMemo(
     () => new Map(subjects.map((subject) => [subject.id, subject])),
@@ -55,6 +39,7 @@ export const useLearnerSubjects = () => {
   )
 
   return {
+    catalog,
     subjects,
     byId,
     loading,

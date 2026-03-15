@@ -66,6 +66,19 @@ const normalizeTopics = (topics: SubjectTopic[] = [], previousTopics: SubjectTop
   })
 )
 
+const normalizeSubjectPayload = (payload: Record<string, unknown>) => {
+  const nextPayload: Record<string, unknown> = { ...payload }
+  if (Object.prototype.hasOwnProperty.call(nextPayload, 'catalogKey')) {
+    nextPayload.catalog_key = nextPayload.catalogKey
+    delete nextPayload.catalogKey
+  }
+  if (Object.prototype.hasOwnProperty.call(nextPayload, 'imageUrl')) {
+    nextPayload.image_url = nextPayload.imageUrl
+    delete nextPayload.imageUrl
+  }
+  return nextPayload
+}
+
 // ─── GET /api/subjects ────────────────────────────────────────────────────────
 
 export const getAllSubjects = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -95,9 +108,9 @@ export const getSubjectById = async (req: AuthRequest, res: Response, next: Next
 export const createSubject = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const payload = {
-      ...req.body,
-      topics: normalizeTopics(req.body.topics || []),
-    }
+      ...normalizeSubjectPayload(req.body),
+      topics: normalizeTopics((req.body.topics as SubjectTopic[] | undefined) || []),
+    } as typeof req.body & { topics: SubjectTopic[] }
 
     if (!hasUniqueTopicIds(payload.topics)) {
       return sendError(res, {
@@ -122,7 +135,7 @@ export const updateSubject = async (req: AuthRequest, res: Response, next: NextF
       return sendSubjectNotFound(req, res)
     }
 
-    const payload = { ...req.body }
+    const payload = normalizeSubjectPayload(req.body) as typeof req.body & { topics?: SubjectTopic[] }
     if (payload.topics) {
       if (!hasUniqueTopicIds(payload.topics)) {
         return sendError(res, {

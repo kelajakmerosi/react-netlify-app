@@ -10,7 +10,7 @@ import SubjectScope from '../models/SubjectScope.model'
 import fs from 'fs/promises'
 import ERROR_CODES from '../constants/errorCodes'
 import { sendError, sendSuccess } from '../utils/http'
-import { isSuperAdminUser } from '../utils/adminAccess'
+import { isAdminUser, isSuperAdminUser } from '../utils/adminAccess'
 import { isExamsCommerceEnabled, isPaymeClickEnabled } from '../config/featureFlags'
 import { importExamFromSource } from '../services/ingestion/importExamFromSource'
 import Exam from '../models/Exam.model'
@@ -21,7 +21,7 @@ const {
 } = Exam
 
 const parseAllowedQuestionCounts = () => {
-  const raw = String(process.env.EXAM_ALLOWED_QUESTION_COUNTS || '35,50')
+  const raw = String(process.env.EXAM_ALLOWED_QUESTION_COUNTS || '35,45,50')
   const parsed = raw
     .split(',')
     .map((value) => Number(value.trim()))
@@ -30,6 +30,66 @@ const parseAllowedQuestionCounts = () => {
 }
 
 const ALLOWED_REQUIRED_QUESTION_COUNTS = parseAllowedQuestionCounts()
+
+const listManagedSubjectIds = async (user: any): Promise<string[]> => {
+  const subjectIds = new Set<string>()
+
+  if (user?.can_teach) {
+    const teacherScopes = await SubjectScope.listTeacherScopes({ userId: user.id, status: 'active' })
+    for (const scope of teacherScopes) {
+      if (scope?.subject_id) subjectIds.add(String(scope.subject_id))
+    }
+  }
+
+  if (isAdminUser(user)) {
+    const adminScopes = await SubjectScope.listAdminScopes({ userId: user.id })
+    for (const scope of adminScopes) {
+      if (scope?.subject_id && scope?.can_manage_content) {
+        subjectIds.add(String(scope.subject_id))
+      }
+    }
+  }
+
+  return Array.from(subjectIds)
+}
+
+const hasManagedExamSubjectAccess = async (user: any, subjectId: string): Promise<boolean> => {
+  if (isSuperAdminUser(user)) return true
+
+  const checks: Promise<boolean>[] = []
+
+  if (user?.can_teach) {
+    checks.push(SubjectScope.hasTeacherScope({ userId: user.id, subjectId }))
+  }
+
+  if (isAdminUser(user)) {
+    checks.push(SubjectScope.hasAdminScope({
+      userId: user.id,
+      subjectId,
+      requireContent: true,
+    }))
+  }
+
+  if (checks.length === 0) return false
+
+  const results = await Promise.all(checks)
+  return results.some(Boolean)
+}
+
+const canAccessManagedExam = async (user: any, exam: any): Promise<boolean> => {
+  if (!user || !exam) return false
+  if (isSuperAdminUser(user)) return true
+  if (exam.ownerUserId === user.id) return true
+  return hasManagedExamSubjectAccess(user, exam.subjectId)
+}
+
+const sendManagedExamAccessDenied = (req: AuthRequest, res: Response, exam: any, message: string) => sendError(res, {
+  status: 403,
+  code: ERROR_CODES.SUBJECT_SCOPE_REQUIRED,
+  message,
+  requestId: req.id as any,
+  details: { subjectId: exam?.subjectId },
+})
 
 const inferSourceType = ({ sourceType, sourcePath = '', originalName = '', mimeType = '' }: any): string => {
   const normalizedExplicit = String(sourceType || '').trim().toLowerCase()
@@ -88,7 +148,7 @@ const mapAttemptReasonToError = (reason: string): any => {
     return {
       status: 400,
       code: ERROR_CODES.VALIDATION_ERROR,
-      message: 'Selected answer is outside question options range',
+      message: 'Answer payload is invalid for this question format',
     }
   }
   if (reason === 'exam_invalid_structure') {
@@ -108,14 +168,12 @@ const mapAttemptReasonToError = (reason: string): any => {
 export const listTeacherExams = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const isSuperadmin = isSuperAdminUser(req.user)
-    const scopes = isSuperadmin
-      ? []
-      : await SubjectScope.listTeacherScopes({ userId: req.user.id, status: 'active' })
+    const subjectIds = isSuperadmin ? [] : await listManagedSubjectIds(req.user)
 
     const exams = await Exam.listManaged({
       userId: req.user.id,
       isSuperadmin,
-      subjectIds: scopes.map((scope) => scope.subject_id),
+      subjectIds,
     })
 
     return sendSuccess(res, exams)
@@ -140,6 +198,8 @@ export const createTeacherExam = async (req: AuthRequest, res: Response, next: N
 
     const exam = await Exam.createDraft({
       subjectId: req.body.subjectId,
+      topicId: req.body.topicId,
+      sectionType: req.body.sectionType,
       ownerUserId: req.user.id,
       title: req.body.title,
       description: req.body.description,
@@ -309,29 +369,8 @@ export const updateTeacherExam = async (req: AuthRequest, res: Response, next: N
       })
     }
 
-    if (current.ownerUserId !== req.user.id && req.user.role !== 'superadmin') {
-      return sendError(res, {
-        status: 403,
-        code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-        message: 'Teacher ownership is required for updates',
-        requestId: req.id as any,
-      })
-    }
-
-    if (!isSuperAdminUser(req.user)) {
-      const hasTeacherScope = await SubjectScope.hasTeacherScope({
-        userId: req.user.id,
-        subjectId: current.subjectId,
-      })
-      if (!hasTeacherScope) {
-        return sendError(res, {
-          status: 403,
-          code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-          message: 'Teacher subject scope is required for exam updates',
-          requestId: req.id as any,
-          details: { subjectId: current.subjectId },
-        })
-      }
+    if (!(await canAccessManagedExam(req.user, current))) {
+      return sendManagedExamAccessDenied(req, res, current, 'Exam management access is required for updates')
     }
 
     if (current.status === 'published') {
@@ -371,29 +410,8 @@ export const submitTeacherExamReview = async (req: AuthRequest, res: Response, n
       })
     }
 
-    if (current.ownerUserId !== req.user.id && req.user.role !== 'superadmin') {
-      return sendError(res, {
-        status: 403,
-        code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-        message: 'Teacher ownership is required for review submission',
-        requestId: req.id as any,
-      })
-    }
-
-    if (!isSuperAdminUser(req.user)) {
-      const hasTeacherScope = await SubjectScope.hasTeacherScope({
-        userId: req.user.id,
-        subjectId: current.subjectId,
-      })
-      if (!hasTeacherScope) {
-        return sendError(res, {
-          status: 403,
-          code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-          message: 'Teacher subject scope is required for exam review submission',
-          requestId: req.id as any,
-          details: { subjectId: current.subjectId },
-        })
-      }
+    if (!(await canAccessManagedExam(req.user, current))) {
+      return sendManagedExamAccessDenied(req, res, current, 'Exam management access is required for review submission')
     }
 
     if (current.status !== 'draft') {
@@ -456,13 +474,8 @@ export const getTeacherExamValidation = async (req: AuthRequest, res: Response, 
       })
     }
 
-    if (current.ownerUserId !== req.user.id && req.user.role !== 'superadmin') {
-      return sendError(res, {
-        status: 403,
-        code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-        message: 'Teacher ownership is required for exam validation view',
-        requestId: req.id as any,
-      })
+    if (!(await canAccessManagedExam(req.user, current))) {
+      return sendManagedExamAccessDenied(req, res, current, 'Exam management access is required for validation view')
     }
 
     const validation = await Exam.validateExamStructure((req.params.examId as string))
@@ -484,13 +497,8 @@ export const getTeacherExamQuestions = async (req: AuthRequest, res: Response, n
       })
     }
 
-    if (current.ownerUserId !== req.user.id && req.user.role !== 'superadmin') {
-      return sendError(res, {
-        status: 403,
-        code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-        message: 'Teacher ownership is required for exam questions',
-        requestId: req.id as any,
-      })
+    if (!(await canAccessManagedExam(req.user, current))) {
+      return sendManagedExamAccessDenied(req, res, current, 'Exam management access is required for questions')
     }
 
     const questions = await Exam.listQuestions((req.params.examId as string))
@@ -512,13 +520,8 @@ export const updateTeacherExamQuestionKey = async (req: AuthRequest, res: Respon
       })
     }
 
-    if (current.ownerUserId !== req.user.id && req.user.role !== 'superadmin') {
-      return sendError(res, {
-        status: 403,
-        code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-        message: 'Teacher ownership is required for answer key updates',
-        requestId: req.id as any,
-      })
+    if (!(await canAccessManagedExam(req.user, current))) {
+      return sendManagedExamAccessDenied(req, res, current, 'Exam management access is required for answer key updates')
     }
 
     const questions = await Exam.listQuestions((req.params.examId as string))
@@ -685,6 +688,7 @@ export const getExamCatalog = async (req: AuthRequest, res: Response, next: Next
   try {
     const exams = await Exam.listPublishedCatalog({
       subjectId: req.query.subjectId,
+      sectionType: req.query.sectionType,
       userId: req.user?.id,
     })
     return sendSuccess(res, exams)
@@ -834,6 +838,7 @@ export const saveExamAnswer = async (req: AuthRequest, res: Response, next: Next
       userId: req.user.id,
       questionId: req.body.questionId,
       selectedIndex: req.body.selectedIndex,
+      writtenAnswer: req.body.writtenAnswer,
     })
 
     if (!result.updated) {
@@ -938,13 +943,8 @@ export const deleteTeacherExam = async (req: AuthRequest, res: Response, next: N
         requestId: req.id as any,
       })
     }
-    if (!isSuperAdminUser(req.user) && exam.ownerUserId !== req.user.id) {
-      return sendError(res, {
-        status: 403,
-        code: ERROR_CODES.NOT_AUTHORISED_INVALID_TOKEN,
-        message: 'Not authorized to delete this exam',
-        requestId: req.id as any,
-      })
+    if (!(await canAccessManagedExam(req.user, exam))) {
+      return sendManagedExamAccessDenied(req, res, exam, 'Exam management access is required to delete this exam')
     }
     const deleted = await Exam.remove((req.params.examId as string))
     return sendSuccess(res, { deleted })

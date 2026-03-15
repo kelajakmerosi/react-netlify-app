@@ -5,3 +5,41 @@
 .actionBtn {
   min-height: 38px;
 }
+
+.sectionsContainer {
+  display: grid;
+  gap: 8px;
+}
+
+.sectionLabel {
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.sectionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.sectionItem {
+  color: var(--text-1);
+  font-size: 13px;
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+
+.sectionItem::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 600;
+}

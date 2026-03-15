@@ -107,6 +107,18 @@ export const requireCapability = (capability: string) => (req: AuthRequest, res:
   })
 }
 
+export const requireTeachCapabilityOrAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user?.can_teach || isAdminUser(req.user)) return next()
+
+  return sendError(res, {
+    status: 403,
+    code: ERROR_CODES.CAPABILITY_REQUIRED,
+    message: 'Teaching capability or admin access is required',
+    requestId: typeof req.id === 'string' ? req.id : undefined,
+    details: { capability: 'teach' },
+  })
+}
+
 const resolveSubjectId = (req: AuthRequest, subjectParam: string): string | null => {
   const param = req.params?.[subjectParam]
   if (param) return Array.isArray(param) ? param[0] : param
@@ -188,13 +200,27 @@ export const teacherSubjectScopeRequired = ({
   if (isSuperAdminUser(req.user)) return next()
 
   try {
-    const hasScope = await SubjectScope.hasTeacherScope({ userId: req.user.id, subjectId })
-    if (hasScope) return next()
+    const checks: Promise<boolean>[] = []
+
+    if (req.user?.can_teach) {
+      checks.push(SubjectScope.hasTeacherScope({ userId: req.user.id, subjectId }))
+    }
+
+    if (isAdminUser(req.user)) {
+      checks.push(SubjectScope.hasAdminScope({
+        userId: req.user.id,
+        subjectId,
+        requireContent: true,
+      }))
+    }
+
+    const results = await Promise.all(checks)
+    if (results.some(Boolean)) return next()
 
     return sendError(res, {
       status: 403,
       code: ERROR_CODES.TEACHER_SCOPE_REQUIRED,
-      message: 'Teacher scope is required',
+      message: 'Teacher or admin subject scope is required',
       requestId: typeof req.id === 'string' ? req.id : undefined,
       details: { subjectId },
     })

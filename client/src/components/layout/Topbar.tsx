@@ -41,7 +41,6 @@ export function Topbar({ activePage, onMenuToggle }: TopbarProps) {
   const title = useMemo(() => {
     if (activePage === 'dashboard') return t('myLearning')
     if (activePage === 'subjects' || activePage === 'subject' || activePage === 'topic') return t('lessons')
-    if (activePage === 'exams' || activePage === 'exam' || activePage === 'examAttempt') return t('exams')
     if (activePage === 'profile') return t('profile')
     if (activePage === 'admin') return t('admin')
     return t('myLearning')

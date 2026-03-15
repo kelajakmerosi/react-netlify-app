@@ -264,7 +264,9 @@ export const SubjectCreateBaseSchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   color: z.string().optional(),
+  imageUrl: z.string().trim().min(1).nullable().optional(),
   order: z.number().int().optional(),
+  catalogKey: z.string().trim().min(1).optional(),
   topics: z.array(SubjectTopicSchema).optional(),
   sections: z.array(SubjectSectionSchema).optional(),
 }).strict()
@@ -415,7 +417,8 @@ export const TeacherSubjectScopeSchema = z.object({
 export const FIXED_EXAM_DURATION_SEC = 120 * 60
 export const FIXED_EXAM_PASS_PERCENT = 80
 export const DEFAULT_REQUIRED_QUESTION_COUNT = 50
-export const AllowedQuestionCountSchema = z.union([z.literal(35), z.literal(50)])
+export const AllowedQuestionCountSchema = z.union([z.literal(35), z.literal(45), z.literal(50)])
+export const ExamSectionTypeSchema = z.enum(['attestation', 'general', 'milliy'])
 
 export const ExamStatusSchema = z.enum(['draft', 'pending_review', 'published', 'archived'])
 export const ExamDifficultySchema = z.enum(['easy', 'medium', 'hard']).optional()
@@ -469,6 +472,8 @@ export const ExamBlockCreateSchema = z.object({
 
 export const ExamCreateSchema = z.object({
   subjectId: z.string().min(1),
+  sectionType: ExamSectionTypeSchema.optional(),
+  topicId: z.string().trim().min(1).optional(),
   title: z.string().trim().min(1),
   description: z.string().max(2000).optional(),
   durationSec: z.literal(FIXED_EXAM_DURATION_SEC).default(FIXED_EXAM_DURATION_SEC),
@@ -482,6 +487,8 @@ export const ExamCreateSchema = z.object({
 export const ExamUpdateSchema = z.object({
   title: z.string().trim().min(1).optional(),
   description: z.string().max(2000).optional(),
+  sectionType: ExamSectionTypeSchema.optional(),
+  topicId: z.string().trim().min(1).optional(),
   durationSec: z.literal(FIXED_EXAM_DURATION_SEC).optional(),
   passPercent: z.literal(FIXED_EXAM_PASS_PERCENT).optional(),
   requiredQuestionCount: AllowedQuestionCountSchema.optional(),
@@ -500,6 +507,7 @@ export const ExamPathParamsSchema = z.object({
 
 export const ExamCatalogQuerySchema = z.object({
   subjectId: z.string().min(1).optional(),
+  sectionType: ExamSectionTypeSchema.optional(),
 }).strict()
 
 export const PaymentProviderSchema = z.enum(['payme', 'click', 'manual'])
@@ -515,8 +523,12 @@ export const ExamAttemptPathParamsSchema = z.object({
 
 export const ExamAttemptAnswerSchema = z.object({
   questionId: z.string().uuid(),
-  selectedIndex: z.number().int().nonnegative(),
-}).strict()
+  selectedIndex: z.number().int().nonnegative().optional(),
+  writtenAnswer: z.string().trim().optional(),
+}).strict().refine(
+  (value: any) => value.selectedIndex !== undefined || (typeof value.writtenAnswer === 'string' && value.writtenAnswer.trim().length > 0),
+  { message: 'Provide selectedIndex or writtenAnswer' },
+)
 
 export const ExamQuestionPathParamsSchema = z.object({
   examId: z.string().uuid(),

@@ -219,9 +219,6 @@ export function MyTestsPage() {
             <Button variant="ghost" size="sm" onClick={() => navigate('/subjects')}>
               {t('subjects')}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/exams')}>
-              {t('exams')}
-            </Button>
           </div>
         }
       />
@@ -266,7 +263,6 @@ export function MyTestsPage() {
           <p className={styles.emptyText}>{isGuest ? t('myTestsGuestText') : t('myTestsEmptyText')}</p>
           <div className={styles.emptyActions}>
             <Button onClick={() => navigate('/subjects')}>{t('subjects')}</Button>
-            <Button variant="ghost" onClick={() => navigate('/exams')}>{t('exams')}</Button>
           </div>
         </GlassCard>
       ) : null}

@@ -1,8 +1,8 @@
 {
   "watch": ["src", "../shared"],
-  "ext": "js,json",
-  "ignore": ["src/**/*.test.js"],
-  "exec": "node src/index.js",
+  "ext": "ts,json",
+  "ignore": ["src/**/*.test.ts", "src/**/*.test.js"],
+  "exec": "ts-node src/index.ts",
   "env": {
     "NODE_ENV": "development"
   }

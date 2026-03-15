@@ -1,8 +1,17 @@
 import { z } from 'zod'
 import api from './api'
 import { tokenStore } from './auth.service'
+import { SubjectSectionSchema } from '@shared/contracts'
 
 export type AdminSource = 'none' | 'allowlist' | 'db_role' | 'both'
+
+export interface SubjectSectionRecord {
+  id: string
+  type: 'attestation' | 'general' | 'milliy'
+  title: string
+  topicIds?: string[]
+  comingSoon?: boolean
+}
 
 export interface AdminUserSummary {
   id: string
@@ -95,13 +104,19 @@ export interface SubjectTopic {
 
 export interface SubjectRecord {
   id: string
+  catalogKey?: string | null
+  catalog_key?: string | null
   title: string
   description?: string | null
   icon?: string | null
   color?: string | null
+  imageUrl?: string | null
+  image_url?: string | null
   order?: number
   topics?: SubjectTopic[]
+  sections?: SubjectSectionRecord[]
   isHidden?: boolean
+  is_hidden?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -251,13 +266,19 @@ const SubjectTopicSchema = z.object({
 
 const SubjectSchema = z.object({
   id: z.string().min(1),
+  catalogKey: z.string().min(1).nullable().optional(),
+  catalog_key: z.string().min(1).nullable().optional(),
   title: z.string().min(1),
   description: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   color: z.string().nullable().optional(),
+  imageUrl: OptionalContentUrlSchema,
+  image_url: OptionalContentUrlSchema,
   order: z.number().int().optional(),
   topics: z.array(SubjectTopicSchema).default([]),
+  sections: z.array(SubjectSectionSchema).default([]),
   isHidden: z.boolean().optional(),
+  is_hidden: z.boolean().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
 })

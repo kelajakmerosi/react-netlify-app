@@ -1,4 +1,5 @@
-import { BarChart3, CheckCircle2, PlayCircle } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { CheckCircle2, PlayCircle } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useLang } from '../../hooks'
 import type { Subject } from '../../types'
@@ -14,15 +15,29 @@ interface SubjectCardProps {
   total: number
   pct: number
   onClick: () => void
+  actionLabel?: string
+  secondaryActions?: ReactNode[]
+  topAction?: ReactNode
+  visualKey?: string
 }
 
-export function SubjectCard({ subject, name, completed, total, pct, onClick }: SubjectCardProps) {
+export function SubjectCard({
+  subject,
+  name,
+  completed,
+  total,
+  pct: _pct,
+  onClick,
+  actionLabel,
+  secondaryActions = [],
+  topAction,
+  visualKey,
+}: SubjectCardProps) {
   const { t } = useLang()
   const safeName = typeof name === 'string' ? name : String(name ?? '')
   const safeTotal = Number.isFinite(total) ? total : 0
   const safeCompleted = Number.isFinite(completed) ? completed : 0
-  const safePct = Number.isFinite(pct) ? pct : 0
-  const visual = getSubjectVisual(subject.id)
+  const visual = getSubjectVisual(visualKey ?? subject.visualKey ?? subject.id)
   const Icon = visual.Icon
 
   return (
@@ -31,22 +46,37 @@ export function SubjectCard({ subject, name, completed, total, pct, onClick }: S
       className={styles.card}
       mediaBackground={visual.media}
       mediaIcon={<Icon size={42} aria-hidden="true" />}
-      mediaImageUrl={visual.imageUrl}
-      mediaImageAlt={visual.imageAlt}
+      mediaImageUrl={subject.imageUrl || visual.imageUrl}
+      mediaImageAlt={subject.imageUrl ? `${safeName} card image` : visual.imageAlt}
+      topAction={topAction}
+      onClick={onClick}
+      clickLabel={`${actionLabel || t('continue')}: ${safeName}`}
       subtitle={`${safeCompleted}/${safeTotal} ${t('completed')}`}
       title={safeName}
-      description={`${safeTotal} ${t('lessons')} • ${safePct}% ${t('progress')}`}
-      rating={{ value: Math.max(3.8, Math.min(5, Number((safePct / 20 + 3.5).toFixed(1)))), votes: `(${safeTotal})` }}
+      description={`${safeTotal} ${t('lessons')}`}
       metaItems={[
         { icon: <PlayCircle size={12} aria-hidden="true" />, text: `${safeTotal} ${t('lessons')}` },
         { icon: <CheckCircle2 size={12} aria-hidden="true" />, text: `${safeCompleted}/${safeTotal} ${t('completed')}` },
-        { icon: <BarChart3 size={12} aria-hidden="true" />, text: `${safePct}% ${t('progress')}` },
       ]}
       actions={[
         <Button key="continue" size="sm" onClick={onClick} className={styles.actionBtn}>
-          {t('continue')} <ArrowRight size={14} aria-hidden="true" />
+          {actionLabel || t('continue')} <ArrowRight size={14} aria-hidden="true" />
         </Button>,
+        ...secondaryActions,
       ]}
-    />
+    >
+      {subject.sections && subject.sections.length > 0 ? (
+        <div className={styles.sectionsContainer}>
+          <p className={styles.sectionLabel}>{t('sections')}</p>
+          <ul className={styles.sectionList}>
+            {subject.sections.map((section) => (
+              <li key={section.id} className={styles.sectionItem}>
+                {section.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </CatalogCard>
   )
 }
